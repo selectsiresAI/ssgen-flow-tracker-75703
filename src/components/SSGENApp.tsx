@@ -37,15 +37,15 @@ export default function SSGENTrackApp() {
       // Carregar dados
       (async()=>{
         const p = await getProfile();
-        if (p) { 
+        if (p && p.role) { 
           setProfile(p); 
-          setRole(p.role); 
-        } else {
-          navigate('/auth');
-          return;
+          setRole(p.role);
+          const d = await fetchOrders();
+          setRows(d);
+        } else if (p && !p.role) {
+          // Usuário existe mas não tem papel
+          setProfile(p);
         }
-        const d = await fetchOrders();
-        setRows(d);
         setLoading(false);
       })();
     });
@@ -164,6 +164,26 @@ export default function SSGENTrackApp() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-muted-foreground">Carregando...</div>
+      </div>
+    );
+  }
+
+  if (!profile || !profile.role) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <Card className="max-w-md">
+          <CardHeader>
+            <CardTitle>Aguardando Atribuição de Papel</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Sua conta foi criada com sucesso, mas ainda não possui um papel atribuído.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Entre em contato com um administrador para receber acesso como <strong>ADM</strong>, <strong>GERENTE</strong> ou <strong>REPRESENTANTE</strong>.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
