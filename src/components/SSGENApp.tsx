@@ -23,6 +23,7 @@ const CoordenadoresPage = React.lazy(() => import('@/components/ssgen/pages/Coor
 const RepresentantesPage = React.lazy(() => import('@/components/ssgen/pages/RepresentantesPage'));
 const CoordenadoresListPage = React.lazy(() => import('@/components/ssgen/pages/CoordenadoresListPage'));
 const RepresentantesListPage = React.lazy(() => import('@/components/ssgen/pages/RepresentantesListPage'));
+const UserManagementPage = React.lazy(() => import('@/components/ssgen/pages/UserManagementPage'));
 
 export default function SSGENTrackApp() {
   const navigate = useNavigate();
@@ -184,6 +185,20 @@ export default function SSGENTrackApp() {
         </React.Suspense>
       );
     }
+    if (current === 'user-management') {
+      return role === 'ADM' ? (
+        <React.Suspense fallback={<div>Carregando...</div>}>
+          <UserManagementPage />
+        </React.Suspense>
+      ) : (
+        <Card className="border-dashed">
+          <CardHeader>
+            <CardTitle>Acesso negado</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">Somente ADM</CardContent>
+        </Card>
+      );
+    }
     if (current === 'config') {
       return role === 'ADM' ? (
         <React.Suspense fallback={<div>Carregando...</div>}>
@@ -241,6 +256,7 @@ export default function SSGENTrackApp() {
       'config': 'Configurações',
       'config-coordenadores': 'Gerenciar Coordenadores',
       'config-representantes': 'Gerenciar Representantes',
+      'user-management': 'Gerenciamento de Usuários',
     };
     return titles[current] || 'Dashboard';
   };

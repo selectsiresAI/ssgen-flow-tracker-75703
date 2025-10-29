@@ -1,6 +1,22 @@
 import * as XLSX from 'xlsx';
 
 export function generateImportTemplate() {
+  // Aba de Coordenadores
+  const coordenadoresData = [
+    {
+      nome: 'João Silva',
+      email: 'joao.silva@exemplo.com.br'
+    }
+  ];
+
+  // Aba de Representantes
+  const representantesData = [
+    {
+      nome: 'Maria Santos',
+      email: 'maria.santos@exemplo.com.br'
+    }
+  ];
+
   // Aba de Clientes
   const clientsData = [
     {
@@ -8,8 +24,8 @@ export function generateImportTemplate() {
       data: '2024-01-15',
       nome: 'Fazenda Exemplo Ltda',
       cpf_cnpj: 12345678901234,
-      representante: 'Nome do Representante',
-      coordenador: 'Nome do Coordenador',
+      representante: 'Maria Santos',
+      coordenador: 'João Silva',
       ordem_servico_neogen: 67890,
       ie_rg: 123456789,
       codigo: 1001,
@@ -50,6 +66,14 @@ export function generateImportTemplate() {
 
   // Criar workbook
   const wb = XLSX.utils.book_new();
+
+  // Adicionar aba de Coordenadores
+  const wsCoordenadores = XLSX.utils.json_to_sheet(coordenadoresData);
+  XLSX.utils.book_append_sheet(wb, wsCoordenadores, 'Coordenadores');
+
+  // Adicionar aba de Representantes
+  const wsRepresentantes = XLSX.utils.json_to_sheet(representantesData);
+  XLSX.utils.book_append_sheet(wb, wsRepresentantes, 'Representantes');
 
   // Adicionar aba de Clientes
   const wsClients = XLSX.utils.json_to_sheet(clientsData);

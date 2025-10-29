@@ -13,7 +13,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { Upload, Download, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { generateImportTemplate } from '@/lib/importTemplate';
-import { importClients, importServiceOrders, validateClients, type ImportResult, type ValidationError } from '@/lib/importApi';
+import { importClients, importServiceOrders, importCoordenadores, importRepresentantes, validateClients, type ImportResult, type ValidationError } from '@/lib/importApi';
 import { useToast } from '@/hooks/use-toast';
 
 interface ImportDialogProps {
@@ -27,10 +27,14 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
   const { toast } = useToast();
   const [step, setStep] = useState<ImportStep>('upload');
   const [file, setFile] = useState<File | null>(null);
+  const [coordenadoresData, setCoordenadoresData] = useState<any[]>([]);
+  const [representantesData, setRepresentantesData] = useState<any[]>([]);
   const [clientsData, setClientsData] = useState<any[]>([]);
   const [ordersData, setOrdersData] = useState<any[]>([]);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [importProgress, setImportProgress] = useState(0);
+  const [coordenadoresResult, setCoordenadoresResult] = useState<ImportResult | null>(null);
+  const [representantesResult, setRepresentantesResult] = useState<ImportResult | null>(null);
   const [clientsResult, setClientsResult] = useState<ImportResult | null>(null);
   const [ordersResult, setOrdersResult] = useState<ImportResult | null>(null);
 
@@ -54,6 +58,20 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
     try {
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
+
+      // Ler aba de Coordenadores
+      const coordenadoresSheet = workbook.Sheets['Coordenadores'];
+      if (coordenadoresSheet) {
+        const coords = XLSX.utils.sheet_to_json(coordenadoresSheet);
+        setCoordenadoresData(coords);
+      }
+
+      // Ler aba de Representantes
+      const representantesSheet = workbook.Sheets['Representantes'];
+      if (representantesSheet) {
+        const reps = XLSX.utils.sheet_to_json(representantesSheet);
+        setRepresentantesData(reps);
+      }
 
       // Ler aba de Clientes
       const clientsSheet = workbook.Sheets['Clientes'];
@@ -91,17 +109,33 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
     setImportProgress(0);
 
     try {
-      // Importar clientes
-      if (clientsData.length > 0) {
+      // 1. Importar coordenadores
+      if (coordenadoresData.length > 0) {
         setImportProgress(10);
-        const clientsRes = await importClients(clientsData);
-        setClientsResult(clientsRes);
-        setImportProgress(50);
+        const coordsRes = await importCoordenadores(coordenadoresData);
+        setCoordenadoresResult(coordsRes);
+        setImportProgress(20);
       }
 
-      // Importar ordens
+      // 2. Importar representantes
+      if (representantesData.length > 0) {
+        setImportProgress(30);
+        const repsRes = await importRepresentantes(representantesData);
+        setRepresentantesResult(repsRes);
+        setImportProgress(40);
+      }
+
+      // 3. Importar clientes
+      if (clientsData.length > 0) {
+        setImportProgress(50);
+        const clientsRes = await importClients(clientsData);
+        setClientsResult(clientsRes);
+        setImportProgress(70);
+      }
+
+      // 4. Importar ordens
       if (ordersData.length > 0) {
-        setImportProgress(60);
+        setImportProgress(80);
         const ordersRes = await importServiceOrders(ordersData);
         setOrdersResult(ordersRes);
         setImportProgress(100);
@@ -125,10 +159,14 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
   const handleClose = () => {
     setStep('upload');
     setFile(null);
+    setCoordenadoresData([]);
+    setRepresentantesData([]);
     setClientsData([]);
     setOrdersData([]);
     setValidationErrors([]);
     setImportProgress(0);
+    setCoordenadoresResult(null);
+    setRepresentantesResult(null);
     setClientsResult(null);
     setOrdersResult(null);
     onOpenChange(false);
@@ -208,6 +246,32 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
             )}
 
             <div className="grid gap-4">
+              {coordenadoresData.length > 0 && (
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-success" />
+                    Coordenadores: {coordenadoresData.length} registros
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Preview: {coordenadoresData.slice(0, 3).map(c => c.nome).join(', ')}
+                    {coordenadoresData.length > 3 && '...'}
+                  </p>
+                </div>
+              )}
+
+              {representantesData.length > 0 && (
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-success" />
+                    Representantes: {representantesData.length} registros
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Preview: {representantesData.slice(0, 3).map(r => r.nome).join(', ')}
+                    {representantesData.length > 3 && '...'}
+                  </p>
+                </div>
+              )}
+
               {clientsData.length > 0 && (
                 <div className="border rounded-lg p-4">
                   <h3 className="font-semibold mb-2 flex items-center gap-2">
@@ -240,7 +304,7 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
               </Button>
               <Button
                 onClick={handleImport}
-                disabled={validationErrors.length > 0 || (clientsData.length === 0 && ordersData.length === 0)}
+                disabled={validationErrors.length > 0 || (coordenadoresData.length === 0 && representantesData.length === 0 && clientsData.length === 0 && ordersData.length === 0)}
               >
                 Importar Dados
               </Button>
@@ -268,6 +332,44 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
                 <p className="font-semibold mb-2">Importação concluída!</p>
               </AlertDescription>
             </Alert>
+
+            {coordenadoresResult && (
+              <div className="border rounded-lg p-4">
+                <h3 className="font-semibold mb-2 flex items-center gap-2">
+                  {coordenadoresResult.errors.length === 0 ? (
+                    <CheckCircle2 className="w-4 h-4 text-success" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-warning" />
+                  )}
+                  Coordenadores
+                </h3>
+                <div className="space-y-1 text-sm">
+                  <p className="text-success">✓ {coordenadoresResult.success} importados com sucesso</p>
+                  {coordenadoresResult.errors.length > 0 && (
+                    <p className="text-destructive">✗ {coordenadoresResult.errors.length} erros</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {representantesResult && (
+              <div className="border rounded-lg p-4">
+                <h3 className="font-semibold mb-2 flex items-center gap-2">
+                  {representantesResult.errors.length === 0 ? (
+                    <CheckCircle2 className="w-4 h-4 text-success" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-warning" />
+                  )}
+                  Representantes
+                </h3>
+                <div className="space-y-1 text-sm">
+                  <p className="text-success">✓ {representantesResult.success} importados com sucesso</p>
+                  {representantesResult.errors.length > 0 && (
+                    <p className="text-destructive">✗ {representantesResult.errors.length} erros</p>
+                  )}
+                </div>
+              </div>
+            )}
 
             {clientsResult && (
               <div className="border rounded-lg p-4">

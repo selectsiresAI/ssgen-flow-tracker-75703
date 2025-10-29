@@ -115,6 +115,94 @@ export async function importClients(clients: any[]): Promise<ImportResult> {
   return result;
 }
 
+export async function importCoordenadores(coordenadores: any[]): Promise<ImportResult> {
+  const result: ImportResult = { success: 0, errors: [] };
+
+  for (let i = 0; i < coordenadores.length; i++) {
+    try {
+      const coord = coordenadores[i];
+      
+      // Verificar se já existe
+      const { data: existing } = await supabase
+        .from('coordenadores')
+        .select('id')
+        .eq('nome', coord.nome)
+        .maybeSingle();
+
+      if (existing) {
+        // Atualizar se já existe
+        const { error } = await supabase
+          .from('coordenadores')
+          .update({ email: coord.email, ativo: true })
+          .eq('nome', coord.nome);
+
+        if (error) throw error;
+      } else {
+        // Inserir novo
+        const { error } = await supabase
+          .from('coordenadores')
+          .insert([{ nome: coord.nome, email: coord.email, ativo: true }]);
+
+        if (error) throw error;
+      }
+
+      result.success++;
+    } catch (error: any) {
+      result.errors.push({
+        row: i + 2,
+        error: error.message,
+        data: coordenadores[i]
+      });
+    }
+  }
+
+  return result;
+}
+
+export async function importRepresentantes(representantes: any[]): Promise<ImportResult> {
+  const result: ImportResult = { success: 0, errors: [] };
+
+  for (let i = 0; i < representantes.length; i++) {
+    try {
+      const rep = representantes[i];
+      
+      // Verificar se já existe
+      const { data: existing } = await supabase
+        .from('representantes')
+        .select('id')
+        .eq('nome', rep.nome)
+        .maybeSingle();
+
+      if (existing) {
+        // Atualizar se já existe
+        const { error } = await supabase
+          .from('representantes')
+          .update({ email: rep.email, ativo: true })
+          .eq('nome', rep.nome);
+
+        if (error) throw error;
+      } else {
+        // Inserir novo
+        const { error } = await supabase
+          .from('representantes')
+          .insert([{ nome: rep.nome, email: rep.email, ativo: true }]);
+
+        if (error) throw error;
+      }
+
+      result.success++;
+    } catch (error: any) {
+      result.errors.push({
+        row: i + 2,
+        error: error.message,
+        data: representantes[i]
+      });
+    }
+  }
+
+  return result;
+}
+
 export async function importServiceOrders(orders: any[]): Promise<ImportResult> {
   const result: ImportResult = { success: 0, errors: [] };
 

@@ -15,6 +15,13 @@ const ConfigPage: React.FC<ConfigPageProps> = ({ setCurrent }) => {
 
   const configSections = [
     {
+      title: 'Gerenciamento de Usuários',
+      description: 'Atribuir papéis e vincular usuários a coordenadores/representantes',
+      icon: <Users2 className="w-5 h-5" />,
+      action: () => setCurrent('user-management'),
+      buttonText: 'Gerenciar Usuários',
+    },
+    {
       title: 'Coordenadores',
       description: 'Gerenciar lista de coordenadores do sistema',
       icon: <UserSquare2 className="w-5 h-5" />,
@@ -37,7 +44,7 @@ const ConfigPage: React.FC<ConfigPageProps> = ({ setCurrent }) => {
     },
     {
       title: 'Importação e Sincronização',
-      description: 'Upload do Excel (SAIDA_PWRBI) e ETL para Supabase',
+      description: 'Upload do Excel com Coordenadores, Representantes, Clientes e Ordens',
       icon: <Upload className="w-5 h-5" />,
       action: () => setImportDialogOpen(true),
       buttonText: 'Importar Dados',
