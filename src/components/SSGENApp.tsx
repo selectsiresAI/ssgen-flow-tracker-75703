@@ -20,6 +20,8 @@ const ClientsPage = React.lazy(() => import('@/components/ssgen/pages/ClientsPag
 const NewOrderPage = React.lazy(() => import('@/components/ssgen/pages/NewOrderPage'));
 const CoordenadoresPage = React.lazy(() => import('@/components/ssgen/pages/CoordenadoresPage'));
 const RepresentantesPage = React.lazy(() => import('@/components/ssgen/pages/RepresentantesPage'));
+const CoordenadoresListPage = React.lazy(() => import('@/components/ssgen/pages/CoordenadoresListPage'));
+const RepresentantesListPage = React.lazy(() => import('@/components/ssgen/pages/RepresentantesListPage'));
 
 export default function SSGENTrackApp() {
   const navigate = useNavigate();
@@ -156,11 +158,25 @@ export default function SSGENTrackApp() {
     if (current === 'coordenadores') {
       return (
         <React.Suspense fallback={<div>Carregando...</div>}>
-          <CoordenadoresPage />
+          <CoordenadoresListPage />
         </React.Suspense>
       );
     }
     if (current === 'representantes') {
+      return (
+        <React.Suspense fallback={<div>Carregando...</div>}>
+          <RepresentantesListPage />
+        </React.Suspense>
+      );
+    }
+    if (current === 'config-coordenadores') {
+      return (
+        <React.Suspense fallback={<div>Carregando...</div>}>
+          <CoordenadoresPage />
+        </React.Suspense>
+      );
+    }
+    if (current === 'config-representantes') {
       return (
         <React.Suspense fallback={<div>Carregando...</div>}>
           <RepresentantesPage />

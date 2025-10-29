@@ -16,14 +16,14 @@ const ConfigPage: React.FC<ConfigPageProps> = ({ setCurrent }) => {
       title: 'Coordenadores',
       description: 'Gerenciar lista de coordenadores do sistema',
       icon: <UserSquare2 className="w-5 h-5" />,
-      action: () => setCurrent('coordenadores'),
+      action: () => setCurrent('config-coordenadores'),
       buttonText: 'Gerenciar Coordenadores',
     },
     {
       title: 'Representantes',
       description: 'Gerenciar lista de representantes comerciais',
       icon: <Users2 className="w-5 h-5" />,
-      action: () => setCurrent('representantes'),
+      action: () => setCurrent('config-representantes'),
       buttonText: 'Gerenciar Representantes',
     },
     {
