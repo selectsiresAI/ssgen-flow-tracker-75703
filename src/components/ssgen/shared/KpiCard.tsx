@@ -9,14 +9,14 @@ interface KpiProps {
 }
 
 export const Kpi: React.FC<KpiProps> = ({ title, value, subtitle, icon }) => (
-  <Card className="rounded-xl shadow-sm">
+  <Card className="rounded-lg shadow-md border-l-4 border-l-primary hover:shadow-lg transition-shadow">
     <CardHeader className="flex flex-row items-center justify-between pb-2">
-      <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-      {icon && <div className="text-muted-foreground">{icon}</div>}
+      <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{title}</CardTitle>
+      {icon && <div className="text-primary">{icon}</div>}
     </CardHeader>
     <CardContent>
-      <div className="text-3xl font-bold">{value}</div>
-      {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
+      <div className="text-3xl font-bold text-foreground">{value}</div>
+      {subtitle && <p className="text-xs text-muted-foreground mt-2">{subtitle}</p>}
     </CardContent>
   </Card>
 );

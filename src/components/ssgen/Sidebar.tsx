@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import type { Role } from '@/types/ssgen';
 import { supabase } from '@/integrations/supabase/client';
+import ssgenLogo from '@/assets/ssgen-logo.png';
+import selectSiresLogo from '@/assets/select-sires-logo.png';
 
 interface SidebarProps {
   current: string;
@@ -39,15 +41,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ current, setCurrent, role }) =
   };
 
   return (
-    <aside className="w-full md:w-72 border-r bg-background">
-      <div className="p-4 text-lg font-semibold">SSGEN Track</div>
-      <nav className="p-2 space-y-1">
+    <aside className="w-full md:w-72 border-r bg-sidebar">
+      <div className="p-6 space-y-4">
+        <div className="flex items-center justify-center">
+          <img src={ssgenLogo} alt="SSGEN Logo" className="h-12" />
+        </div>
+        <div className="flex items-center justify-center pb-2">
+          <img src={selectSiresLogo} alt="Select Sires Logo" className="h-16" />
+        </div>
+      </div>
+      <Separator />
+      <nav className="p-3 space-y-1">
         {items.filter((i) => allow(i.key)).map((i) => (
           <button
             key={i.key}
             onClick={() => setCurrent(i.key)}
-            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left hover:bg-muted ${
-              current === i.key ? 'bg-muted' : ''
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+              current === i.key 
+                ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' 
+                : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
             }`}
           >
             {i.icon}
@@ -56,10 +68,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ current, setCurrent, role }) =
         ))}
       </nav>
       <Separator className="my-3" />
-      <div className="p-2">
+      <div className="p-3">
         <Button
           variant="ghost"
-          className="w-full gap-2"
+          className="w-full gap-3 text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
           onClick={async () => {
             await supabase.auth.signOut();
             location.reload();

@@ -23,20 +23,20 @@ const RepresentantesListPage: React.FC = () => {
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filtered.map((rep) => (
-          <Card key={rep.id} className="hover:shadow-md transition-shadow">
-            <CardHeader>
-              <CardTitle className="text-lg">{rep.nome}</CardTitle>
+          <Card key={rep.id} className="hover:shadow-lg transition-all hover:border-primary/50 cursor-pointer">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg font-semibold">{rep.nome}</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-2">
               {rep.email && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Mail className="w-4 h-4" />
+                  <Mail className="w-4 h-4 text-primary" />
                   {rep.email}
                 </div>
               )}
               {rep.ativo && (
-                <div className="mt-2">
-                  <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700">
+                <div className="mt-3">
+                  <span className="inline-flex items-center rounded-full bg-success/10 px-3 py-1 text-xs font-medium text-success border border-success/20">
                     Ativo
                   </span>
                 </div>
