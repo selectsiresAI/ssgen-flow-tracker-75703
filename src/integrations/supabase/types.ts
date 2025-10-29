@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      clients: {
+        Row: {
+          codigo: number | null
+          coordenador: string
+          cpf_cnpj: number
+          created_at: string
+          data: string
+          id_conta_ssgen: number | null
+          ie_rg: number | null
+          nome: string
+          ordem_servico_neogen: number | null
+          ordem_servico_ssgen: number
+          representante: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          codigo?: number | null
+          coordenador: string
+          cpf_cnpj: number
+          created_at?: string
+          data: string
+          id_conta_ssgen?: number | null
+          ie_rg?: number | null
+          nome: string
+          ordem_servico_neogen?: number | null
+          ordem_servico_ssgen: number
+          representante: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          codigo?: number | null
+          coordenador?: string
+          cpf_cnpj?: number
+          created_at?: string
+          data?: string
+          id_conta_ssgen?: number | null
+          ie_rg?: number | null
+          nome?: string
+          ordem_servico_neogen?: number | null
+          ordem_servico_ssgen?: number
+          representante?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           cliente: string
@@ -151,6 +199,111 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      service_orders: {
+        Row: {
+          cra_data: string | null
+          cra_status: string | null
+          created_at: string
+          envio_planilha_data: string | null
+          envio_planilha_status: string | null
+          envio_resultados_data: string | null
+          envio_resultados_data_final: string | null
+          envio_resultados_data_prova: string | null
+          envio_resultados_ordem_id: number | null
+          envio_resultados_order_id: number | null
+          envio_resultados_previsao: string | null
+          envio_resultados_status: string | null
+          id: string
+          liberacao_data: string | null
+          liberacao_n_amostras: number | null
+          lpr_data: string | null
+          lpr_n_amostras: number | null
+          nome_produto: string | null
+          numero_nf_neogen: number | null
+          numero_teste_nota_neogen: number | null
+          ordem_servico_neogen: number | null
+          ordem_servico_ssgen: number
+          recebimento_data: string | null
+          recebimento_status: string | null
+          updated_at: string
+          vri_data: string | null
+          vri_n_amostras: number | null
+        }
+        Insert: {
+          cra_data?: string | null
+          cra_status?: string | null
+          created_at?: string
+          envio_planilha_data?: string | null
+          envio_planilha_status?: string | null
+          envio_resultados_data?: string | null
+          envio_resultados_data_final?: string | null
+          envio_resultados_data_prova?: string | null
+          envio_resultados_ordem_id?: number | null
+          envio_resultados_order_id?: number | null
+          envio_resultados_previsao?: string | null
+          envio_resultados_status?: string | null
+          id?: string
+          liberacao_data?: string | null
+          liberacao_n_amostras?: number | null
+          lpr_data?: string | null
+          lpr_n_amostras?: number | null
+          nome_produto?: string | null
+          numero_nf_neogen?: number | null
+          numero_teste_nota_neogen?: number | null
+          ordem_servico_neogen?: number | null
+          ordem_servico_ssgen: number
+          recebimento_data?: string | null
+          recebimento_status?: string | null
+          updated_at?: string
+          vri_data?: string | null
+          vri_n_amostras?: number | null
+        }
+        Update: {
+          cra_data?: string | null
+          cra_status?: string | null
+          created_at?: string
+          envio_planilha_data?: string | null
+          envio_planilha_status?: string | null
+          envio_resultados_data?: string | null
+          envio_resultados_data_final?: string | null
+          envio_resultados_data_prova?: string | null
+          envio_resultados_ordem_id?: number | null
+          envio_resultados_order_id?: number | null
+          envio_resultados_previsao?: string | null
+          envio_resultados_status?: string | null
+          id?: string
+          liberacao_data?: string | null
+          liberacao_n_amostras?: number | null
+          lpr_data?: string | null
+          lpr_n_amostras?: number | null
+          nome_produto?: string | null
+          numero_nf_neogen?: number | null
+          numero_teste_nota_neogen?: number | null
+          ordem_servico_neogen?: number | null
+          ordem_servico_ssgen?: number
+          recebimento_data?: string | null
+          recebimento_status?: string | null
+          updated_at?: string
+          vri_data?: string | null
+          vri_n_amostras?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_orders_ordem_servico_ssgen_fkey"
+            columns: ["ordem_servico_ssgen"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["ordem_servico_ssgen"]
+          },
+          {
+            foreignKeyName: "service_orders_ordem_servico_ssgen_fkey"
+            columns: ["ordem_servico_ssgen"]
+            isOneToOne: false
+            referencedRelation: "vw_orders_unified"
+            referencedColumns: ["ordem_servico_ssgen"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -295,6 +448,48 @@ export type Database = {
           REP?: string | null
           RESULT_SSG?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      vw_orders_unified: {
+        Row: {
+          client_created_at: string | null
+          cliente_nome: string | null
+          cliente_status: string | null
+          codigo: number | null
+          coordenador: string | null
+          cpf_cnpj: number | null
+          cra_data: string | null
+          cra_status: string | null
+          data_cadastro: string | null
+          envio_planilha_data: string | null
+          envio_planilha_status: string | null
+          envio_resultados_data: string | null
+          envio_resultados_data_final: string | null
+          envio_resultados_data_prova: string | null
+          envio_resultados_ordem_id: number | null
+          envio_resultados_order_id: number | null
+          envio_resultados_previsao: string | null
+          envio_resultados_status: string | null
+          id_conta_ssgen: number | null
+          ie_rg: number | null
+          liberacao_data: string | null
+          liberacao_n_amostras: number | null
+          lpr_data: string | null
+          lpr_n_amostras: number | null
+          nome_produto: string | null
+          numero_nf_neogen: number | null
+          numero_teste_nota_neogen: number | null
+          ordem_id: string | null
+          ordem_servico_neogen: number | null
+          ordem_servico_ssgen: number | null
+          order_created_at: string | null
+          recebimento_data: string | null
+          recebimento_status: string | null
+          representante: string | null
+          updated_at: string | null
+          vri_data: string | null
+          vri_n_amostras: number | null
         }
         Relationships: []
       }
