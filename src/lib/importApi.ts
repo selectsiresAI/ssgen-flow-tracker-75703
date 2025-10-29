@@ -12,6 +12,58 @@ export interface ValidationError {
   message: string;
 }
 
+// Função auxiliar para limpar e formatar CPF/CNPJ
+function cleanCpfCnpj(value: any): number | null {
+  if (!value) return null;
+  const cleaned = String(value).replace(/[^\d]/g, '');
+  return cleaned ? parseInt(cleaned, 10) : null;
+}
+
+// Função auxiliar para converter data do Excel para YYYY-MM-DD
+function parseExcelDate(value: any): string | null {
+  if (!value) return null;
+  
+  // Se já está no formato correto YYYY-MM-DD
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+  
+  // Se é uma data do Excel (número)
+  if (typeof value === 'number') {
+    const date = new Date((value - 25569) * 86400 * 1000);
+    return date.toISOString().split('T')[0];
+  }
+  
+  // Tentar parsear formato M/D/YY ou M/D/YYYY
+  if (typeof value === 'string') {
+    const parts = value.split('/');
+    if (parts.length === 3) {
+      let [month, day, year] = parts;
+      
+      // Converter ano de 2 dígitos para 4 dígitos
+      if (year.length === 2) {
+        const yearNum = parseInt(year, 10);
+        year = yearNum < 50 ? `20${year}` : `19${year}`;
+      }
+      
+      // Garantir 2 dígitos para mês e dia
+      month = month.padStart(2, '0');
+      day = day.padStart(2, '0');
+      
+      return `${year}-${month}-${day}`;
+    }
+  }
+  
+  return null;
+}
+
+// Função auxiliar para limpar ordem de serviço
+function cleanOrderNumber(value: any): number | null {
+  if (!value) return null;
+  const cleaned = String(value).replace(/[^\d]/g, '');
+  return cleaned ? parseInt(cleaned, 10) : null;
+}
+
 export async function validateClients(clients: any[]): Promise<ValidationError[]> {
   const errors: ValidationError[] = [];
   
@@ -61,11 +113,6 @@ export async function validateClients(clients: any[]): Promise<ValidationError[]
     if (client.representante && !validReps.has(client.representante)) {
       errors.push({ row, field: 'representante', message: `Representante "${client.representante}" não encontrado` });
     }
-
-    // Validar formato de data
-    if (client.data && !/^\d{4}-\d{2}-\d{2}$/.test(client.data)) {
-      errors.push({ row, field: 'data', message: 'Formato deve ser YYYY-MM-DD' });
-    }
   });
 
   return errors;
@@ -76,7 +123,22 @@ export async function importClients(clients: any[]): Promise<ImportResult> {
 
   for (let i = 0; i < clients.length; i++) {
     try {
-      const client = clients[i];
+      const rawClient = clients[i];
+      
+      // Limpar e formatar dados
+      const client = {
+        ordem_servico_ssgen: cleanOrderNumber(rawClient.ordem_servico_ssgen),
+        data: parseExcelDate(rawClient.data),
+        nome: rawClient.nome,
+        cpf_cnpj: cleanCpfCnpj(rawClient.cpf_cnpj),
+        representante: rawClient.representante,
+        coordenador: rawClient.coordenador,
+        ordem_servico_neogen: cleanOrderNumber(rawClient.ordem_servico_neogen),
+        ie_rg: cleanCpfCnpj(rawClient.ie_rg),
+        codigo: rawClient.codigo ? parseInt(String(rawClient.codigo), 10) : null,
+        status: rawClient.status || null,
+        id_conta_ssgen: rawClient.id_conta_ssgen ? parseInt(String(rawClient.id_conta_ssgen), 10) : null,
+      };
       
       // Verificar se já existe
       const { data: existing } = await supabase
@@ -208,18 +270,43 @@ export async function importServiceOrders(orders: any[]): Promise<ImportResult> 
 
   for (let i = 0; i < orders.length; i++) {
     try {
-      const order = orders[i];
+      const rawOrder = orders[i];
+      
+      // Limpar e formatar dados
+      const orderNumber = cleanOrderNumber(rawOrder.ordem_servico_ssgen);
       
       // Verificar se o cliente existe
       const { data: client } = await supabase
         .from('clients')
         .select('ordem_servico_ssgen')
-        .eq('ordem_servico_ssgen', order.ordem_servico_ssgen)
+        .eq('ordem_servico_ssgen', orderNumber)
         .maybeSingle();
 
       if (!client) {
         throw new Error('Cliente não encontrado. Importe os clientes primeiro.');
       }
+
+      const order = {
+        ordem_servico_ssgen: orderNumber,
+        ordem_servico_neogen: cleanOrderNumber(rawOrder.ordem_servico_neogen),
+        numero_nf_neogen: rawOrder.numero_nf_neogen ? parseInt(String(rawOrder.numero_nf_neogen), 10) : null,
+        nome_produto: rawOrder.nome_produto || null,
+        numero_amostras: rawOrder.numero_amostras ? parseInt(String(rawOrder.numero_amostras), 10) : null,
+        cra_data: parseExcelDate(rawOrder.cra_data),
+        cra_status: rawOrder.cra_status || null,
+        envio_planilha_data: parseExcelDate(rawOrder.envio_planilha_data),
+        envio_planilha_status: rawOrder.envio_planilha_status || null,
+        vri_data: parseExcelDate(rawOrder.vri_data),
+        vri_n_amostras: rawOrder.vri_n_amostras ? parseInt(String(rawOrder.vri_n_amostras), 10) : null,
+        lpr_data: parseExcelDate(rawOrder.lpr_data),
+        lpr_n_amostras: rawOrder.lpr_n_amostras ? parseInt(String(rawOrder.lpr_n_amostras), 10) : null,
+        liberacao_data: parseExcelDate(rawOrder.liberacao_data),
+        liberacao_n_amostras: rawOrder.liberacao_n_amostras ? parseInt(String(rawOrder.liberacao_n_amostras), 10) : null,
+        envio_resultados_data: parseExcelDate(rawOrder.envio_resultados_data),
+        envio_resultados_previsao: parseExcelDate(rawOrder.envio_resultados_previsao),
+        envio_resultados_status: rawOrder.envio_resultados_status || null,
+        envio_resultados_data_prova: rawOrder.envio_resultados_data_prova || null,
+      };
 
       // Verificar se já existe
       const { data: existing } = await supabase

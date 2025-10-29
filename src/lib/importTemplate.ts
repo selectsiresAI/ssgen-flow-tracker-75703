@@ -31,6 +31,19 @@ export function generateImportTemplate() {
       codigo: 1001,
       status: 'Ativo',
       id_conta_ssgen: 5001
+    },
+    {
+      ordem_servico_ssgen: 12346,
+      data: '2024-01-16',
+      nome: 'Fazenda Modelo Ltda',
+      cpf_cnpj: 98765432109876,
+      representante: 'Maria Santos',
+      coordenador: 'João Silva',
+      ordem_servico_neogen: 67891,
+      ie_rg: 987654321,
+      codigo: 1002,
+      status: 'Ativo',
+      id_conta_ssgen: 5002
     }
   ];
 
@@ -54,9 +67,29 @@ export function generateImportTemplate() {
       envio_resultados_data: '2024-01-30',
       envio_resultados_status: 'Enviado',
       envio_resultados_previsao: '2024-01-29',
-      envio_resultados_ordem_id: 1,
       envio_resultados_data_prova: 'Laudo Técnico',
       numero_nf_neogen: 9876
+    },
+    {
+      ordem_servico_ssgen: 12346,
+      ordem_servico_neogen: 67891,
+      nome_produto: 'Análise Genética Básica',
+      numero_amostras: 30,
+      cra_data: '2024-01-21',
+      cra_status: 'Em Andamento',
+      envio_planilha_data: '2024-01-17',
+      envio_planilha_status: 'Enviado',
+      vri_data: '2024-01-23',
+      vri_n_amostras: 30,
+      lpr_data: '2024-01-26',
+      lpr_n_amostras: 28,
+      liberacao_data: '2024-01-29',
+      liberacao_n_amostras: 28,
+      envio_resultados_data: '2024-01-31',
+      envio_resultados_status: 'Pendente',
+      envio_resultados_previsao: '2024-01-30',
+      envio_resultados_data_prova: 'Relatório',
+      numero_nf_neogen: 9877
     }
   ];
 
