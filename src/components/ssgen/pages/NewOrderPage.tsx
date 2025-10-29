@@ -20,7 +20,6 @@ const NewOrderPage: React.FC = () => {
   const [formData, setFormData] = useState({
     // Dados básicos
     numero_nf_neogen: '',
-    numero_teste_nota_neogen: '',
     nome_produto: '',
     numero_amostras: '',
     
@@ -49,9 +48,7 @@ const NewOrderPage: React.FC = () => {
     envio_resultados_ordem_id: '',
     envio_resultados_previsao: '',
     envio_resultados_status: '',
-    envio_resultados_data_final: '',
     envio_resultados_data_prova: '',
-    envio_resultados_order_id: '',
   });
 
   useEffect(() => {
@@ -79,7 +76,6 @@ const NewOrderPage: React.FC = () => {
         ordem_servico_ssgen: selectedClient.ordem_servico_ssgen,
         ordem_servico_neogen: selectedClient.ordem_servico_neogen || null,
         numero_nf_neogen: formData.numero_nf_neogen ? Number(formData.numero_nf_neogen) : null,
-        numero_teste_nota_neogen: formData.numero_teste_nota_neogen ? Number(formData.numero_teste_nota_neogen) : null,
         nome_produto: formData.nome_produto || null,
         numero_amostras: formData.numero_amostras ? Number(formData.numero_amostras) : null,
         
@@ -102,9 +98,7 @@ const NewOrderPage: React.FC = () => {
         envio_resultados_ordem_id: formData.envio_resultados_ordem_id ? Number(formData.envio_resultados_ordem_id) : null,
         envio_resultados_previsao: formData.envio_resultados_previsao || null,
         envio_resultados_status: formData.envio_resultados_status || null,
-        envio_resultados_data_final: formData.envio_resultados_data_final || null,
         envio_resultados_data_prova: formData.envio_resultados_data_prova || null,
-        envio_resultados_order_id: formData.envio_resultados_order_id ? Number(formData.envio_resultados_order_id) : null,
       };
 
       await createServiceOrder(orderData);
@@ -114,7 +108,6 @@ const NewOrderPage: React.FC = () => {
       setSelectedClient(null);
       setFormData({
         numero_nf_neogen: '',
-        numero_teste_nota_neogen: '',
         nome_produto: '',
         numero_amostras: '',
         cra_data: '',
@@ -131,9 +124,7 @@ const NewOrderPage: React.FC = () => {
         envio_resultados_ordem_id: '',
         envio_resultados_previsao: '',
         envio_resultados_status: '',
-        envio_resultados_data_final: '',
         envio_resultados_data_prova: '',
-        envio_resultados_order_id: '',
       });
     } catch (error: any) {
       toast({ 
@@ -191,7 +182,7 @@ const NewOrderPage: React.FC = () => {
               <CardTitle>Dados Básicos</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="numero_nf_neogen">Número da Nota Fiscal Neogen</Label>
                   <Input
@@ -199,15 +190,6 @@ const NewOrderPage: React.FC = () => {
                     type="number"
                     value={formData.numero_nf_neogen}
                     onChange={(e) => setFormData({ ...formData, numero_nf_neogen: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="numero_teste_nota_neogen">Número de teste na nota Neogen</Label>
-                  <Input
-                    id="numero_teste_nota_neogen"
-                    type="number"
-                    value={formData.numero_teste_nota_neogen}
-                    onChange={(e) => setFormData({ ...formData, numero_teste_nota_neogen: e.target.value })}
                   />
                 </div>
                 <div>
@@ -409,29 +391,11 @@ const NewOrderPage: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="envio_resultados_data_final">Data Final</Label>
-                    <Input
-                      id="envio_resultados_data_final"
-                      type="date"
-                      value={formData.envio_resultados_data_final}
-                      onChange={(e) => setFormData({ ...formData, envio_resultados_data_final: e.target.value })}
-                    />
-                  </div>
-                  <div>
                     <Label htmlFor="envio_resultados_data_prova">Data Prova</Label>
                     <Input
                       id="envio_resultados_data_prova"
                       value={formData.envio_resultados_data_prova}
                       onChange={(e) => setFormData({ ...formData, envio_resultados_data_prova: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="envio_resultados_order_id">Order ID</Label>
-                    <Input
-                      id="envio_resultados_order_id"
-                      type="number"
-                      value={formData.envio_resultados_order_id}
-                      onChange={(e) => setFormData({ ...formData, envio_resultados_order_id: e.target.value })}
                     />
                   </div>
                 </div>

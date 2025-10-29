@@ -91,7 +91,6 @@ export type ServiceOrder = {
   ordem_servico_ssgen: number;
   ordem_servico_neogen?: number | null;
   numero_nf_neogen?: number | null;
-  numero_teste_nota_neogen?: number | null;
   nome_produto?: string | null;
   numero_amostras?: number | null;
   
@@ -120,9 +119,7 @@ export type ServiceOrder = {
   envio_resultados_ordem_id?: number | null;
   envio_resultados_previsao?: string | null;
   envio_resultados_status?: string | null;
-  envio_resultados_data_final?: string | null;
   envio_resultados_data_prova?: string | null;
-  envio_resultados_order_id?: number | null;
   
   created_at?: string;
   updated_at?: string;

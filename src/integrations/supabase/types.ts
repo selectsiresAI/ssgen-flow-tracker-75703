@@ -262,10 +262,8 @@ export type Database = {
           envio_planilha_data: string | null
           envio_planilha_status: string | null
           envio_resultados_data: string | null
-          envio_resultados_data_final: string | null
           envio_resultados_data_prova: string | null
           envio_resultados_ordem_id: number | null
-          envio_resultados_order_id: number | null
           envio_resultados_previsao: string | null
           envio_resultados_status: string | null
           id: string
@@ -276,7 +274,6 @@ export type Database = {
           nome_produto: string | null
           numero_amostras: number | null
           numero_nf_neogen: number | null
-          numero_teste_nota_neogen: number | null
           ordem_servico_neogen: number | null
           ordem_servico_ssgen: number
           updated_at: string
@@ -290,10 +287,8 @@ export type Database = {
           envio_planilha_data?: string | null
           envio_planilha_status?: string | null
           envio_resultados_data?: string | null
-          envio_resultados_data_final?: string | null
           envio_resultados_data_prova?: string | null
           envio_resultados_ordem_id?: number | null
-          envio_resultados_order_id?: number | null
           envio_resultados_previsao?: string | null
           envio_resultados_status?: string | null
           id?: string
@@ -304,7 +299,6 @@ export type Database = {
           nome_produto?: string | null
           numero_amostras?: number | null
           numero_nf_neogen?: number | null
-          numero_teste_nota_neogen?: number | null
           ordem_servico_neogen?: number | null
           ordem_servico_ssgen: number
           updated_at?: string
@@ -318,10 +312,8 @@ export type Database = {
           envio_planilha_data?: string | null
           envio_planilha_status?: string | null
           envio_resultados_data?: string | null
-          envio_resultados_data_final?: string | null
           envio_resultados_data_prova?: string | null
           envio_resultados_ordem_id?: number | null
-          envio_resultados_order_id?: number | null
           envio_resultados_previsao?: string | null
           envio_resultados_status?: string | null
           id?: string
@@ -332,7 +324,6 @@ export type Database = {
           nome_produto?: string | null
           numero_amostras?: number | null
           numero_nf_neogen?: number | null
-          numero_teste_nota_neogen?: number | null
           ordem_servico_neogen?: number | null
           ordem_servico_ssgen?: number
           updated_at?: string
@@ -516,10 +507,8 @@ export type Database = {
           envio_planilha_data: string | null
           envio_planilha_status: string | null
           envio_resultados_data: string | null
-          envio_resultados_data_final: string | null
           envio_resultados_data_prova: string | null
           envio_resultados_ordem_id: number | null
-          envio_resultados_order_id: number | null
           envio_resultados_previsao: string | null
           envio_resultados_status: string | null
           id_conta_ssgen: number | null
@@ -531,7 +520,6 @@ export type Database = {
           nome_produto: string | null
           numero_amostras: number | null
           numero_nf_neogen: number | null
-          numero_teste_nota_neogen: number | null
           ordem_id: string | null
           ordem_servico_neogen: number | null
           ordem_servico_ssgen: number | null

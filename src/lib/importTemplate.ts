@@ -54,12 +54,9 @@ export function generateImportTemplate() {
       envio_resultados_data: '2024-01-30',
       envio_resultados_status: 'Enviado',
       envio_resultados_previsao: '2024-01-29',
-      envio_resultados_data_final: '2024-01-30',
       envio_resultados_ordem_id: 1,
-      envio_resultados_order_id: 1,
       envio_resultados_data_prova: 'Laudo Técnico',
-      numero_nf_neogen: 9876,
-      numero_teste_nota_neogen: 5432
+      numero_nf_neogen: 9876
     }
   ];
 
