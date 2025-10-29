@@ -68,3 +68,75 @@ export const slaBadge = (row: PowerRow) => {
   if (d === 0) return { label: 'D0', tone: 'warning' } as const;
   return { label: `+${d}d`, tone: 'destructive' } as const;
 };
+
+// Novos tipos para Clientes e Ordens de Serviço
+export type Client = {
+  ordem_servico_ssgen: number;
+  data: string;
+  ordem_servico_neogen?: number | null;
+  nome: string;
+  cpf_cnpj: number;
+  ie_rg?: number | null;
+  codigo?: number | null;
+  status?: string | null;
+  representante: string;
+  coordenador: string;
+  id_conta_ssgen?: number | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ServiceOrder = {
+  id?: string;
+  ordem_servico_ssgen: number;
+  ordem_servico_neogen?: number | null;
+  numero_nf_neogen?: number | null;
+  numero_teste_nota_neogen?: number | null;
+  nome_produto?: string | null;
+  
+  // CRA
+  cra_data?: string | null;
+  cra_status?: string | null;
+  
+  // Recebimento
+  recebimento_data?: string | null;
+  recebimento_status?: string | null;
+  
+  // Envio Planilha
+  envio_planilha_data?: string | null;
+  envio_planilha_status?: string | null;
+  
+  // VRI
+  vri_data?: string | null;
+  vri_n_amostras?: number | null;
+  
+  // LPR
+  lpr_data?: string | null;
+  lpr_n_amostras?: number | null;
+  
+  // Liberação
+  liberacao_data?: string | null;
+  liberacao_n_amostras?: number | null;
+  
+  // Envio Resultados
+  envio_resultados_data?: string | null;
+  envio_resultados_ordem_id?: number | null;
+  envio_resultados_previsao?: string | null;
+  envio_resultados_status?: string | null;
+  envio_resultados_data_final?: string | null;
+  envio_resultados_data_prova?: string | null;
+  envio_resultados_order_id?: number | null;
+  
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type UnifiedOrder = Client & Omit<ServiceOrder, 'ordem_servico_ssgen' | 'ordem_servico_neogen' | 'created_at' | 'updated_at'> & {
+  ordem_id?: string;
+  cliente_nome?: string;
+  cliente_status?: string;
+  data_cadastro?: string;
+  client_created_at?: string;
+  order_created_at?: string;
+  updated_at?: string;
+};

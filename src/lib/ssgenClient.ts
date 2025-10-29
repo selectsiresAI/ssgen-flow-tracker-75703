@@ -22,3 +22,12 @@ export async function fetchOrders(): Promise<PowerRow[]> {
   }
   return (data as any[]).map((r) => ({ ...r }));
 }
+
+export async function fetchUnifiedOrdersForDashboard() {
+  const { data, error } = await supabase.from('vw_orders_unified').select('*');
+  if (error) {
+    console.error('Error fetching unified orders:', error);
+    return [];
+  }
+  return data;
+}

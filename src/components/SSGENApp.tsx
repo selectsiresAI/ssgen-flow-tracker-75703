@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import type { Profile, PowerRow, Role } from '@/types/ssgen';
+import type { Profile, PowerRow, Role, UnifiedOrder } from '@/types/ssgen';
 import { fmt, isSet, slaBadge } from '@/types/ssgen';
 import { getProfile, fetchOrders } from '@/lib/ssgenClient';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,6 +16,8 @@ const RepDashboard = React.lazy(() => import('@/components/ssgen/dashboards/RepD
 const OrdersPage = React.lazy(() => import('@/components/ssgen/pages/OrdersPage'));
 const CatalogPage = React.lazy(() => import('@/components/ssgen/pages/CatalogPage'));
 const ConfigPage = React.lazy(() => import('@/components/ssgen/pages/ConfigPage'));
+const ClientsPage = React.lazy(() => import('@/components/ssgen/pages/ClientsPage'));
+const NewOrderPage = React.lazy(() => import('@/components/ssgen/pages/NewOrderPage'));
 
 export default function SSGENTrackApp() {
   const navigate = useNavigate();
@@ -75,8 +77,8 @@ export default function SSGENTrackApp() {
   },[rows,filters,role,profile]);
 
   const [open,setOpen] = useState(false);
-  const [detail,setDetail] = useState<PowerRow|null>(null);
-  const openDetail = (r:PowerRow)=>{ setDetail(r); setOpen(true); };
+  const [detail,setDetail] = useState<PowerRow | UnifiedOrder | null>(null);
+  const openDetail = (r: PowerRow | UnifiedOrder)=>{ setDetail(r); setOpen(true); };
 
   const listClientes = useMemo(()=> Array.from(new Set(rowsFiltered.map(r=>r.CLIENTE))).sort() as string[], [rowsFiltered]);
   const listReps = useMemo(()=> Array.from(new Set(rowsFiltered.map(r=>r.REP))).sort() as string[], [rowsFiltered]);
@@ -106,7 +108,6 @@ export default function SSGENTrackApp() {
       return (
         <React.Suspense fallback={<div>Carregando...</div>}>
           <OrdersPage
-            rows={rowsFiltered}
             onOpen={openDetail}
             canEdit={role === 'ADM'}
             canAttach={role === 'ADM'}
@@ -118,7 +119,7 @@ export default function SSGENTrackApp() {
     if (current === 'faturamento') {
       return (
         <React.Suspense fallback={<div>Carregando...</div>}>
-          <OrdersPage rows={rowsFiltered} onOpen={openDetail} canEdit={false} canAttach={false} canFinance={role === 'ADM'} />
+          <OrdersPage onOpen={openDetail} canEdit={false} canAttach={false} canFinance={role === 'ADM'} />
         </React.Suspense>
       );
     }
@@ -139,7 +140,14 @@ export default function SSGENTrackApp() {
     if (current === 'clientes') {
       return (
         <React.Suspense fallback={<div>Carregando...</div>}>
-          <CatalogPage title="Clientes" items={listClientes} />
+          <ClientsPage profile={profile} />
+        </React.Suspense>
+      );
+    }
+    if (current === 'nova-ordem') {
+      return (
+        <React.Suspense fallback={<div>Carregando...</div>}>
+          <NewOrderPage />
         </React.Suspense>
       );
     }
@@ -197,8 +205,12 @@ export default function SSGENTrackApp() {
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-5xl">
-          <DialogHeader><DialogTitle>OS • {detail?.OS_SSGEN}</DialogTitle></DialogHeader>
-          {detail && (
+          <DialogHeader>
+            <DialogTitle>
+              OS • {(detail as any)?.OS_SSGEN || (detail as any)?.ordem_servico_ssgen}
+            </DialogTitle>
+          </DialogHeader>
+          {detail && 'OS_SSGEN' in detail && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Card>
@@ -254,6 +266,41 @@ export default function SSGENTrackApp() {
                   <div className="text-sm text-muted-foreground">Notas internas (ADM/Gerente) com @menções (tabela separada).</div>
                 </TabsContent>
               </Tabs>
+            </div>
+          )}
+          {detail && 'ordem_servico_ssgen' in detail && !('OS_SSGEN' in detail) && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader><CardTitle>Cliente</CardTitle></CardHeader>
+                  <CardContent className="text-sm space-y-2">
+                    <div><span className="text-muted-foreground">Nome:</span> {detail.cliente_nome || detail.nome}</div>
+                    <div><span className="text-muted-foreground">CPF/CNPJ:</span> {detail.cpf_cnpj}</div>
+                    <div><span className="text-muted-foreground">Representante:</span> {detail.representante}</div>
+                    <div><span className="text-muted-foreground">Coordenador:</span> {detail.coordenador}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader><CardTitle>Ordem</CardTitle></CardHeader>
+                  <CardContent className="text-sm space-y-2">
+                    <div><span className="text-muted-foreground">NF Neogen:</span> {detail.numero_nf_neogen || '—'}</div>
+                    <div><span className="text-muted-foreground">Produto:</span> {detail.nome_produto || '—'}</div>
+                    <div><span className="text-muted-foreground">Status:</span> {detail.cliente_status || '—'}</div>
+                  </CardContent>
+                </Card>
+              </div>
+              <Card>
+                <CardHeader><CardTitle>Fluxo de Processos</CardTitle></CardHeader>
+                <CardContent className="text-sm space-y-2">
+                  <div><span className="text-muted-foreground">CRA:</span> {fmt(detail.cra_data)} - {detail.cra_status || '—'}</div>
+                  <div><span className="text-muted-foreground">Recebimento:</span> {fmt(detail.recebimento_data)} - {detail.recebimento_status || '—'}</div>
+                  <div><span className="text-muted-foreground">Envio Planilha:</span> {fmt(detail.envio_planilha_data)} - {detail.envio_planilha_status || '—'}</div>
+                  <div><span className="text-muted-foreground">VRI:</span> {fmt(detail.vri_data)} - {detail.vri_n_amostras || '—'} amostras</div>
+                  <div><span className="text-muted-foreground">LPR:</span> {fmt(detail.lpr_data)} - {detail.lpr_n_amostras || '—'} amostras</div>
+                  <div><span className="text-muted-foreground">Liberação:</span> {fmt(detail.liberacao_data)} - {detail.liberacao_n_amostras || '—'} amostras</div>
+                  <div><span className="text-muted-foreground">Envio Resultados:</span> {fmt(detail.envio_resultados_data)} - {detail.envio_resultados_status || '—'}</div>
+                </CardContent>
+              </Card>
             </div>
           )}
         </DialogContent>
