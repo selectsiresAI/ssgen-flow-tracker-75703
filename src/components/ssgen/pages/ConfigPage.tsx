@@ -3,25 +3,27 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { HeaderBar } from '../shared/HeaderBar';
 import { Users2, UserSquare2, Settings2, Upload } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
-const ConfigPage: React.FC = () => {
+interface ConfigPageProps {
+  setCurrent: (page: string) => void;
+}
+
+const ConfigPage: React.FC<ConfigPageProps> = ({ setCurrent }) => {
   const [query, setQuery] = useState('');
-  const navigate = useNavigate();
 
   const configSections = [
     {
       title: 'Coordenadores',
       description: 'Gerenciar lista de coordenadores do sistema',
       icon: <UserSquare2 className="w-5 h-5" />,
-      action: () => navigate('/app?page=coordenadores'),
+      action: () => setCurrent('coordenadores'),
       buttonText: 'Gerenciar Coordenadores',
     },
     {
       title: 'Representantes',
       description: 'Gerenciar lista de representantes comerciais',
       icon: <Users2 className="w-5 h-5" />,
-      action: () => navigate('/app?page=representantes'),
+      action: () => setCurrent('representantes'),
       buttonText: 'Gerenciar Representantes',
     },
     {
@@ -30,7 +32,6 @@ const ConfigPage: React.FC = () => {
       icon: <Settings2 className="w-5 h-5" />,
       action: () => alert('Funcionalidade em desenvolvimento'),
       buttonText: 'Configurar SLA',
-      disabled: true,
     },
     {
       title: 'Importação e Sincronização',
@@ -38,7 +39,6 @@ const ConfigPage: React.FC = () => {
       icon: <Upload className="w-5 h-5" />,
       action: () => alert('Funcionalidade em desenvolvimento'),
       buttonText: 'Importar Dados',
-      disabled: true,
     },
   ];
 
@@ -59,7 +59,6 @@ const ConfigPage: React.FC = () => {
             <CardContent>
               <Button
                 onClick={section.action}
-                disabled={section.disabled}
                 className="w-full"
               >
                 {section.buttonText}

@@ -170,7 +170,7 @@ export default function SSGENTrackApp() {
     if (current === 'config') {
       return role === 'ADM' ? (
         <React.Suspense fallback={<div>Carregando...</div>}>
-          <ConfigPage />
+          <ConfigPage setCurrent={setCurrent} />
         </React.Suspense>
       ) : (
         <Card className="border-dashed">
