@@ -119,6 +119,7 @@ export default function SSGENTrackApp() {
             canEdit={role === 'ADM'}
             canAttach={role === 'ADM'}
             canFinance={role === 'ADM'}
+            userRole={role}
           />
         </React.Suspense>
       );
@@ -126,7 +127,13 @@ export default function SSGENTrackApp() {
     if (current === 'faturamento') {
       return (
         <React.Suspense fallback={<div>Carregando...</div>}>
-          <OrdersPage onOpen={openDetail} canEdit={false} canAttach={false} canFinance={role === 'ADM'} />
+          <OrdersPage 
+            onOpen={openDetail} 
+            canEdit={false} 
+            canAttach={false} 
+            canFinance={role === 'ADM'}
+            userRole={role}
+          />
         </React.Suspense>
       );
     }
@@ -386,8 +393,8 @@ export default function SSGENTrackApp() {
                   <div><span className="text-muted-foreground">CRA:</span> {fmt(detail.cra_data)} - {detail.cra_status || '—'}</div>
                   <div><span className="text-muted-foreground">Envio Planilha:</span> {fmt(detail.envio_planilha_data)} - {detail.envio_planilha_status || '—'}</div>
                   <div><span className="text-muted-foreground">VRI:</span> {fmt(detail.vri_data)} - {detail.vri_n_amostras || '—'} amostras</div>
+                  <div><span className="text-muted-foreground">VRI Resolvido:</span> {fmt(detail.vri_resolvido_data)}</div>
                   <div><span className="text-muted-foreground">LPR:</span> {fmt(detail.lpr_data)} - {detail.lpr_n_amostras || '—'} amostras</div>
-                  <div><span className="text-muted-foreground">Liberação:</span> {fmt(detail.liberacao_data)} - {detail.liberacao_n_amostras || '—'} amostras</div>
                   <div><span className="text-muted-foreground">Envio Resultados:</span> {fmt(detail.envio_resultados_data)} - {detail.envio_resultados_status || '—'}</div>
                 </CardContent>
               </Card>

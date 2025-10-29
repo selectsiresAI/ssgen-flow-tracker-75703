@@ -4,22 +4,52 @@ import { Badge } from '@/components/ui/badge';
 import type { UnifiedOrder } from '@/types/ssgen';
 import { fmt } from '@/types/ssgen';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { EditableCell } from './EditableCell';
+import { SLABadge } from './SLABadge';
+import { updateServiceOrder } from '@/lib/serviceOrdersApi';
+import { toast } from 'sonner';
 
 interface UnifiedOrdersTableProps {
   rows: UnifiedOrder[];
   onOpen: (r: UnifiedOrder) => void;
+  userRole?: string;
+  onUpdate?: () => void;
 }
 
-export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({ rows, onOpen }) => {
+export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({ 
+  rows, 
+  onOpen, 
+  userRole,
+  onUpdate 
+}) => {
+  const isAdmin = userRole === 'ADM';
+
+  const handleCellUpdate = async (orderId: string | undefined, field: string, value: any) => {
+    if (!orderId) {
+      toast.error('ID da ordem não encontrado');
+      return;
+    }
+
+    try {
+      await updateServiceOrder(orderId, { [field]: value });
+      toast.success('Campo atualizado com sucesso');
+      onUpdate?.();
+    } catch (error) {
+      console.error('Error updating field:', error);
+      toast.error('Erro ao atualizar campo');
+      throw error;
+    }
+  };
+
   return (
     <ScrollArea className="w-full">
-      <div className="min-w-[1800px]">
+      <div className="min-w-[2400px]">
         <table className="w-full text-sm">
           <thead className="bg-muted sticky top-0 z-10">
             <tr>
-              <th className="p-2 text-left border">Ordem de Serviço SSGen</th>
+              <th className="p-2 text-left border">OS SSGen</th>
               <th className="p-2 text-left border">Data</th>
-              <th className="p-2 text-left border">Ordem de Serviço Neogen</th>
+              <th className="p-2 text-left border">OS Neogen</th>
               <th className="p-2 text-left border">Nome</th>
               <th className="p-2 text-left border">CPF/CNPJ</th>
               <th className="p-2 text-left border">IE/RG</th>
@@ -27,29 +57,32 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({ rows, on
               <th className="p-2 text-left border">Status</th>
               <th className="p-2 text-left border">Representante</th>
               <th className="p-2 text-left border">Coordenador</th>
-              <th className="p-2 text-left border">ID Conta SSGen</th>
-              <th className="p-2 text-left border">Nº NF Neogen</th>
-              <th className="p-2 text-left border">Nome Produto</th>
-              <th className="p-2 text-left border">Número de Amostras</th>
+              <th className="p-2 text-left border">ID Conta</th>
+              <th className="p-2 text-left border">NF Neogen</th>
+              <th className="p-2 text-left border">Produto</th>
+              <th className="p-2 text-left border">N° Amostras</th>
               <th className="p-2 text-left border">CRA Data</th>
               <th className="p-2 text-left border">CRA Status</th>
-              <th className="p-2 text-left border">Envio Planilha Data</th>
-              <th className="p-2 text-left border">Envio Planilha Status</th>
+              <th className="p-2 text-left border">Envio Plan. Data</th>
+              <th className="p-2 text-left border">Envio Plan. Status</th>
+              <th className="p-2 text-left border">Envio Plan. SLA</th>
               <th className="p-2 text-left border">VRI Data</th>
-              <th className="p-2 text-left border">VRI Nº Amostras</th>
+              <th className="p-2 text-left border">VRI N° Amostras</th>
+              <th className="p-2 text-left border">VRI Resolvido</th>
+              <th className="p-2 text-left border">VRI SLA</th>
               <th className="p-2 text-left border">LPR Data</th>
-              <th className="p-2 text-left border">LPR Nº Amostras</th>
-              <th className="p-2 text-left border">Liberação Data</th>
-              <th className="p-2 text-left border">Liberação Nº Amostras</th>
-              <th className="p-2 text-left border">Envio Resultados Data</th>
-              <th className="p-2 text-left border">Envio Resultados Status</th>
+              <th className="p-2 text-left border">LPR N° Amostras</th>
+              <th className="p-2 text-left border">LPR SLA</th>
+              <th className="p-2 text-left border">Env. Result. Data</th>
+              <th className="p-2 text-left border">Env. Result. Status</th>
+              <th className="p-2 text-left border">Env. Result. SLA</th>
               <th className="p-2 text-left border">Ações</th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={26} className="p-4 text-center text-muted-foreground">
+                <td colSpan={30} className="p-4 text-center text-muted-foreground">
                   Nenhuma ordem encontrada
                 </td>
               </tr>
@@ -65,7 +98,14 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({ rows, on
                     </button>
                   </td>
                   <td className="p-2 border">{fmt(row.data_cadastro)}</td>
-                  <td className="p-2 border">{row.ordem_servico_neogen || '—'}</td>
+                  <td className="p-2 border">
+                    <EditableCell
+                      value={row.ordem_servico_neogen}
+                      onSave={(v) => handleCellUpdate(row.ordem_id, 'ordem_servico_neogen', v)}
+                      isEditable={isAdmin}
+                      type="number"
+                    />
+                  </td>
                   <td className="p-2 border">{row.cliente_nome || '—'}</td>
                   <td className="p-2 border">{row.cpf_cnpj || '—'}</td>
                   <td className="p-2 border">{row.ie_rg || '—'}</td>
@@ -80,38 +120,131 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({ rows, on
                   <td className="p-2 border">{row.representante || '—'}</td>
                   <td className="p-2 border">{row.coordenador || '—'}</td>
                   <td className="p-2 border">{row.id_conta_ssgen || '—'}</td>
-                  <td className="p-2 border">{row.numero_nf_neogen || '—'}</td>
-                  <td className="p-2 border">{row.nome_produto || '—'}</td>
-                  <td className="p-2 border">{row.numero_amostras || '—'}</td>
-                  <td className="p-2 border">{fmt(row.cra_data)}</td>
                   <td className="p-2 border">
-                    {row.cra_status ? (
-                      <Badge variant="secondary">{row.cra_status}</Badge>
-                    ) : (
-                      '—'
-                    )}
+                    <EditableCell
+                      value={row.numero_nf_neogen}
+                      onSave={(v) => handleCellUpdate(row.ordem_id, 'numero_nf_neogen', v)}
+                      isEditable={isAdmin}
+                      type="number"
+                    />
                   </td>
-                  <td className="p-2 border">{fmt(row.envio_planilha_data)}</td>
                   <td className="p-2 border">
-                    {row.envio_planilha_status ? (
-                      <Badge variant="secondary">{row.envio_planilha_status}</Badge>
-                    ) : (
-                      '—'
-                    )}
+                    <EditableCell
+                      value={row.nome_produto}
+                      onSave={(v) => handleCellUpdate(row.ordem_id, 'nome_produto', v)}
+                      isEditable={isAdmin}
+                    />
                   </td>
-                  <td className="p-2 border">{fmt(row.vri_data)}</td>
-                  <td className="p-2 border">{row.vri_n_amostras || '—'}</td>
-                  <td className="p-2 border">{fmt(row.lpr_data)}</td>
-                  <td className="p-2 border">{row.lpr_n_amostras || '—'}</td>
-                  <td className="p-2 border">{fmt(row.liberacao_data)}</td>
-                  <td className="p-2 border">{row.liberacao_n_amostras || '—'}</td>
-                  <td className="p-2 border">{fmt(row.envio_resultados_data)}</td>
                   <td className="p-2 border">
-                    {row.envio_resultados_status ? (
-                      <Badge variant="secondary">{row.envio_resultados_status}</Badge>
-                    ) : (
-                      '—'
-                    )}
+                    <EditableCell
+                      value={row.numero_amostras}
+                      onSave={(v) => handleCellUpdate(row.ordem_id, 'numero_amostras', v)}
+                      isEditable={isAdmin}
+                      type="number"
+                    />
+                  </td>
+                  <td className="p-2 border">
+                    <EditableCell
+                      value={row.cra_data}
+                      onSave={(v) => handleCellUpdate(row.ordem_id, 'cra_data', v)}
+                      isEditable={isAdmin}
+                      type="date"
+                    />
+                  </td>
+                  <td className="p-2 border">
+                    <EditableCell
+                      value={row.cra_status}
+                      onSave={(v) => handleCellUpdate(row.ordem_id, 'cra_status', v)}
+                      isEditable={isAdmin}
+                      type="badge"
+                      badgeVariant="secondary"
+                    />
+                  </td>
+                  <td className="p-2 border">
+                    <EditableCell
+                      value={row.envio_planilha_data}
+                      onSave={(v) => handleCellUpdate(row.ordem_id, 'envio_planilha_data', v)}
+                      isEditable={isAdmin}
+                      type="date"
+                    />
+                  </td>
+                  <td className="p-2 border">
+                    <EditableCell
+                      value={row.envio_planilha_status}
+                      onSave={(v) => handleCellUpdate(row.ordem_id, 'envio_planilha_status', v)}
+                      isEditable={isAdmin}
+                      type="badge"
+                      badgeVariant="secondary"
+                    />
+                  </td>
+                  <td className="p-2 border">
+                    <SLABadge status={row.envio_planilha_status_sla} />
+                  </td>
+                  <td className="p-2 border">
+                    <EditableCell
+                      value={row.vri_data}
+                      onSave={(v) => handleCellUpdate(row.ordem_id, 'vri_data', v)}
+                      isEditable={isAdmin}
+                      type="date"
+                    />
+                  </td>
+                  <td className="p-2 border">
+                    <EditableCell
+                      value={row.vri_n_amostras}
+                      onSave={(v) => handleCellUpdate(row.ordem_id, 'vri_n_amostras', v)}
+                      isEditable={isAdmin}
+                      type="number"
+                    />
+                  </td>
+                  <td className="p-2 border">
+                    <EditableCell
+                      value={row.vri_resolvido_data}
+                      onSave={(v) => handleCellUpdate(row.ordem_id, 'vri_resolvido_data', v)}
+                      isEditable={isAdmin}
+                      type="date"
+                    />
+                  </td>
+                  <td className="p-2 border">
+                    <SLABadge status={row.vri_status_sla} />
+                  </td>
+                  <td className="p-2 border">
+                    <EditableCell
+                      value={row.lpr_data}
+                      onSave={(v) => handleCellUpdate(row.ordem_id, 'lpr_data', v)}
+                      isEditable={isAdmin}
+                      type="date"
+                    />
+                  </td>
+                  <td className="p-2 border">
+                    <EditableCell
+                      value={row.lpr_n_amostras}
+                      onSave={(v) => handleCellUpdate(row.ordem_id, 'lpr_n_amostras', v)}
+                      isEditable={isAdmin}
+                      type="number"
+                    />
+                  </td>
+                  <td className="p-2 border">
+                    <SLABadge status={row.lpr_status_sla} />
+                  </td>
+                  <td className="p-2 border">
+                    <EditableCell
+                      value={row.envio_resultados_data}
+                      onSave={(v) => handleCellUpdate(row.ordem_id, 'envio_resultados_data', v)}
+                      isEditable={isAdmin}
+                      type="date"
+                    />
+                  </td>
+                  <td className="p-2 border">
+                    <EditableCell
+                      value={row.envio_resultados_status}
+                      onSave={(v) => handleCellUpdate(row.ordem_id, 'envio_resultados_status', v)}
+                      isEditable={isAdmin}
+                      type="badge"
+                      badgeVariant="secondary"
+                    />
+                  </td>
+                  <td className="p-2 border">
+                    <SLABadge status={row.envio_resultados_status_sla} />
                   </td>
                   <td className="p-2 border">
                     <Button

@@ -11,9 +11,10 @@ interface OrdersPageProps {
   canEdit: boolean;
   canAttach: boolean;
   canFinance: boolean;
+  userRole?: string;
 }
 
-const OrdersPage: React.FC<OrdersPageProps> = ({ onOpen, canEdit, canAttach, canFinance }) => {
+const OrdersPage: React.FC<OrdersPageProps> = ({ onOpen, canEdit, canAttach, canFinance, userRole }) => {
   const [rows, setRows] = useState<UnifiedOrder[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,7 +41,12 @@ const OrdersPage: React.FC<OrdersPageProps> = ({ onOpen, canEdit, canAttach, can
           Importar Excel
         </Button>
       </HeaderBar>
-      <UnifiedOrdersTable rows={rows} onOpen={onOpen} />
+      <UnifiedOrdersTable 
+        rows={rows} 
+        onOpen={onOpen} 
+        userRole={userRole}
+        onUpdate={loadOrders}
+      />
     </div>
   );
 };

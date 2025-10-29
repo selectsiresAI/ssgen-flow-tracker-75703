@@ -101,18 +101,18 @@ export type ServiceOrder = {
   // Envio Planilha
   envio_planilha_data?: string | null;
   envio_planilha_status?: string | null;
+  envio_planilha_status_sla?: string | null;
   
   // VRI
   vri_data?: string | null;
   vri_n_amostras?: number | null;
+  vri_resolvido_data?: string | null;
+  vri_status_sla?: string | null;
   
   // LPR
   lpr_data?: string | null;
   lpr_n_amostras?: number | null;
-  
-  // Liberação
-  liberacao_data?: string | null;
-  liberacao_n_amostras?: number | null;
+  lpr_status_sla?: string | null;
   
   // Envio Resultados
   envio_resultados_data?: string | null;
@@ -120,6 +120,7 @@ export type ServiceOrder = {
   envio_resultados_previsao?: string | null;
   envio_resultados_status?: string | null;
   envio_resultados_data_prova?: string | null;
+  envio_resultados_status_sla?: string | null;
   
   created_at?: string;
   updated_at?: string;
