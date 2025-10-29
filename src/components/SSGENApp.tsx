@@ -24,6 +24,7 @@ const RepresentantesPage = React.lazy(() => import('@/components/ssgen/pages/Rep
 const CoordenadoresListPage = React.lazy(() => import('@/components/ssgen/pages/CoordenadoresListPage'));
 const RepresentantesListPage = React.lazy(() => import('@/components/ssgen/pages/RepresentantesListPage'));
 const UserManagementPage = React.lazy(() => import('@/components/ssgen/pages/UserManagementPage'));
+const SLAConfigPage = React.lazy(() => import('@/components/ssgen/pages/SLAConfigPage'));
 
 export default function SSGENTrackApp() {
   const navigate = useNavigate();
@@ -199,6 +200,20 @@ export default function SSGENTrackApp() {
         </Card>
       );
     }
+    if (current === 'sla-config') {
+      return role === 'ADM' ? (
+        <React.Suspense fallback={<div>Carregando...</div>}>
+          <SLAConfigPage />
+        </React.Suspense>
+      ) : (
+        <Card className="border-dashed">
+          <CardHeader>
+            <CardTitle>Acesso negado</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">Somente ADM</CardContent>
+        </Card>
+      );
+    }
     if (current === 'config') {
       return role === 'ADM' ? (
         <React.Suspense fallback={<div>Carregando...</div>}>
@@ -255,6 +270,7 @@ export default function SSGENTrackApp() {
       'representantes-gestao': 'Gerenciar Representantes',
       'faturamento': 'Faturamento',
       'config': 'Configurações',
+      'sla-config': 'Configurações de SLA',
       'config-coordenadores': 'Gerenciar Coordenadores',
       'config-representantes': 'Gerenciar Representantes',
       'user-management': 'Gerenciamento de Usuários',

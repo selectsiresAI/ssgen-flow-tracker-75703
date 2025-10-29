@@ -39,7 +39,7 @@ const ConfigPage: React.FC<ConfigPageProps> = ({ setCurrent }) => {
       title: 'Regras de SLA',
       description: 'Parametrizar dias alvo entre etapas e cores/badges',
       icon: <Settings2 className="w-5 h-5" />,
-      action: () => alert('Funcionalidade em desenvolvimento'),
+      action: () => setCurrent('sla-config'),
       buttonText: 'Configurar SLA',
     },
     {

@@ -347,6 +347,42 @@ export type Database = {
           },
         ]
       }
+      sla_config: {
+        Row: {
+          ativo: boolean
+          cor_dentro_prazo: string
+          cor_dia_zero: string
+          cor_fora_prazo: string
+          created_at: string
+          dias_alvo: number
+          etapa: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          cor_dentro_prazo?: string
+          cor_dia_zero?: string
+          cor_fora_prazo?: string
+          created_at?: string
+          dias_alvo?: number
+          etapa: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          cor_dentro_prazo?: string
+          cor_dia_zero?: string
+          cor_fora_prazo?: string
+          created_at?: string
+          dias_alvo?: number
+          etapa?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           coord: string | null
