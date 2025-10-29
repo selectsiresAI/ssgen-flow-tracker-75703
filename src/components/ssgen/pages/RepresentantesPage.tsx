@@ -18,10 +18,13 @@ const RepresentantesPage: React.FC = () => {
 
   const queryClient = useQueryClient();
 
-  const { data: representantes = [] } = useQuery({
+  const { data: representantes = [], isLoading } = useQuery({
     queryKey: ['representantes'],
     queryFn: fetchRepresentantes,
   });
+
+  // Debug log
+  console.log('Representantes carregados:', representantes);
 
   const createMutation = useMutation({
     mutationFn: createRepresentante,
@@ -130,45 +133,59 @@ const RepresentantesPage: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Lista de Representantes ({filtered.length})</CardTitle>
+          <CardTitle>
+            Lista de Representantes ({filtered.length})
+            {isLoading && <span className="text-sm font-normal ml-2">Carregando...</span>}
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            {filtered.map((rep) => (
-              <div
-                key={rep.id}
-                className="flex items-center justify-between p-3 border rounded-lg"
-              >
-                <div>
-                  <div className="font-medium">{rep.nome}</div>
-                  {rep.email && (
-                    <div className="text-sm text-muted-foreground">{rep.email}</div>
+          {isLoading ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Carregando representantes...
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {filtered.map((rep) => (
+                <div
+                  key={rep.id}
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors"
+                >
+                  <div className="flex-1">
+                    <div className="font-medium text-base">{rep.nome}</div>
+                    {rep.email && (
+                      <div className="text-sm text-muted-foreground mt-1">{rep.email}</div>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEdit(rep)}
+                      title="Editar representante"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(rep.id)}
+                      title="Remover representante"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              {filtered.length === 0 && !isLoading && (
+                <div className="text-center text-muted-foreground py-8 border-2 border-dashed rounded-lg">
+                  <p className="text-lg mb-2">Nenhum representante encontrado</p>
+                  {query && (
+                    <p className="text-sm">Tente ajustar sua busca ou adicionar um novo representante</p>
                   )}
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEdit(rep)}
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDelete(rep.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-            {filtered.length === 0 && (
-              <div className="text-center text-muted-foreground py-8">
-                Nenhum representante encontrado
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
