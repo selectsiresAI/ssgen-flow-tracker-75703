@@ -31,10 +31,9 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({ rows, on
               <th className="p-2 text-left border">Nº NF Neogen</th>
               <th className="p-2 text-left border">Nº Teste Nota</th>
               <th className="p-2 text-left border">Nome Produto</th>
+              <th className="p-2 text-left border">Número de Amostras</th>
               <th className="p-2 text-left border">CRA Data</th>
               <th className="p-2 text-left border">CRA Status</th>
-              <th className="p-2 text-left border">Recebimento Data</th>
-              <th className="p-2 text-left border">Recebimento Status</th>
               <th className="p-2 text-left border">Envio Planilha Data</th>
               <th className="p-2 text-left border">Envio Planilha Status</th>
               <th className="p-2 text-left border">VRI Data</th>
@@ -51,7 +50,7 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({ rows, on
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={29} className="p-4 text-center text-muted-foreground">
+                <td colSpan={27} className="p-4 text-center text-muted-foreground">
                   Nenhuma ordem encontrada
                 </td>
               </tr>
@@ -85,18 +84,11 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({ rows, on
                   <td className="p-2 border">{row.numero_nf_neogen || '—'}</td>
                   <td className="p-2 border">{row.numero_teste_nota_neogen || '—'}</td>
                   <td className="p-2 border">{row.nome_produto || '—'}</td>
+                  <td className="p-2 border">{row.numero_amostras || '—'}</td>
                   <td className="p-2 border">{fmt(row.cra_data)}</td>
                   <td className="p-2 border">
                     {row.cra_status ? (
                       <Badge variant="secondary">{row.cra_status}</Badge>
-                    ) : (
-                      '—'
-                    )}
-                  </td>
-                  <td className="p-2 border">{fmt(row.recebimento_data)}</td>
-                  <td className="p-2 border">
-                    {row.recebimento_status ? (
-                      <Badge variant="secondary">{row.recebimento_status}</Badge>
                     ) : (
                       '—'
                     )}

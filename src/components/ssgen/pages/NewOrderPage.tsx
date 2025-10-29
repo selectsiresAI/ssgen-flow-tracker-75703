@@ -22,14 +22,11 @@ const NewOrderPage: React.FC = () => {
     numero_nf_neogen: '',
     numero_teste_nota_neogen: '',
     nome_produto: '',
+    numero_amostras: '',
     
     // CRA
     cra_data: '',
     cra_status: '',
-    
-    // Recebimento
-    recebimento_data: '',
-    recebimento_status: '',
     
     // Envio Planilha
     envio_planilha_data: '',
@@ -84,12 +81,10 @@ const NewOrderPage: React.FC = () => {
         numero_nf_neogen: formData.numero_nf_neogen ? Number(formData.numero_nf_neogen) : null,
         numero_teste_nota_neogen: formData.numero_teste_nota_neogen ? Number(formData.numero_teste_nota_neogen) : null,
         nome_produto: formData.nome_produto || null,
+        numero_amostras: formData.numero_amostras ? Number(formData.numero_amostras) : null,
         
         cra_data: formData.cra_data || null,
         cra_status: formData.cra_status || null,
-        
-        recebimento_data: formData.recebimento_data || null,
-        recebimento_status: formData.recebimento_status || null,
         
         envio_planilha_data: formData.envio_planilha_data || null,
         envio_planilha_status: formData.envio_planilha_status || null,
@@ -121,10 +116,9 @@ const NewOrderPage: React.FC = () => {
         numero_nf_neogen: '',
         numero_teste_nota_neogen: '',
         nome_produto: '',
+        numero_amostras: '',
         cra_data: '',
         cra_status: '',
-        recebimento_data: '',
-        recebimento_status: '',
         envio_planilha_data: '',
         envio_planilha_status: '',
         vri_data: '',
@@ -197,7 +191,7 @@ const NewOrderPage: React.FC = () => {
               <CardTitle>Dados Básicos</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                   <Label htmlFor="numero_nf_neogen">Número da Nota Fiscal Neogen</Label>
                   <Input
@@ -222,6 +216,15 @@ const NewOrderPage: React.FC = () => {
                     id="nome_produto"
                     value={formData.nome_produto}
                     onChange={(e) => setFormData({ ...formData, nome_produto: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="numero_amostras">Número de Amostras</Label>
+                  <Input
+                    id="numero_amostras"
+                    type="number"
+                    value={formData.numero_amostras}
+                    onChange={(e) => setFormData({ ...formData, numero_amostras: e.target.value })}
                   />
                 </div>
               </div>
@@ -252,32 +255,6 @@ const NewOrderPage: React.FC = () => {
                       id="cra_status"
                       value={formData.cra_status}
                       onChange={(e) => setFormData({ ...formData, cra_status: e.target.value })}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Recebimento de planilha */}
-              <div>
-                <h3 className="font-semibold mb-3">Recebimento de Planilha</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="recebimento_data">Data</Label>
-                    <Input
-                      id="recebimento_data"
-                      type="date"
-                      value={formData.recebimento_data}
-                      onChange={(e) => setFormData({ ...formData, recebimento_data: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="recebimento_status">Status</Label>
-                    <Input
-                      id="recebimento_status"
-                      value={formData.recebimento_status}
-                      onChange={(e) => setFormData({ ...formData, recebimento_status: e.target.value })}
                     />
                   </div>
                 </div>

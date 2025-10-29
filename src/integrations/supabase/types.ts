@@ -274,12 +274,11 @@ export type Database = {
           lpr_data: string | null
           lpr_n_amostras: number | null
           nome_produto: string | null
+          numero_amostras: number | null
           numero_nf_neogen: number | null
           numero_teste_nota_neogen: number | null
           ordem_servico_neogen: number | null
           ordem_servico_ssgen: number
-          recebimento_data: string | null
-          recebimento_status: string | null
           updated_at: string
           vri_data: string | null
           vri_n_amostras: number | null
@@ -303,12 +302,11 @@ export type Database = {
           lpr_data?: string | null
           lpr_n_amostras?: number | null
           nome_produto?: string | null
+          numero_amostras?: number | null
           numero_nf_neogen?: number | null
           numero_teste_nota_neogen?: number | null
           ordem_servico_neogen?: number | null
           ordem_servico_ssgen: number
-          recebimento_data?: string | null
-          recebimento_status?: string | null
           updated_at?: string
           vri_data?: string | null
           vri_n_amostras?: number | null
@@ -332,12 +330,11 @@ export type Database = {
           lpr_data?: string | null
           lpr_n_amostras?: number | null
           nome_produto?: string | null
+          numero_amostras?: number | null
           numero_nf_neogen?: number | null
           numero_teste_nota_neogen?: number | null
           ordem_servico_neogen?: number | null
           ordem_servico_ssgen?: number
-          recebimento_data?: string | null
-          recebimento_status?: string | null
           updated_at?: string
           vri_data?: string | null
           vri_n_amostras?: number | null
@@ -532,14 +529,13 @@ export type Database = {
           lpr_data: string | null
           lpr_n_amostras: number | null
           nome_produto: string | null
+          numero_amostras: number | null
           numero_nf_neogen: number | null
           numero_teste_nota_neogen: number | null
           ordem_id: string | null
           ordem_servico_neogen: number | null
           ordem_servico_ssgen: number | null
           order_created_at: string | null
-          recebimento_data: string | null
-          recebimento_status: string | null
           representante: string | null
           updated_at: string | null
           vri_data: string | null

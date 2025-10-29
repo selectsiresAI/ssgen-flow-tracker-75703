@@ -93,14 +93,11 @@ export type ServiceOrder = {
   numero_nf_neogen?: number | null;
   numero_teste_nota_neogen?: number | null;
   nome_produto?: string | null;
+  numero_amostras?: number | null;
   
   // CRA
   cra_data?: string | null;
   cra_status?: string | null;
-  
-  // Recebimento
-  recebimento_data?: string | null;
-  recebimento_status?: string | null;
   
   // Envio Planilha
   envio_planilha_data?: string | null;

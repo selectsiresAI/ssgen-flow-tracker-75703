@@ -365,8 +365,8 @@ export default function SSGENTrackApp() {
               <Card>
                 <CardHeader><CardTitle>Fluxo de Processos</CardTitle></CardHeader>
                 <CardContent className="text-sm space-y-2">
+                  <div><span className="text-muted-foreground">Número de Amostras:</span> {detail.numero_amostras || '—'}</div>
                   <div><span className="text-muted-foreground">CRA:</span> {fmt(detail.cra_data)} - {detail.cra_status || '—'}</div>
-                  <div><span className="text-muted-foreground">Recebimento:</span> {fmt(detail.recebimento_data)} - {detail.recebimento_status || '—'}</div>
                   <div><span className="text-muted-foreground">Envio Planilha:</span> {fmt(detail.envio_planilha_data)} - {detail.envio_planilha_status || '—'}</div>
                   <div><span className="text-muted-foreground">VRI:</span> {fmt(detail.vri_data)} - {detail.vri_n_amostras || '—'} amostras</div>
                   <div><span className="text-muted-foreground">LPR:</span> {fmt(detail.lpr_data)} - {detail.lpr_n_amostras || '—'} amostras</div>
