@@ -12,7 +12,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import type { Role } from '@/types/ssgen';
-import { supabase } from '@/lib/ssgenClient';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SidebarProps {
   current: string;
@@ -60,7 +60,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ current, setCurrent, role }) =
           variant="ghost"
           className="w-full gap-2"
           onClick={async () => {
-            if (supabase) await supabase.auth.signOut();
+            await supabase.auth.signOut();
             location.reload();
           }}
         >

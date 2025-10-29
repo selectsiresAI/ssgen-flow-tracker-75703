@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import type { Profile, PowerRow, Role } from '@/types/ssgen';
 import { fmt, isSet, slaBadge } from '@/types/ssgen';
-import { getProfile, fetchOrders, hasSupabaseConfig } from '@/lib/ssgenClient';
+import { getProfile, fetchOrders } from '@/lib/ssgenClient';
+import { supabase } from '@/integrations/supabase/client';
 import { Sidebar } from '@/components/ssgen/Sidebar';
 
 const AdminDashboard = React.lazy(() => import('@/components/ssgen/dashboards/AdminDashboard'));
@@ -16,18 +18,47 @@ const CatalogPage = React.lazy(() => import('@/components/ssgen/pages/CatalogPag
 const ConfigPage = React.lazy(() => import('@/components/ssgen/pages/ConfigPage'));
 
 export default function SSGENTrackApp() {
+  const navigate = useNavigate();
   const [profile,setProfile] = useState<Profile|null>(null);
   const [role,setRole] = useState<Role>('ADM');
   const [rows,setRows] = useState<PowerRow[]>([]);
   const [current,setCurrent] = useState<string>('dashboard');
   const [filters,setFilters] = useState<any>({ q:'', coord:undefined, rep:undefined, cliente:undefined, produto:undefined });
+  const [loading, setLoading] = useState(true);
 
-  useEffect(()=>{(async()=>{
-    const p = await getProfile();
-    if (p) { setProfile(p); setRole(p.role); }
-    const d = await fetchOrders();
-    setRows(d);
-  })();},[]);
+  useEffect(()=>{
+    // Verificar autenticação
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        navigate('/auth');
+        return;
+      }
+      
+      // Carregar dados
+      (async()=>{
+        const p = await getProfile();
+        if (p) { 
+          setProfile(p); 
+          setRole(p.role); 
+        } else {
+          navigate('/auth');
+          return;
+        }
+        const d = await fetchOrders();
+        setRows(d);
+        setLoading(false);
+      })();
+    });
+
+    // Listener para mudanças de auth
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session) {
+        navigate('/auth');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  },[navigate]);
 
   const rowsFiltered = useMemo(()=>{
     const q = (filters.q||'').toLowerCase();
@@ -129,20 +160,19 @@ export default function SSGENTrackApp() {
     return null;
   };
 
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-muted-foreground">Carregando...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen">
       <Sidebar current={current} setCurrent={setCurrent} role={role}/>
       <main className="flex-1 p-6 space-y-6">
         {renderContent()}
-        {!hasSupabaseConfig ? (
-          <Card className="border-dashed">
-            <CardHeader><CardTitle>Configuração necessária</CardTitle></CardHeader>
-            <CardContent className="text-sm text-muted-foreground space-y-2">
-              <div>Defina <code>NEXT_PUBLIC_SUPABASE_URL</code> e <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> no ambiente do projeto.</div>
-              <div>Suportados: <strong>process.env</strong>, <strong>import.meta.env</strong> ou <strong>globalThis</strong> (ex.: <code>window.NEXT_PUBLIC_SUPABASE_URL = "https://..."</code>).</div>
-            </CardContent>
-          </Card>
-        ) : null}
       </main>
 
       <Dialog open={open} onOpenChange={setOpen}>

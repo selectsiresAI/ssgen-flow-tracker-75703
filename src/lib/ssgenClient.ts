@@ -9,7 +9,9 @@ export async function getProfile(): Promise<Profile | null> {
     console.error('Error fetching profile:', error);
     return null;
   }
-  return data as Profile;
+  // RPC retorna array, pegar primeiro item
+  const profile = Array.isArray(data) ? data[0] : data;
+  return profile as Profile;
 }
 
 export async function fetchOrders(): Promise<PowerRow[]> {
