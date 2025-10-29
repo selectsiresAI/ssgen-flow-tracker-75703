@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { HeaderBar } from '../shared/HeaderBar';
 import { Users2, UserSquare2, Settings2, Upload } from 'lucide-react';
+import ImportDialog from '../import/ImportDialog';
 
 interface ConfigPageProps {
   setCurrent: (page: string) => void;
@@ -10,6 +11,7 @@ interface ConfigPageProps {
 
 const ConfigPage: React.FC<ConfigPageProps> = ({ setCurrent }) => {
   const [query, setQuery] = useState('');
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
 
   const configSections = [
     {
@@ -37,7 +39,7 @@ const ConfigPage: React.FC<ConfigPageProps> = ({ setCurrent }) => {
       title: 'Importação e Sincronização',
       description: 'Upload do Excel (SAIDA_PWRBI) e ETL para Supabase',
       icon: <Upload className="w-5 h-5" />,
-      action: () => alert('Funcionalidade em desenvolvimento'),
+      action: () => setImportDialogOpen(true),
       buttonText: 'Importar Dados',
     },
   ];
@@ -67,6 +69,8 @@ const ConfigPage: React.FC<ConfigPageProps> = ({ setCurrent }) => {
           </Card>
         ))}
       </div>
+
+      <ImportDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} />
     </div>
   );
 };
