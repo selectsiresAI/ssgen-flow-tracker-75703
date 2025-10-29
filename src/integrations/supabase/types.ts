@@ -261,16 +261,17 @@ export type Database = {
           created_at: string
           envio_planilha_data: string | null
           envio_planilha_status: string | null
+          envio_planilha_status_sla: string | null
           envio_resultados_data: string | null
           envio_resultados_data_prova: string | null
           envio_resultados_ordem_id: number | null
           envio_resultados_previsao: string | null
           envio_resultados_status: string | null
+          envio_resultados_status_sla: string | null
           id: string
-          liberacao_data: string | null
-          liberacao_n_amostras: number | null
           lpr_data: string | null
           lpr_n_amostras: number | null
+          lpr_status_sla: string | null
           nome_produto: string | null
           numero_amostras: number | null
           numero_nf_neogen: number | null
@@ -279,6 +280,8 @@ export type Database = {
           updated_at: string
           vri_data: string | null
           vri_n_amostras: number | null
+          vri_resolvido_data: string | null
+          vri_status_sla: string | null
         }
         Insert: {
           cra_data?: string | null
@@ -286,16 +289,17 @@ export type Database = {
           created_at?: string
           envio_planilha_data?: string | null
           envio_planilha_status?: string | null
+          envio_planilha_status_sla?: string | null
           envio_resultados_data?: string | null
           envio_resultados_data_prova?: string | null
           envio_resultados_ordem_id?: number | null
           envio_resultados_previsao?: string | null
           envio_resultados_status?: string | null
+          envio_resultados_status_sla?: string | null
           id?: string
-          liberacao_data?: string | null
-          liberacao_n_amostras?: number | null
           lpr_data?: string | null
           lpr_n_amostras?: number | null
+          lpr_status_sla?: string | null
           nome_produto?: string | null
           numero_amostras?: number | null
           numero_nf_neogen?: number | null
@@ -304,6 +308,8 @@ export type Database = {
           updated_at?: string
           vri_data?: string | null
           vri_n_amostras?: number | null
+          vri_resolvido_data?: string | null
+          vri_status_sla?: string | null
         }
         Update: {
           cra_data?: string | null
@@ -311,16 +317,17 @@ export type Database = {
           created_at?: string
           envio_planilha_data?: string | null
           envio_planilha_status?: string | null
+          envio_planilha_status_sla?: string | null
           envio_resultados_data?: string | null
           envio_resultados_data_prova?: string | null
           envio_resultados_ordem_id?: number | null
           envio_resultados_previsao?: string | null
           envio_resultados_status?: string | null
+          envio_resultados_status_sla?: string | null
           id?: string
-          liberacao_data?: string | null
-          liberacao_n_amostras?: number | null
           lpr_data?: string | null
           lpr_n_amostras?: number | null
+          lpr_status_sla?: string | null
           nome_produto?: string | null
           numero_amostras?: number | null
           numero_nf_neogen?: number | null
@@ -329,6 +336,8 @@ export type Database = {
           updated_at?: string
           vri_data?: string | null
           vri_n_amostras?: number | null
+          vri_resolvido_data?: string | null
+          vri_status_sla?: string | null
         }
         Relationships: [
           {
@@ -549,8 +558,6 @@ export type Database = {
           envio_resultados_status: string | null
           id_conta_ssgen: number | null
           ie_rg: number | null
-          liberacao_data: string | null
-          liberacao_n_amostras: number | null
           lpr_data: string | null
           lpr_n_amostras: number | null
           nome_produto: string | null
@@ -569,6 +576,10 @@ export type Database = {
       }
     }
     Functions: {
+      calcular_status_sla: {
+        Args: { data_fim: string; data_inicio: string; dias_alvo: number }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
