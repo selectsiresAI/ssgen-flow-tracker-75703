@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import type { Role } from '@/types/ssgen';
 import { supabase } from '@/integrations/supabase/client';
-import ssgenLogo from '@/assets/ssgen-logo.png';
 import selectSiresLogo from '@/assets/select-sires-logo.png';
 
 interface SidebarProps {
@@ -42,12 +41,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ current, setCurrent, role }) =
 
   return (
     <aside className="w-full md:w-72 border-r bg-sidebar">
-      <div className="p-6 space-y-4">
+      <div className="p-6 py-8">
         <div className="flex items-center justify-center">
-          <img src={ssgenLogo} alt="SSGEN Logo" className="h-12" />
-        </div>
-        <div className="flex items-center justify-center pb-2">
-          <img src={selectSiresLogo} alt="Select Sires Logo" className="h-16" />
+          <img src={selectSiresLogo} alt="Select Sires Logo" className="h-24 w-auto" />
         </div>
       </div>
       <Separator />

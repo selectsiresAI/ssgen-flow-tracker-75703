@@ -9,6 +9,7 @@ import { fmt, isSet, slaBadge } from '@/types/ssgen';
 import { getProfile, fetchOrders } from '@/lib/ssgenClient';
 import { supabase } from '@/integrations/supabase/client';
 import { Sidebar } from '@/components/ssgen/Sidebar';
+import ssgenLogo from '@/assets/ssgen-logo.png';
 
 const AdminDashboard = React.lazy(() => import('@/components/ssgen/dashboards/AdminDashboard'));
 const ManagerDashboard = React.lazy(() => import('@/components/ssgen/dashboards/ManagerDashboard'));
@@ -228,11 +229,35 @@ export default function SSGENTrackApp() {
     );
   }
 
+  const getPageTitle = () => {
+    const titles: Record<string, string> = {
+      'dashboard': `Dashboard • ${role}`,
+      'clientes': 'Clientes',
+      'nova-ordem': 'Nova Ordem',
+      'ordens': 'Ordens',
+      'coordenadores': 'Coordenadores',
+      'representantes': 'Representantes',
+      'faturamento': 'Faturamento',
+      'config': 'Configurações',
+      'config-coordenadores': 'Gerenciar Coordenadores',
+      'config-representantes': 'Gerenciar Representantes',
+    };
+    return titles[current] || 'Dashboard';
+  };
+
   return (
     <div className="flex min-h-screen">
       <Sidebar current={current} setCurrent={setCurrent} role={role}/>
-      <main className="flex-1 p-6 space-y-6">
-        {renderContent()}
+      <main className="flex-1">
+        <header className="border-b bg-background px-6 py-4">
+          <div className="flex items-center gap-3">
+            <img src={ssgenLogo} alt="SSGEN Logo" className="h-8" />
+            <h1 className="text-2xl font-bold text-foreground">{getPageTitle()}</h1>
+          </div>
+        </header>
+        <div className="p-6 space-y-6">
+          {renderContent()}
+        </div>
       </main>
 
       <Dialog open={open} onOpenChange={setOpen}>
