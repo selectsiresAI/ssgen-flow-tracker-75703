@@ -164,7 +164,7 @@ export default function SSGENTrackApp() {
         </React.Suspense>
       );
     }
-    if (current === 'representantes') {
+    if (current === 'representantes-gestao') {
       return (
         <React.Suspense fallback={<div>Carregando...</div>}>
           <RepresentantesListPage />
@@ -252,6 +252,7 @@ export default function SSGENTrackApp() {
       'ordens': 'Ordens',
       'coordenadores': 'Coordenadores',
       'representantes': 'Representantes',
+      'representantes-gestao': 'Gerenciar Representantes',
       'faturamento': 'Faturamento',
       'config': 'Configurações',
       'config-coordenadores': 'Gerenciar Coordenadores',

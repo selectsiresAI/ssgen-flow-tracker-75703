@@ -28,7 +28,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ current, setCurrent, role }) =
     { key: 'nova-ordem', label: 'Nova Ordem', icon: <ListTodo className="w-4 h-4" /> },
     { key: 'ordens', label: 'Ordens', icon: <ListTodo className="w-4 h-4" /> },
     { key: 'coordenadores', label: 'Coordenadores', icon: <UserSquare2 className="w-4 h-4" /> },
-    { key: 'representantes', label: 'Representantes', icon: <Users2 className="w-4 h-4" /> },
+    { key: 'representantes-gestao', label: 'Representantes', icon: <Users2 className="w-4 h-4" /> },
     { key: 'faturamento', label: 'Faturamento', icon: <Receipt className="w-4 h-4" /> },
     { key: 'config', label: 'Configurações', icon: <Settings className="w-4 h-4" /> },
   ];
