@@ -18,6 +18,8 @@ const CatalogPage = React.lazy(() => import('@/components/ssgen/pages/CatalogPag
 const ConfigPage = React.lazy(() => import('@/components/ssgen/pages/ConfigPage'));
 const ClientsPage = React.lazy(() => import('@/components/ssgen/pages/ClientsPage'));
 const NewOrderPage = React.lazy(() => import('@/components/ssgen/pages/NewOrderPage'));
+const CoordenadoresPage = React.lazy(() => import('@/components/ssgen/pages/CoordenadoresPage'));
+const RepresentantesPage = React.lazy(() => import('@/components/ssgen/pages/RepresentantesPage'));
 
 export default function SSGENTrackApp() {
   const navigate = useNavigate();
@@ -148,6 +150,20 @@ export default function SSGENTrackApp() {
       return (
         <React.Suspense fallback={<div>Carregando...</div>}>
           <NewOrderPage />
+        </React.Suspense>
+      );
+    }
+    if (current === 'coordenadores') {
+      return (
+        <React.Suspense fallback={<div>Carregando...</div>}>
+          <CoordenadoresPage />
+        </React.Suspense>
+      );
+    }
+    if (current === 'representantes') {
+      return (
+        <React.Suspense fallback={<div>Carregando...</div>}>
+          <RepresentantesPage />
         </React.Suspense>
       );
     }

@@ -26,14 +26,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ current, setCurrent, role }) =
     { key: 'clientes', label: 'Clientes', icon: <Building2 className="w-4 h-4" /> },
     { key: 'nova-ordem', label: 'Nova Ordem', icon: <ListTodo className="w-4 h-4" /> },
     { key: 'ordens', label: 'Ordens', icon: <ListTodo className="w-4 h-4" /> },
+    { key: 'coordenadores', label: 'Coordenadores', icon: <UserSquare2 className="w-4 h-4" /> },
     { key: 'representantes', label: 'Representantes', icon: <Users2 className="w-4 h-4" /> },
-    { key: 'gerentes', label: 'Gerentes', icon: <UserSquare2 className="w-4 h-4" /> },
     { key: 'faturamento', label: 'Faturamento', icon: <Receipt className="w-4 h-4" /> },
     { key: 'config', label: 'Configurações', icon: <Settings className="w-4 h-4" /> },
   ];
 
   const allow = (k: string) => {
-    if (role === 'REPRESENTANTE' && (k === 'gerentes' || k === 'config')) return false;
+    if (role === 'REPRESENTANTE' && (k === 'coordenadores' || k === 'config')) return false;
     if (role === 'GERENTE' && k === 'config') return false;
     return true;
   };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +11,8 @@ import type { Client } from '@/types/ssgen';
 import { useToast } from '@/hooks/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ClientsPageProps {
   profile: { rep?: string | null; coord?: string | null };
@@ -33,6 +36,30 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
     representante: profile.rep || '',
     coordenador: profile.coord || '',
     id_conta_ssgen: '',
+  });
+
+  const { data: coordenadores = [] } = useQuery({
+    queryKey: ['coordenadores'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('coordenadores')
+        .select('nome')
+        .eq('ativo', true)
+        .order('nome');
+      return data || [];
+    },
+  });
+
+  const { data: representantes = [] } = useQuery({
+    queryKey: ['representantes'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('representantes')
+        .select('nome')
+        .eq('ativo', true)
+        .order('nome');
+      return data || [];
+    },
   });
 
   useEffect(() => {
@@ -224,21 +251,39 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="representante">Representante *</Label>
-                  <Input
-                    id="representante"
-                    required
+                  <Select
                     value={formData.representante}
-                    onChange={(e) => setFormData({ ...formData, representante: e.target.value })}
-                  />
+                    onValueChange={(value) => setFormData({ ...formData, representante: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um representante" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {representantes.map((rep) => (
+                        <SelectItem key={rep.nome} value={rep.nome}>
+                          {rep.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="coordenador">Coordenador *</Label>
-                  <Input
-                    id="coordenador"
-                    required
+                  <Select
                     value={formData.coordenador}
-                    onChange={(e) => setFormData({ ...formData, coordenador: e.target.value })}
-                  />
+                    onValueChange={(value) => setFormData({ ...formData, coordenador: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um coordenador" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {coordenadores.map((coord) => (
+                        <SelectItem key={coord.nome} value={coord.nome}>
+                          {coord.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="id_conta_ssgen">ID Conta SSGen</Label>
