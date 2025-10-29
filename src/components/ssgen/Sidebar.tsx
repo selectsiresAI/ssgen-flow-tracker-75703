@@ -35,7 +35,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ current, setCurrent, role }) =
 
   const allow = (k: string) => {
     if (role === 'REPRESENTANTE' && (k === 'coordenadores' || k === 'config')) return false;
-    if (role === 'GERENTE' && k === 'config') return false;
+    if (role === 'GERENTE' && (k === 'coordenadores' || k === 'config')) return false;
     return true;
   };
 
