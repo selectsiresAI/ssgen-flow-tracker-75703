@@ -87,13 +87,8 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
         setOrdersData(orders);
       }
 
-      // Validar dados
-      if (clientsSheet) {
-        const clients = XLSX.utils.sheet_to_json(clientsSheet);
-        const errors = await validateClients(clients);
-        setValidationErrors(errors);
-      }
-
+      // Não validar aqui - validação será feita após importar coordenadores e representantes
+      setValidationErrors([]);
       setStep('preview');
     } catch (error) {
       toast({
@@ -125,7 +120,23 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
         setImportProgress(40);
       }
 
-      // 3. Importar clientes
+      // 3. Validar clientes agora que coordenadores e representantes foram importados
+      if (clientsData.length > 0) {
+        setImportProgress(45);
+        const errors = await validateClients(clientsData);
+        if (errors.length > 0) {
+          setValidationErrors(errors);
+          toast({
+            title: 'Erros de validação',
+            description: `${errors.length} erro(s) encontrado(s) nos dados dos clientes`,
+            variant: 'destructive',
+          });
+          setStep('preview');
+          return;
+        }
+      }
+
+      // 4. Importar clientes
       if (clientsData.length > 0) {
         setImportProgress(50);
         const clientsRes = await importClients(clientsData);
@@ -133,7 +144,7 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
         setImportProgress(70);
       }
 
-      // 4. Importar ordens
+      // 5. Importar ordens
       if (ordersData.length > 0) {
         setImportProgress(80);
         const ordersRes = await importServiceOrders(ordersData);
