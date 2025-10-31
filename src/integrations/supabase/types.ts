@@ -598,11 +598,17 @@ export type Database = {
           pct_sla_vri_ok: number | null
           reagendamentos: number | null
           sla_envio_atrasado: number | null
+          sla_envio_ok: number | null
           sla_envio_res_atrasado: number | null
+          sla_envio_res_ok: number | null
           sla_lpr_atrasado: number | null
+          sla_lpr_ok: number | null
           sla_vri_atrasado: number | null
+          sla_vri_ok: number | null
           tma_dias: number | null
-          total_os: number | null
+          total_amostras: number | null
+          total_clientes: number | null
+          total_ordens: number | null
         }
         Relationships: []
       }
