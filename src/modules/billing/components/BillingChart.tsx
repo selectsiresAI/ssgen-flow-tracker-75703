@@ -1,4 +1,4 @@
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { useEffect, useState } from 'react';
 import type { BillingMonthly } from '@/lib/billingApi';
 
 interface BillingChartProps {
@@ -6,6 +6,40 @@ interface BillingChartProps {
 }
 
 export function BillingChart({ data }: BillingChartProps) {
+  const [RC, setRC] = useState<any | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    import("recharts")
+      .then(mod => {
+        if (mounted) setRC(mod);
+      })
+      .catch(err => console.error("Failed to load recharts:", err));
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  if (!RC) {
+    return (
+      <div className="bg-zenith-card rounded-2xl p-6 border border-zenith-navy/30">
+        <div className="text-zenith-gold mb-4 font-semibold">Evolução de Faturamento (12 meses)</div>
+        <div className="h-[300px] flex items-center justify-center text-zenith-gray">
+          Carregando gráfico...
+        </div>
+      </div>
+    );
+  }
+  const {
+    ResponsiveContainer,
+    AreaChart,
+    Area,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+  } = RC as any;
+
   if (!data || data.length === 0) {
     return (
       <div className="bg-zenith-card rounded-2xl p-6 border border-zenith-navy/30">

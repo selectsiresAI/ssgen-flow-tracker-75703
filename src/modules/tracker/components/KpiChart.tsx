@@ -1,4 +1,4 @@
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
+import { useEffect, useState } from 'react';
 
 interface KpiChartProps {
   data: Array<{
@@ -9,6 +9,41 @@ interface KpiChartProps {
 }
 
 export function KpiChart({ data }: KpiChartProps) {
+  const [RC, setRC] = useState<any | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    import("recharts")
+      .then(mod => {
+        if (mounted) setRC(mod);
+      })
+      .catch(err => console.error("Failed to load recharts:", err));
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  if (!RC) {
+    return (
+      <div className="bg-zenith-card rounded-2xl p-4 border border-zenith-navy/30">
+        <div className="text-zenith-gold mb-2">Evolução de Ordens e Amostras</div>
+        <div className="h-[250px] flex items-center justify-center text-zenith-gray">
+          Carregando gráfico...
+        </div>
+      </div>
+    );
+  }
+  const {
+    ResponsiveContainer,
+    AreaChart,
+    Area,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    Legend,
+  } = RC as any;
+
   if (!data || data.length === 0) {
     return (
       <div className="bg-zenith-card rounded-2xl p-4 border border-zenith-navy/30">
