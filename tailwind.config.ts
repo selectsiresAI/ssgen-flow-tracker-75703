@@ -14,6 +14,16 @@ export default {
     },
     extend: {
       colors: {
+        zenith: {
+          black: '#0B0B0C',
+          navy: '#0F1B2D',
+          gold: '#C6A053',
+          gray: '#BBC3CF',
+          bg: '#0D1117',
+          card: '#111826',
+        },
+      },
+      colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

@@ -25,6 +25,8 @@ const CoordenadoresListPage = React.lazy(() => import('@/components/ssgen/pages/
 const RepresentantesListPage = React.lazy(() => import('@/components/ssgen/pages/RepresentantesListPage'));
 const UserManagementPage = React.lazy(() => import('@/components/ssgen/pages/UserManagementPage'));
 const SLAConfigPage = React.lazy(() => import('@/components/ssgen/pages/SLAConfigPage'));
+const TrackerDashboard = React.lazy(() => import('@/modules/tracker/pages/Dashboard'));
+const MapPage = React.lazy(() => import('@/modules/tracker/pages/MapPage'));
 
 export default function SSGENTrackApp() {
   const navigate = useNavigate();
@@ -219,6 +221,20 @@ export default function SSGENTrackApp() {
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">Somente ADM</CardContent>
         </Card>
+      );
+    }
+    if (current === 'tracker') {
+      return (
+        <React.Suspense fallback={<div>Carregando...</div>}>
+          <TrackerDashboard />
+        </React.Suspense>
+      );
+    }
+    if (current === 'mapa') {
+      return (
+        <React.Suspense fallback={<div>Carregando...</div>}>
+          <MapPage />
+        </React.Suspense>
       );
     }
     if (current === 'config') {

@@ -134,4 +134,79 @@ export type UnifiedOrder = Client & Omit<ServiceOrder, 'ordem_servico_ssgen' | '
   client_created_at?: string;
   order_created_at?: string;
   updated_at?: string;
+  cliente_lat?: number | null;
+  cliente_lon?: number | null;
+  prioridade?: 'alta' | 'media' | 'baixa';
+  flag_reagendamento?: boolean;
+  issue_text?: string | null;
+  dt_faturamento?: string | null;
+  dt_receb_resultados?: string | null;
+};
+
+export type TeamLocation = {
+  id: string;
+  user_id: string;
+  nome: string;
+  lat: number;
+  lon: number;
+  status: 'online' | 'ocupado' | 'offline';
+  updated_at: string;
+};
+
+export type MapOrder = {
+  id: string;
+  ordem_servico_ssgen: number;
+  cliente: string;
+  lat: number;
+  lon: number;
+  prioridade?: 'alta' | 'media' | 'baixa';
+  flag_reagendamento?: boolean;
+  envio_planilha_status_sla?: string | null;
+  vri_status_sla?: string | null;
+  lpr_status_sla?: string | null;
+  envio_resultados_status_sla?: string | null;
+  representante: string;
+  coordenador: string;
+  cliente_status?: string | null;
+};
+
+export type TrackerTimeline = {
+  id: string;
+  ordem_servico_ssgen: number;
+  cliente: string;
+  prioridade?: string | null;
+  flag_reagendamento?: boolean;
+  issue_text?: string | null;
+  etapa1_cra_data?: string | null;
+  etapa2_envio_planilha_data?: string | null;
+  etapa3_vri_data?: string | null;
+  etapa4_vri_resolucao_data?: string | null;
+  etapa5_lpr_data?: string | null;
+  etapa6_receb_resultados_data?: string | null;
+  etapa7_envio_resultados_data?: string | null;
+  etapa8_faturamento_data?: string | null;
+  aging_dias_total?: number | null;
+  etapa_atual?: string | null;
+  etapa2_status_sla?: string | null;
+  etapa3_status_sla?: string | null;
+  etapa5_status_sla?: string | null;
+  etapa7_status_sla?: string | null;
+};
+
+export type TrackerKPI = {
+  total_os: number;
+  em_processamento: number;
+  a_faturar: number;
+  concluidas_hoje: number;
+  reagendamentos: number;
+  alta_prioridade: number;
+  pct_sla_envio_ok: number;
+  sla_envio_atrasado: number;
+  pct_sla_vri_ok: number;
+  sla_vri_atrasado: number;
+  pct_sla_lpr_ok: number;
+  sla_lpr_atrasado: number;
+  pct_sla_envio_res_ok: number;
+  sla_envio_res_atrasado: number;
+  tma_dias: number;
 };

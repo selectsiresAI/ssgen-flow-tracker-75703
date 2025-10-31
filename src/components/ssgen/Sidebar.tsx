@@ -10,6 +10,8 @@ import {
   Receipt,
   Settings,
   LogOut,
+  MapPin,
+  Map,
 } from 'lucide-react';
 import type { Role } from '@/types/ssgen';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,6 +26,8 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ current, setCurrent, role }) => {
   const items = [
     { key: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
+    { key: 'tracker', label: 'Tracker', icon: <MapPin className="w-4 h-4" /> },
+    { key: 'mapa', label: 'Mapa Operacional', icon: <Map className="w-4 h-4" /> },
     { key: 'clientes', label: 'Clientes', icon: <Building2 className="w-4 h-4" /> },
     { key: 'nova-ordem', label: 'Nova Ordem', icon: <ListTodo className="w-4 h-4" /> },
     { key: 'ordens', label: 'Ordens', icon: <ListTodo className="w-4 h-4" /> },
