@@ -475,6 +475,47 @@ export type Database = {
       }
     }
     Views: {
+      v_billing_by_coord: {
+        Row: {
+          coordenador: string | null
+          total_amostras: number | null
+          total_ordens: number | null
+          valor_total: number | null
+        }
+        Relationships: []
+      }
+      v_billing_by_rep: {
+        Row: {
+          representante: string | null
+          total_amostras: number | null
+          total_ordens: number | null
+          valor_total: number | null
+        }
+        Relationships: []
+      }
+      v_billing_monthly: {
+        Row: {
+          mes: string | null
+          mes_label: string | null
+          total_amostras: number | null
+          total_ordens: number | null
+          valor_faturado: number | null
+        }
+        Relationships: []
+      }
+      v_billing_summary: {
+        Row: {
+          faturamento_mes_atual: number | null
+          ordens_mes_atual: number | null
+          ticket_medio: number | null
+          total_amostras_faturadas: number | null
+          total_coordenadores: number | null
+          total_ordens_faturadas: number | null
+          total_representantes: number | null
+          valor_total_faturado: number | null
+        }
+        Relationships: []
+      }
       v_map_orders: {
         Row: {
           cliente: string | null
@@ -493,6 +534,40 @@ export type Database = {
           representante: string | null
           updated_at: string | null
           vri_status_sla: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_orders_ordem_servico_ssgen_fkey"
+            columns: ["ordem_servico_ssgen"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["ordem_servico_ssgen"]
+          },
+          {
+            foreignKeyName: "service_orders_ordem_servico_ssgen_fkey"
+            columns: ["ordem_servico_ssgen"]
+            isOneToOne: false
+            referencedRelation: "vw_orders_unified"
+            referencedColumns: ["ordem_servico_ssgen"]
+          },
+        ]
+      }
+      v_ready_to_invoice: {
+        Row: {
+          cliente: string | null
+          coordenador: string | null
+          cpf_cnpj: number | null
+          created_at: string | null
+          dias_desde_liberacao: number | null
+          envio_resultados_data: string | null
+          id: string | null
+          nome_produto: string | null
+          numero_amostras: number | null
+          ordem_servico_neogen: number | null
+          ordem_servico_ssgen: number | null
+          representante: string | null
+          updated_at: string | null
+          valor_estimado: number | null
         }
         Relationships: [
           {
