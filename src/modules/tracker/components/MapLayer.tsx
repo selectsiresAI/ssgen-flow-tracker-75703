@@ -35,35 +35,37 @@ export function MapLayer({
         zoom={7} 
         style={{ height: 500, width: '100%', borderRadius: '12px' }}
       >
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        {orders.map((o) => (
-          <Marker 
-            key={`os-${o.id}`} 
-            position={[o.lat, o.lon]}
-            eventHandlers={{ 
-              click: () => onOrderClick(o.id) 
-            }}
-          >
-            <Popup>
-              <div className="text-xs">
-                <div className="font-bold">OS {o.ordem_servico_ssgen}</div>
-                <div>{o.cliente}</div>
-                <div>Prioridade: {o.prioridade ?? '-'}</div>
-                <div>Rep: {o.representante}</div>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
-        {team.map((t) => (
-          <Marker key={`team-${t.id}`} position={[t.lat, t.lon]}>
-            <Popup>
-              <div className="text-xs">
-                <div className="font-bold">Equipe: {t.nome}</div>
-                <div>Status: {t.status}</div>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+        <>
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          {orders.map((o) => (
+            <Marker 
+              key={`os-${o.id}`} 
+              position={[o.lat, o.lon]}
+              eventHandlers={{ 
+                click: () => onOrderClick(o.id) 
+              }}
+            >
+              <Popup>
+                <div className="text-xs">
+                  <div className="font-bold">OS {o.ordem_servico_ssgen}</div>
+                  <div>{o.cliente}</div>
+                  <div>Prioridade: {o.prioridade ?? '-'}</div>
+                  <div>Rep: {o.representante}</div>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+          {team.map((t) => (
+            <Marker key={`team-${t.id}`} position={[t.lat, t.lon]}>
+              <Popup>
+                <div className="text-xs">
+                  <div className="font-bold">Equipe: {t.nome}</div>
+                  <div>Status: {t.status}</div>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </>
       </MapContainer>
     </div>
   );
