@@ -4,14 +4,28 @@ import { GaugeSLA } from '../components/GaugeSLA';
 import { OrdersTable } from '../components/OrdersTable';
 import { OrderCard } from '../components/OrderCard';
 import { AlertCenter } from '../components/AlertCenter';
+import { SmartKPIs } from '../components/SmartKPIs';
+import { useOrderAlarms } from '../hooks/useOrderAlarms';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Bell, BellOff } from 'lucide-react';
 
 export default function TrackerDashboard() {
   const { data: rows = [] } = useTrackerTimelines();
   const { data: kpis } = useTrackerKPIs();
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState<'table' | 'cards'>('table');
+  const [alarmsEnabled, setAlarmsEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+
+  const { criticalCount, warningCount } = useOrderAlarms(rows, {
+    enabled: alarmsEnabled,
+    soundEnabled,
+    criticalThreshold: 5,
+    warningThreshold: 3,
+  });
 
   const filtered = useMemo(() => {
     return rows.filter((r) => {
@@ -32,13 +46,50 @@ export default function TrackerDashboard() {
     pct_sla_lpr_ok: 0,
     pct_sla_envio_res_ok: 0,
     tma_dias: 0,
+    reagendamentos: 0,
+    alta_prioridade: 0,
+    sla_envio_atrasado: 0,
+    sla_vri_atrasado: 0,
+    sla_lpr_atrasado: 0,
+    sla_envio_res_atrasado: 0,
   };
 
   return (
     <div className="p-6 space-y-6 bg-zenith-black min-h-screen">
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="text-3xl font-bold text-white">SSGEN Tracker</div>
+        <div className="flex items-center gap-4">
+          <div className="text-3xl font-bold text-white">SSGEN Tracker</div>
+          {(criticalCount > 0 || warningCount > 0) && (
+            <div className="flex gap-2">
+              {criticalCount > 0 && (
+                <div className="px-3 py-1 rounded-full bg-destructive/20 text-destructive text-xs font-semibold border border-destructive">
+                  {criticalCount} Crítico{criticalCount !== 1 ? 's' : ''}
+                </div>
+              )}
+              {warningCount > 0 && (
+                <div className="px-3 py-1 rounded-full bg-warning/20 text-warning text-xs font-semibold border border-warning">
+                  {warningCount} Aviso{warningCount !== 1 ? 's' : ''}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
         <div className="flex gap-3 items-center">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zenith-card border border-zenith-navy/30">
+            {alarmsEnabled ? <Bell className="w-4 h-4 text-zenith-gold" /> : <BellOff className="w-4 h-4 text-zenith-gray" />}
+            <Switch checked={alarmsEnabled} onCheckedChange={setAlarmsEnabled} />
+            <Label className="text-xs text-white cursor-pointer" onClick={() => setAlarmsEnabled(!alarmsEnabled)}>
+              Alarmes
+            </Label>
+          </div>
+          {alarmsEnabled && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zenith-card border border-zenith-navy/30">
+              <Switch checked={soundEnabled} onCheckedChange={setSoundEnabled} />
+              <Label className="text-xs text-white cursor-pointer" onClick={() => setSoundEnabled(!soundEnabled)}>
+                Som
+              </Label>
+            </div>
+          )}
           <Input
             placeholder="Buscar por OS ou cliente..."
             className="w-80 bg-zenith-bg text-white border-zenith-navy"
@@ -55,13 +106,7 @@ export default function TrackerDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <KPI title="Total OS" value={k.total_os} />
-        <KPI title="Em Processamento" value={k.em_processamento} />
-        <KPI title="A Faturar" value={k.a_faturar} />
-        <KPI title="Concluídas Hoje" value={k.concluidas_hoje} />
-        <KPI title="TMA (dias)" value={k.tma_dias?.toFixed(1) ?? '-'} />
-      </div>
+      <SmartKPIs kpis={k} />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <div className="grid grid-cols-2 gap-3">

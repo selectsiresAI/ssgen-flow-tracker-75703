@@ -124,3 +124,12 @@ export async function updateIssueText(orderId: string, issueText: string) {
   
   if (error) throw error;
 }
+
+export async function deleteServiceOrder(orderId: string) {
+  const { error } = await supabase
+    .from('service_orders')
+    .delete()
+    .eq('id', orderId);
+  
+  if (error) throw error;
+}

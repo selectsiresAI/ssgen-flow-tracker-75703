@@ -6,7 +6,8 @@ import {
   fetchTeamLocations,
   updateOrderPriority,
   toggleReagendamento,
-  updateIssueText
+  updateIssueText,
+  deleteServiceOrder
 } from '@/lib/trackerApi';
 
 export function useTrackerTimelines() {
@@ -46,6 +47,17 @@ export function useUpdatePriority() {
   return useMutation({
     mutationFn: ({ orderId, prioridade }: { orderId: string; prioridade: 'alta' | 'media' | 'baixa' }) =>
       updateOrderPriority(orderId, prioridade),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tracker_timelines'] });
+      queryClient.invalidateQueries({ queryKey: ['tracker_map_orders'] });
+    },
+  });
+}
+
+export function useDeleteOrder() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (orderId: string) => deleteServiceOrder(orderId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tracker_timelines'] });
       queryClient.invalidateQueries({ queryKey: ['tracker_map_orders'] });
