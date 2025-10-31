@@ -261,6 +261,8 @@ export type Database = {
           cra_data: string | null
           cra_status: string | null
           created_at: string
+          dt_faturamento: string | null
+          dt_receb_resultados: string | null
           envio_planilha_data: string | null
           envio_planilha_status: string | null
           envio_planilha_status_sla: string | null
@@ -294,6 +296,8 @@ export type Database = {
           cra_data?: string | null
           cra_status?: string | null
           created_at?: string
+          dt_faturamento?: string | null
+          dt_receb_resultados?: string | null
           envio_planilha_data?: string | null
           envio_planilha_status?: string | null
           envio_planilha_status_sla?: string | null
@@ -327,6 +331,8 @@ export type Database = {
           cra_data?: string | null
           cra_status?: string | null
           created_at?: string
+          dt_faturamento?: string | null
+          dt_receb_resultados?: string | null
           envio_planilha_data?: string | null
           envio_planilha_status?: string | null
           envio_planilha_status_sla?: string | null
@@ -487,6 +493,66 @@ export type Database = {
           representante: string | null
           updated_at: string | null
           vri_status_sla: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_orders_ordem_servico_ssgen_fkey"
+            columns: ["ordem_servico_ssgen"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["ordem_servico_ssgen"]
+          },
+          {
+            foreignKeyName: "service_orders_ordem_servico_ssgen_fkey"
+            columns: ["ordem_servico_ssgen"]
+            isOneToOne: false
+            referencedRelation: "vw_orders_unified"
+            referencedColumns: ["ordem_servico_ssgen"]
+          },
+        ]
+      }
+      v_tracker_kpi_topline: {
+        Row: {
+          a_faturar: number | null
+          alta_prioridade: number | null
+          concluidas_hoje: number | null
+          em_processamento: number | null
+          pct_sla_envio_ok: number | null
+          pct_sla_envio_res_ok: number | null
+          pct_sla_lpr_ok: number | null
+          pct_sla_vri_ok: number | null
+          reagendamentos: number | null
+          sla_envio_atrasado: number | null
+          sla_envio_res_atrasado: number | null
+          sla_lpr_atrasado: number | null
+          sla_vri_atrasado: number | null
+          tma_dias: number | null
+          total_os: number | null
+        }
+        Relationships: []
+      }
+      v_tracker_timeline: {
+        Row: {
+          aging_dias_total: number | null
+          cliente: string | null
+          etapa_atual: string | null
+          etapa1_cra_data: string | null
+          etapa2_envio_planilha_data: string | null
+          etapa2_status_sla: string | null
+          etapa3_status_sla: string | null
+          etapa3_vri_data: string | null
+          etapa4_vri_resolucao_data: string | null
+          etapa5_lpr_data: string | null
+          etapa5_status_sla: string | null
+          etapa6_receb_resultados_data: string | null
+          etapa7_envio_resultados_data: string | null
+          etapa7_status_sla: string | null
+          etapa8_faturamento_data: string | null
+          flag_reagendamento: boolean | null
+          id: string | null
+          issue_text: string | null
+          ordem_servico_ssgen: number | null
+          prioridade: string | null
         }
         Relationships: [
           {
