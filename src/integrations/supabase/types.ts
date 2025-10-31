@@ -256,6 +256,8 @@ export type Database = {
       }
       service_orders: {
         Row: {
+          cliente_lat: number | null
+          cliente_lon: number | null
           cra_data: string | null
           cra_status: string | null
           created_at: string
@@ -268,7 +270,9 @@ export type Database = {
           envio_resultados_previsao: string | null
           envio_resultados_status: string | null
           envio_resultados_status_sla: string | null
+          flag_reagendamento: boolean | null
           id: string
+          issue_text: string | null
           lpr_data: string | null
           lpr_n_amostras: number | null
           lpr_status_sla: string | null
@@ -277,6 +281,7 @@ export type Database = {
           numero_nf_neogen: number | null
           ordem_servico_neogen: number | null
           ordem_servico_ssgen: number
+          prioridade: string | null
           updated_at: string
           vri_data: string | null
           vri_n_amostras: number | null
@@ -284,6 +289,8 @@ export type Database = {
           vri_status_sla: string | null
         }
         Insert: {
+          cliente_lat?: number | null
+          cliente_lon?: number | null
           cra_data?: string | null
           cra_status?: string | null
           created_at?: string
@@ -296,7 +303,9 @@ export type Database = {
           envio_resultados_previsao?: string | null
           envio_resultados_status?: string | null
           envio_resultados_status_sla?: string | null
+          flag_reagendamento?: boolean | null
           id?: string
+          issue_text?: string | null
           lpr_data?: string | null
           lpr_n_amostras?: number | null
           lpr_status_sla?: string | null
@@ -305,6 +314,7 @@ export type Database = {
           numero_nf_neogen?: number | null
           ordem_servico_neogen?: number | null
           ordem_servico_ssgen: number
+          prioridade?: string | null
           updated_at?: string
           vri_data?: string | null
           vri_n_amostras?: number | null
@@ -312,6 +322,8 @@ export type Database = {
           vri_status_sla?: string | null
         }
         Update: {
+          cliente_lat?: number | null
+          cliente_lon?: number | null
           cra_data?: string | null
           cra_status?: string | null
           created_at?: string
@@ -324,7 +336,9 @@ export type Database = {
           envio_resultados_previsao?: string | null
           envio_resultados_status?: string | null
           envio_resultados_status_sla?: string | null
+          flag_reagendamento?: boolean | null
           id?: string
+          issue_text?: string | null
           lpr_data?: string | null
           lpr_n_amostras?: number | null
           lpr_status_sla?: string | null
@@ -333,6 +347,7 @@ export type Database = {
           numero_nf_neogen?: number | null
           ordem_servico_neogen?: number | null
           ordem_servico_ssgen?: number
+          prioridade?: string | null
           updated_at?: string
           vri_data?: string | null
           vri_n_amostras?: number | null
@@ -392,6 +407,39 @@ export type Database = {
         }
         Relationships: []
       }
+      team_locations: {
+        Row: {
+          created_at: string | null
+          id: string
+          lat: number
+          lon: number
+          nome: string
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          lat: number
+          lon: number
+          nome: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          lat?: number
+          lon?: number
+          nome?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           coord: string | null
@@ -421,6 +469,42 @@ export type Database = {
       }
     }
     Views: {
+      v_map_orders: {
+        Row: {
+          cliente: string | null
+          coordenador: string | null
+          created_at: string | null
+          envio_planilha_status_sla: string | null
+          envio_resultados_status_sla: string | null
+          flag_reagendamento: boolean | null
+          id: string | null
+          issue_text: string | null
+          lat: number | null
+          lon: number | null
+          lpr_status_sla: string | null
+          ordem_servico_ssgen: number | null
+          prioridade: string | null
+          representante: string | null
+          updated_at: string | null
+          vri_status_sla: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_orders_ordem_servico_ssgen_fkey"
+            columns: ["ordem_servico_ssgen"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["ordem_servico_ssgen"]
+          },
+          {
+            foreignKeyName: "service_orders_ordem_servico_ssgen_fkey"
+            columns: ["ordem_servico_ssgen"]
+            isOneToOne: false
+            referencedRelation: "vw_orders_unified"
+            referencedColumns: ["ordem_servico_ssgen"]
+          },
+        ]
+      }
       vw_orders_powerbi: {
         Row: {
           CLIENTE: string | null
