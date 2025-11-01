@@ -1,6 +1,6 @@
 import { BillingKPIs } from '../components/BillingKPIs';
 import { BillingChart } from '../components/BillingChart';
-import { ReadyToInvoice } from '../components/ReadyToInvoice';
+import { BillingOrdersTable } from '../components/BillingOrdersTable';
 import { BillingFilters } from '../components/BillingFilters';
 import { 
   useBillingSummary, 
@@ -31,6 +31,14 @@ export default function BillingPage() {
     [byCoord]
   );
 
+  const filteredOrders = useMemo(() => {
+    return readyToInvoice.filter(order => {
+      if (selectedRep !== 'all' && order.representante !== selectedRep) return false;
+      if (selectedCoord !== 'all' && order.coordenador !== selectedCoord) return false;
+      return true;
+    });
+  }, [readyToInvoice, selectedRep, selectedCoord]);
+
   return (
     <div className="p-6 space-y-6 bg-zenith-black min-h-screen">
       <div className="flex items-center justify-between">
@@ -52,26 +60,21 @@ export default function BillingPage() {
         <BillingKPIs summary={summary} />
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <div>
-          {loadingMonthly ? (
-            <div className="bg-zenith-card rounded-2xl p-6 border border-zenith-navy/30">
-              <div className="text-center text-zenith-gray py-8">Carregando gráfico...</div>
-            </div>
-          ) : (
-            <BillingChart data={monthly} />
-          )}
+      {loadingMonthly ? (
+        <div className="bg-zenith-card rounded-2xl p-6 border border-zenith-navy/30">
+          <div className="text-center text-zenith-gray py-8">Carregando gráfico...</div>
         </div>
-        <div>
-          {loadingReady ? (
-            <div className="bg-zenith-card rounded-2xl p-6 border border-zenith-navy/30">
-              <div className="text-center text-zenith-gray py-8">Carregando ordens...</div>
-            </div>
-          ) : (
-            <ReadyToInvoice orders={readyToInvoice} />
-          )}
+      ) : (
+        <BillingChart data={monthly} />
+      )}
+
+      {loadingReady ? (
+        <div className="bg-zenith-card rounded-2xl p-6 border border-zenith-navy/30">
+          <div className="text-center text-zenith-gray py-8">Carregando ordens...</div>
         </div>
-      </div>
+      ) : (
+        <BillingOrdersTable orders={filteredOrders} />
+      )}
     </div>
   );
 }
