@@ -1,10 +1,11 @@
 import { useState, useMemo } from 'react';
-import { useTrackerTimelines, useTrackerKPIs } from '../hooks/useTrackerData';
-import { GaugeSLA } from '../components/GaugeSLA';
+import { useTrackerTimelines } from '../hooks/useTrackerData';
+import { useTrackerKpis } from '../hooks/useTrackerKpis';
 import { OrdersTable } from '../components/OrdersTable';
 import { OrderCard } from '../components/OrderCard';
 import { AlertCenter } from '../components/AlertCenter';
-import { SmartKPIs } from '../components/SmartKPIs';
+import { KpiCards } from '../components/KpiCards';
+import { KpiSlaBlock } from '../components/KpiSlaBlock';
 import { useOrderAlarms } from '../hooks/useOrderAlarms';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,7 @@ import { Bell, BellOff } from 'lucide-react';
 
 export default function TrackerDashboard() {
   const { data: rows = [] } = useTrackerTimelines();
-  const { data: kpis } = useTrackerKPIs();
+  const { data: kpis, isLoading: loadingKpis } = useTrackerKpis();
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState<'table' | 'cards'>('table');
   const [alarmsEnabled, setAlarmsEnabled] = useState(true);
@@ -35,24 +36,6 @@ export default function TrackerDashboard() {
         String(r.cliente ?? '').toLowerCase().includes(q);
     });
   }, [rows, query]);
-
-  const k = kpis ?? {
-    total_os: 0,
-    em_processamento: 0,
-    a_faturar: 0,
-    concluidas_hoje: 0,
-    pct_sla_envio_ok: 0,
-    pct_sla_vri_ok: 0,
-    pct_sla_lpr_ok: 0,
-    pct_sla_envio_res_ok: 0,
-    tma_dias: 0,
-    reagendamentos: 0,
-    alta_prioridade: 0,
-    sla_envio_atrasado: 0,
-    sla_vri_atrasado: 0,
-    sla_lpr_atrasado: 0,
-    sla_envio_res_atrasado: 0,
-  };
 
   return (
     <div className="p-6 space-y-6 bg-zenith-black min-h-screen">
@@ -106,24 +89,27 @@ export default function TrackerDashboard() {
         </div>
       </div>
 
-      <SmartKPIs kpis={k} />
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="grid grid-cols-2 gap-3">
-          <GaugeSLA value={k.pct_sla_envio_ok} label="SLA Envio Planilha" />
-          <GaugeSLA value={k.pct_sla_vri_ok} label="SLA VRI" />
-          <GaugeSLA value={k.pct_sla_lpr_ok} label="SLA LPR" />
-          <GaugeSLA value={k.pct_sla_envio_res_ok} label="SLA Envio Resultados" />
-        </div>
-        <AlertCenter rows={rows} />
-        <div className="bg-zenith-card rounded-2xl p-4 border border-zenith-navy/30">
-          <div className="text-zenith-gold font-semibold mb-2">Resumo Executivo</div>
-          <div className="text-sm text-zenith-gray space-y-2">
-            <p>Operação com {k.em_processamento} OS ativas.</p>
-            <p>Priorize etapas críticas para manter SLA.</p>
+      {loadingKpis ? (
+        <div className="text-center text-zenith-gray py-8">Carregando KPIs...</div>
+      ) : (
+        <>
+          <KpiCards k={kpis} />
+          
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <KpiSlaBlock k={kpis} />
+            <div className="grid grid-cols-1 gap-4">
+              <AlertCenter rows={rows} />
+              <div className="bg-zenith-card rounded-2xl p-4 border border-zenith-navy/30">
+                <div className="text-zenith-gold font-semibold mb-2">Resumo Executivo</div>
+                <div className="text-sm text-zenith-gray space-y-2">
+                  <p>Operação com {kpis?.em_processamento ?? 0} OS ativas.</p>
+                  <p>Priorize etapas críticas para manter SLA.</p>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
 
       {mode === 'table' ? (
         <OrdersTable rows={filtered} />
@@ -139,15 +125,6 @@ export default function TrackerDashboard() {
           ))}
         </div>
       )}
-    </div>
-  );
-}
-
-function KPI({ title, value }: { title: string; value: any }) {
-  return (
-    <div className="rounded-2xl p-4 bg-zenith-card border border-zenith-navy/30">
-      <div className="text-zenith-gold text-sm mb-1">{title}</div>
-      <div className="text-2xl font-bold text-white">{value}</div>
     </div>
   );
 }
