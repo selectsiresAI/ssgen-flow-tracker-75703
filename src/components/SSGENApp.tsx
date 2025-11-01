@@ -27,6 +27,7 @@ const UserManagementPage = React.lazy(() => import('@/components/ssgen/pages/Use
 const SLAConfigPage = React.lazy(() => import('@/components/ssgen/pages/SLAConfigPage'));
 const TrackerDashboard = React.lazy(() => import('@/modules/tracker/pages/Dashboard'));
 const MapPage = React.lazy(() => import('@/modules/tracker/pages/MapPage'));
+const BillingPage = React.lazy(() => import('@/modules/billing/pages/BillingPage'));
 
 export default function SSGENTrackApp() {
   const navigate = useNavigate();
@@ -129,13 +130,7 @@ export default function SSGENTrackApp() {
     if (current === 'faturamento') {
       return (
         <React.Suspense fallback={<div>Carregando...</div>}>
-          <OrdersPage 
-            onOpen={openDetail} 
-            canEdit={false} 
-            canAttach={false} 
-            canFinance={role === 'ADM'}
-            userRole={role}
-          />
+          <BillingPage />
         </React.Suspense>
       );
     }
