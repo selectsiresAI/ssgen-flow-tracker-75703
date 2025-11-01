@@ -301,6 +301,27 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
                   <Save className="w-4 h-4" />
                   Salvar
                 </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => {
+                    setFormData({
+                      ordem_servico_ssgen: '',
+                      data: '',
+                      ordem_servico_neogen: '',
+                      nome: '',
+                      cpf_cnpj: '',
+                      ie_rg: '',
+                      codigo: '',
+                      status: '',
+                      representante: profile.rep || '',
+                      coordenador: profile.coord || '',
+                      id_conta_ssgen: '',
+                    });
+                  }}
+                >
+                  Limpar
+                </Button>
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Cancelar
                 </Button>

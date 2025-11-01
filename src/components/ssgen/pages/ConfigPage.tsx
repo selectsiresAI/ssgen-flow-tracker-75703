@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { HeaderBar } from '../shared/HeaderBar';
-import { Users2, UserSquare2, Settings2, Upload } from 'lucide-react';
+import { Users2, UserSquare2, Settings2, Upload, Trash2 } from 'lucide-react';
 import ImportDialog from '../import/ImportDialog';
+import { DeleteDataDialog } from '../shared/DeleteDataDialog';
 
 interface ConfigPageProps {
   setCurrent: (page: string) => void;
@@ -12,6 +13,7 @@ interface ConfigPageProps {
 const ConfigPage: React.FC<ConfigPageProps> = ({ setCurrent }) => {
   const [query, setQuery] = useState('');
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const configSections = [
     {
@@ -49,6 +51,13 @@ const ConfigPage: React.FC<ConfigPageProps> = ({ setCurrent }) => {
       action: () => setImportDialogOpen(true),
       buttonText: 'Importar Dados',
     },
+    {
+      title: 'Gerenciamento de Dados',
+      description: 'Apagar clientes e ordens de serviço do sistema',
+      icon: <Trash2 className="w-5 h-5" />,
+      action: () => setDeleteDialogOpen(true),
+      buttonText: 'Gerenciar Dados',
+    },
   ];
 
   return (
@@ -78,6 +87,7 @@ const ConfigPage: React.FC<ConfigPageProps> = ({ setCurrent }) => {
       </div>
 
       <ImportDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} />
+      <DeleteDataDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} />
     </div>
   );
 };
