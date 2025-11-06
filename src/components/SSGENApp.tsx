@@ -256,10 +256,9 @@ export default function SSGENTrackApp() {
           <CardHeader>
             <CardTitle>Configuração necessária</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <CardContent className="text-sm text-muted-foreground space-y-2">
             <div>
-              Defina <code>NEXT_PUBLIC_SUPABASE_URL</code>/<code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> ou
-              <code>VITE_SUPABASE_URL</code>/<code>VITE_SUPABASE_ANON_KEY</code> no ambiente do projeto.
+              Defina <code>NEXT_PUBLIC_SUPABASE_URL</code> e <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> no ambiente do projeto.
             </div>
             <div>
               Suportados: <strong>process.env</strong>, <strong>import.meta.env</strong> ou <strong>globalThis</strong> (ex.: <code>window.NEXT_PUBLIC_SUPABASE_URL = "https://..."</code>).
