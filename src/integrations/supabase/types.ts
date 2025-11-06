@@ -21,6 +21,7 @@ export type Database = {
           cpf_cnpj: number
           created_at: string
           data: string
+          deleted_at: string | null
           id_conta_ssgen: number | null
           ie_rg: number | null
           nome: string
@@ -36,6 +37,7 @@ export type Database = {
           cpf_cnpj: number
           created_at?: string
           data: string
+          deleted_at?: string | null
           id_conta_ssgen?: number | null
           ie_rg?: number | null
           nome: string
@@ -51,6 +53,7 @@ export type Database = {
           cpf_cnpj?: number
           created_at?: string
           data?: string
+          deleted_at?: string | null
           id_conta_ssgen?: number | null
           ie_rg?: number | null
           nome?: string
@@ -66,6 +69,7 @@ export type Database = {
         Row: {
           ativo: boolean
           created_at: string
+          deleted_at: string | null
           email: string | null
           id: string
           nome: string
@@ -74,6 +78,7 @@ export type Database = {
         Insert: {
           ativo?: boolean
           created_at?: string
+          deleted_at?: string | null
           email?: string | null
           id?: string
           nome: string
@@ -82,12 +87,86 @@ export type Database = {
         Update: {
           ativo?: boolean
           created_at?: string
+          deleted_at?: string | null
           email?: string | null
           id?: string
           nome?: string
           updated_at?: string
         }
         Relationships: []
+      }
+      invoices: {
+        Row: {
+          amount: number
+          created_at: string | null
+          deleted_at: string | null
+          id: string
+          issued_on: string
+          service_order_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          issued_on: string
+          service_order_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string
+          issued_on?: string
+          service_order_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "service_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "v_map_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "v_orders_aging"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "v_ready_to_invoice"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "v_tracker_timeline"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "vw_orders_unified"
+            referencedColumns: ["ordem_id"]
+          },
+        ]
       }
       orders: {
         Row: {
@@ -231,6 +310,7 @@ export type Database = {
         Row: {
           ativo: boolean
           created_at: string
+          deleted_at: string | null
           email: string | null
           id: string
           nome: string
@@ -239,6 +319,7 @@ export type Database = {
         Insert: {
           ativo?: boolean
           created_at?: string
+          deleted_at?: string | null
           email?: string | null
           id?: string
           nome: string
@@ -247,6 +328,7 @@ export type Database = {
         Update: {
           ativo?: boolean
           created_at?: string
+          deleted_at?: string | null
           email?: string | null
           id?: string
           nome?: string
@@ -254,10 +336,145 @@ export type Database = {
         }
         Relationships: []
       }
+      service_order_samples: {
+        Row: {
+          created_at: string | null
+          id: number
+          sample_code: string | null
+          service_order_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          sample_code?: string | null
+          service_order_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          sample_code?: string | null
+          service_order_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_order_samples_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "service_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_order_samples_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "v_map_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_order_samples_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "v_orders_aging"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_order_samples_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "v_ready_to_invoice"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_order_samples_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "v_tracker_timeline"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_order_samples_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "vw_orders_unified"
+            referencedColumns: ["ordem_id"]
+          },
+        ]
+      }
+      service_order_stage_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          etapa: string
+          id: number
+          notes: string | null
+          service_order_id: string | null
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          etapa: string
+          id?: number
+          notes?: string | null
+          service_order_id?: string | null
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          etapa?: string
+          id?: number
+          notes?: string | null
+          service_order_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_order_stage_history_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "service_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_order_stage_history_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "v_map_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_order_stage_history_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "v_orders_aging"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_order_stage_history_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "v_ready_to_invoice"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_order_stage_history_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "v_tracker_timeline"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_order_stage_history_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "vw_orders_unified"
+            referencedColumns: ["ordem_id"]
+          },
+        ]
+      }
       service_orders: {
         Row: {
           cliente_lat: number | null
           cliente_lon: number | null
+          completed_at: string | null
           cra_data: string | null
           cra_status: string | null
           created_at: string
@@ -272,9 +489,11 @@ export type Database = {
           envio_resultados_previsao: string | null
           envio_resultados_status: string | null
           envio_resultados_status_sla: string | null
+          etapa_atual: string | null
           flag_reagendamento: boolean | null
           id: string
           issue_text: string | null
+          liberacao_data: string | null
           lpr_data: string | null
           lpr_n_amostras: number | null
           lpr_status_sla: string | null
@@ -284,6 +503,8 @@ export type Database = {
           ordem_servico_neogen: number | null
           ordem_servico_ssgen: number
           prioridade: string | null
+          received_at: string | null
+          sla_days: number | null
           updated_at: string
           vri_data: string | null
           vri_n_amostras: number | null
@@ -293,6 +514,7 @@ export type Database = {
         Insert: {
           cliente_lat?: number | null
           cliente_lon?: number | null
+          completed_at?: string | null
           cra_data?: string | null
           cra_status?: string | null
           created_at?: string
@@ -307,9 +529,11 @@ export type Database = {
           envio_resultados_previsao?: string | null
           envio_resultados_status?: string | null
           envio_resultados_status_sla?: string | null
+          etapa_atual?: string | null
           flag_reagendamento?: boolean | null
           id?: string
           issue_text?: string | null
+          liberacao_data?: string | null
           lpr_data?: string | null
           lpr_n_amostras?: number | null
           lpr_status_sla?: string | null
@@ -319,6 +543,8 @@ export type Database = {
           ordem_servico_neogen?: number | null
           ordem_servico_ssgen: number
           prioridade?: string | null
+          received_at?: string | null
+          sla_days?: number | null
           updated_at?: string
           vri_data?: string | null
           vri_n_amostras?: number | null
@@ -328,6 +554,7 @@ export type Database = {
         Update: {
           cliente_lat?: number | null
           cliente_lon?: number | null
+          completed_at?: string | null
           cra_data?: string | null
           cra_status?: string | null
           created_at?: string
@@ -342,9 +569,11 @@ export type Database = {
           envio_resultados_previsao?: string | null
           envio_resultados_status?: string | null
           envio_resultados_status_sla?: string | null
+          etapa_atual?: string | null
           flag_reagendamento?: boolean | null
           id?: string
           issue_text?: string | null
+          liberacao_data?: string | null
           lpr_data?: string | null
           lpr_n_amostras?: number | null
           lpr_status_sla?: string | null
@@ -354,6 +583,8 @@ export type Database = {
           ordem_servico_neogen?: number | null
           ordem_servico_ssgen?: number
           prioridade?: string | null
+          received_at?: string | null
+          sla_days?: number | null
           updated_at?: string
           vri_data?: string | null
           vri_n_amostras?: number | null
@@ -516,6 +747,21 @@ export type Database = {
         }
         Relationships: []
       }
+      v_kpi_orders: {
+        Row: {
+          a_faturar: number | null
+          active_clients: number | null
+          avg_tat_days: number | null
+          closed_orders: number | null
+          concluidas_hoje: number | null
+          em_processamento: number | null
+          open_orders: number | null
+          sla_on_time_ratio: number | null
+          total_orders: number | null
+          total_samples: number | null
+        }
+        Relationships: []
+      }
       v_map_orders: {
         Row: {
           cliente: string | null
@@ -534,6 +780,44 @@ export type Database = {
           representante: string | null
           updated_at: string | null
           vri_status_sla: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_orders_ordem_servico_ssgen_fkey"
+            columns: ["ordem_servico_ssgen"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["ordem_servico_ssgen"]
+          },
+          {
+            foreignKeyName: "service_orders_ordem_servico_ssgen_fkey"
+            columns: ["ordem_servico_ssgen"]
+            isOneToOne: false
+            referencedRelation: "vw_orders_unified"
+            referencedColumns: ["ordem_servico_ssgen"]
+          },
+        ]
+      }
+      v_monthly_billing: {
+        Row: {
+          month: string | null
+          n_invoices: number | null
+          total_revenue: number | null
+        }
+        Relationships: []
+      }
+      v_orders_aging: {
+        Row: {
+          aging_days: number | null
+          cliente_nome: string | null
+          completed_at: string | null
+          etapa_atual: string | null
+          etapa_started_at: string | null
+          id: string | null
+          ordem_servico_ssgen: number | null
+          overdue: boolean | null
+          received_at: string | null
+          sla_days: number | null
         }
         Relationships: [
           {
@@ -828,6 +1112,7 @@ export type Database = {
           role: string
         }[]
       }
+      next_ordem_servico_ssgen: { Args: never; Returns: number }
     }
     Enums: {
       app_role: "ADM" | "GERENTE" | "REPRESENTANTE"

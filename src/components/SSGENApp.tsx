@@ -28,6 +28,8 @@ const SLAConfigPage = React.lazy(() => import('@/components/ssgen/pages/SLAConfi
 const TrackerDashboard = React.lazy(() => import('@/modules/tracker/pages/Dashboard'));
 const MapPage = React.lazy(() => import('@/modules/tracker/pages/MapPage'));
 const BillingPage = React.lazy(() => import('@/modules/billing/pages/BillingPage'));
+const NewDashboard = React.lazy(() => import('@/modules/dashboard/pages/NewDashboard'));
+const OrdersManagement = React.lazy(() => import('@/modules/orders/pages/OrdersManagement'));
 
 export default function SSGENTrackApp() {
   const navigate = useNavigate();
@@ -96,34 +98,16 @@ export default function SSGENTrackApp() {
 
   const renderContent = () => {
     if (current === 'dashboard') {
-      if (role === 'ADM')
-        return (
-          <React.Suspense fallback={<div>Carregando...</div>}>
-            <AdminDashboard rows={rowsFiltered} filters={filters} setFilters={setFilters} onOpen={openDetail} />
-          </React.Suspense>
-        );
-      if (role === 'GERENTE')
-        return (
-          <React.Suspense fallback={<div>Carregando...</div>}>
-            <ManagerDashboard rows={rowsFiltered} filters={filters} setFilters={setFilters} onOpen={openDetail} />
-          </React.Suspense>
-        );
       return (
         <React.Suspense fallback={<div>Carregando...</div>}>
-          <RepDashboard rows={rowsFiltered} filters={filters} setFilters={setFilters} onOpen={openDetail} />
+          <NewDashboard />
         </React.Suspense>
       );
     }
     if (current === 'ordens') {
       return (
         <React.Suspense fallback={<div>Carregando...</div>}>
-          <OrdersPage
-            onOpen={openDetail}
-            canEdit={role === 'ADM'}
-            canAttach={role === 'ADM'}
-            canFinance={role === 'ADM'}
-            userRole={role}
-          />
+          <OrdersManagement />
         </React.Suspense>
       );
     }
