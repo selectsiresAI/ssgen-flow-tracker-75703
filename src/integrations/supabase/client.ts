@@ -1,4 +1,8 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import {
+  createClient,
+  type SupabaseClient,
+  type SupabaseClientOptions,
+} from '@supabase/supabase-js';
 import type { Database } from './types';
 
 const readFromImportMeta = (key: string): string | undefined => {
@@ -20,29 +24,64 @@ const readFromGlobalThis = (key: string): string | undefined => {
 };
 
 const getEnvVar = (key: string): string | undefined => {
-  if (typeof process !== 'undefined' && typeof process.env !== 'undefined' && process.env[key]) {
-    return process.env[key];
+  if (typeof process !== 'undefined' && typeof process.env !== 'undefined') {
+    const value = process.env[key];
+    if (typeof value === 'string' && value.length > 0) {
+      return value;
+    }
   }
 
   const metaValue = readFromImportMeta(key);
-  if (metaValue) {
+  if (typeof metaValue === 'string' && metaValue.length > 0) {
     return metaValue;
   }
 
   const globalValue = readFromGlobalThis(key);
-  if (globalValue) {
+  if (typeof globalValue === 'string' && globalValue.length > 0) {
     return globalValue;
   }
 
   return undefined;
 };
 
-export const SUPABASE_URL = getEnvVar('NEXT_PUBLIC_SUPABASE_URL');
-export const SUPABASE_ANON_KEY = getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+const getFirstAvailableEnvVar = (keys: string[]): string | undefined => {
+  for (const key of keys) {
+    const value = getEnvVar(key);
+    if (value) {
+      return value;
+    }
+  }
+
+  return undefined;
+};
+
+const DEFAULT_SUPABASE_URL = 'https://cevsigsqiroeomtbrzpe.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNldnNpZ3NxaXJvZW9tdGJyenBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3MDU3NzQsImV4cCI6MjA3NzI4MTc3NH0.ONNsDNzS6e6gKXU7DoUyzmYlTU_n0VElOvpt914yGbE';
+
+export const SUPABASE_URL =
+  getFirstAvailableEnvVar([
+    'NEXT_PUBLIC_SUPABASE_URL',
+    'VITE_SUPABASE_URL',
+    'SUPABASE_URL',
+  ]) ?? DEFAULT_SUPABASE_URL;
+
+export const SUPABASE_ANON_KEY =
+  getFirstAvailableEnvVar([
+    'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+    'VITE_SUPABASE_ANON_KEY',
+    'SUPABASE_ANON_KEY',
+  ]) ?? DEFAULT_SUPABASE_ANON_KEY;
+
+const hasCustomSupabaseConfig =
+  SUPABASE_URL !== DEFAULT_SUPABASE_URL || SUPABASE_ANON_KEY !== DEFAULT_SUPABASE_ANON_KEY;
+
 export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+export const isUsingDefaultSupabaseConfig = !hasCustomSupabaseConfig;
 
 const createMissingConfigProxy = (): SupabaseClient<Database> => {
-  const message = 'Supabase não está configurado. Defina NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY no ambiente do projeto.';
+  const message =
+    'Supabase não está configurado. Defina NEXT_PUBLIC_SUPABASE_URL/NEXT_PUBLIC_SUPABASE_ANON_KEY ou VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY no ambiente do projeto.';
 
   const handler: ProxyHandler<any> = {
     get: () => proxy,
@@ -66,12 +105,19 @@ const createSupabaseClient = (): SupabaseClient<Database> => {
     return createMissingConfigProxy();
   }
 
-  return createClient<Database>(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
-    auth: {
-      storage: localStorage,
-      persistSession: true,
-      autoRefreshToken: true,
-    },
+  const hasBrowserStorage = typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
+
+  const authOptions: SupabaseClientOptions<Database>['auth'] = {
+    persistSession: hasBrowserStorage,
+    autoRefreshToken: hasBrowserStorage,
+  };
+
+  if (hasBrowserStorage) {
+    authOptions.storage = window.localStorage;
+  }
+
+  return createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: authOptions,
   });
 };
 
