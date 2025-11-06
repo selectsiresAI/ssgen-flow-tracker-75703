@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +15,10 @@ export default function AuthPage() {
   const [password, setPassword] = useState('');
 
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      return;
+    }
+
     // Verificar se usuário já está logado
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
@@ -30,7 +34,7 @@ export default function AuthPage() {
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, isSupabaseConfigured]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,6 +120,26 @@ export default function AuthPage() {
       setLoading(false);
     }
   };
+
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-primary/10 via-background to-secondary/10">
+        <Card className="w-full max-w-xl border-dashed">
+          <CardHeader>
+            <CardTitle className="text-center text-2xl font-bold">Configuração necessária</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm text-muted-foreground text-center">
+            <div>
+              Defina <code>NEXT_PUBLIC_SUPABASE_URL</code> e <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> no ambiente do projeto.
+            </div>
+            <div>
+              Suportados: <strong>process.env</strong>, <strong>import.meta.env</strong> ou <strong>globalThis</strong> (ex.: <code>window.NEXT_PUBLIC_SUPABASE_URL = "https://..."</code>).
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-4">
