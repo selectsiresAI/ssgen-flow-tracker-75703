@@ -31,3 +31,19 @@ export async function fetchUnifiedOrdersForDashboard() {
   }
   return data;
 }
+
+export async function persistStage(
+  orderId: string,
+  field: keyof PowerRow,
+  value: string | null,
+  userId?: string
+) {
+  const { error } = await supabase.rpc('update_order_stage', {
+    p_order_id: orderId,
+    p_field: field,
+    p_value: value,
+    p_user: userId ?? null
+  });
+
+  if (error) throw error;
+}

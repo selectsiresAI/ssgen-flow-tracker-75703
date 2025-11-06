@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -10,6 +10,7 @@ import { getProfile, fetchOrders } from '@/lib/ssgenClient';
 import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 import { Sidebar } from '@/components/ssgen/Sidebar';
 import ssgenLogo from '@/assets/ssgen-logo.png';
+import { EtapasRow } from '@/components/ssgen/shared/EtapasRow';
 
 const AdminDashboard = React.lazy(() => import('@/components/ssgen/dashboards/AdminDashboard'));
 const ManagerDashboard = React.lazy(() => import('@/components/ssgen/dashboards/ManagerDashboard'));
@@ -96,6 +97,16 @@ export default function SSGENTrackApp() {
   const [open,setOpen] = useState(false);
   const [detail,setDetail] = useState<PowerRow | UnifiedOrder | null>(null);
   const openDetail = (r: PowerRow | UnifiedOrder)=>{ setDetail(r); setOpen(true); };
+
+  const handleStageUpdate = useCallback((orderId: string, field: keyof PowerRow, value: string | null) => {
+    setRows((prev) => prev.map((row) => (row.id === orderId ? { ...row, [field]: value } : row)));
+    setDetail((prev) => {
+      if (prev && 'OS_SSGEN' in prev && prev.id === orderId) {
+        return { ...prev, [field]: value };
+      }
+      return prev;
+    });
+  }, []);
 
   const listClientes = useMemo(()=> Array.from(new Set(rowsFiltered.map(r=>r.CLIENTE))).sort() as string[], [rowsFiltered]);
   const listReps = useMemo(()=> Array.from(new Set(rowsFiltered.map(r=>r.REP))).sort() as string[], [rowsFiltered]);
@@ -366,6 +377,20 @@ export default function SSGENTrackApp() {
                     <Card><CardHeader><CardTitle>RESULT_SSG</CardTitle></CardHeader><CardContent>{detail.RESULT_SSG||'—'}<div className="text-xs text-muted-foreground">{fmt(detail.DT_RESULT_SSG)}</div></CardContent></Card>
                     <Card><CardHeader><CardTitle>FATURAMENTO</CardTitle></CardHeader><CardContent>{detail.FATUR_TIPO||'—'}<div className="text-xs text-muted-foreground">{fmt(detail.DT_FATUR_SSG)}</div></CardContent></Card>
                   </div>
+                  <Card className="mt-4">
+                    <CardHeader><CardTitle>Atualizar Etapas</CardTitle></CardHeader>
+                    <CardContent>
+                      <EtapasRow
+                        row={detail}
+                        profile={profile}
+                        onStageUpdate={(field, value) => {
+                          if (detail.id) {
+                            handleStageUpdate(detail.id, field, value);
+                          }
+                        }}
+                      />
+                    </CardContent>
+                  </Card>
                 </TabsContent>
                 <TabsContent value="neogen">
                   <div className="grid grid-cols-1 md:grid-cols-5 gap-3 text-sm">
