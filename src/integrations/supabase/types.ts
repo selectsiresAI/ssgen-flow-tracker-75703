@@ -1056,6 +1056,8 @@ export type Database = {
       vw_orders_unified: {
         Row: {
           client_created_at: string | null
+          cliente_lat: number | null
+          cliente_lon: number | null
           cliente_nome: string | null
           cliente_status: string | null
           codigo: number | null
@@ -1064,17 +1066,24 @@ export type Database = {
           cra_data: string | null
           cra_status: string | null
           data_cadastro: string | null
+          dt_faturamento: string | null
+          dt_receb_resultados: string | null
           envio_planilha_data: string | null
           envio_planilha_status: string | null
+          envio_planilha_status_sla: string | null
           envio_resultados_data: string | null
           envio_resultados_data_prova: string | null
           envio_resultados_ordem_id: number | null
           envio_resultados_previsao: string | null
           envio_resultados_status: string | null
+          envio_resultados_status_sla: string | null
+          flag_reagendamento: boolean | null
           id_conta_ssgen: number | null
           ie_rg: number | null
+          issue_text: string | null
           lpr_data: string | null
           lpr_n_amostras: number | null
+          lpr_status_sla: string | null
           nome_produto: string | null
           numero_amostras: number | null
           numero_nf_neogen: number | null
@@ -1082,10 +1091,14 @@ export type Database = {
           ordem_servico_neogen: number | null
           ordem_servico_ssgen: number | null
           order_created_at: string | null
+          order_updated_at: string | null
+          prioridade: string | null
           representante: string | null
           updated_at: string | null
           vri_data: string | null
           vri_n_amostras: number | null
+          vri_resolvido_data: string | null
+          vri_status_sla: string | null
         }
         Relationships: []
       }
