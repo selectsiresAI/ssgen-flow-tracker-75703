@@ -133,6 +133,7 @@ export type UnifiedOrder = Client & Omit<ServiceOrder, 'ordem_servico_ssgen' | '
   data_cadastro?: string;
   client_created_at?: string;
   order_created_at?: string;
+  order_updated_at?: string;
   updated_at?: string;
   cliente_lat?: number | null;
   cliente_lon?: number | null;
