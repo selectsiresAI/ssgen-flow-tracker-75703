@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import type { Profile, PowerRow, Role, UnifiedOrder } from '@/types/ssgen';
 import { fmt, isSet, slaBadge } from '@/types/ssgen';
 import { getProfile, fetchOrders } from '@/lib/ssgenClient';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 import { Sidebar } from '@/components/ssgen/Sidebar';
 import ssgenLogo from '@/assets/ssgen-logo.png';
 
@@ -38,9 +38,14 @@ export default function SSGENTrackApp() {
   const [rows,setRows] = useState<PowerRow[]>([]);
   const [current,setCurrent] = useState<string>('dashboard');
   const [filters,setFilters] = useState<any>({ q:'', coord:undefined, rep:undefined, cliente:undefined, produto:undefined });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(isSupabaseConfigured);
 
   useEffect(()=>{
+    if (!isSupabaseConfigured) {
+      setLoading(false);
+      return;
+    }
+
     // Verificar autenticação
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
@@ -72,7 +77,7 @@ export default function SSGENTrackApp() {
     });
 
     return () => subscription.unsubscribe();
-  },[navigate]);
+  },[navigate,isSupabaseConfigured]);
 
   const rowsFiltered = useMemo(()=>{
     const q = (filters.q||'').toLowerCase();
@@ -232,6 +237,27 @@ export default function SSGENTrackApp() {
     }
     return null;
   };
+
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-6">
+        <Card className="w-full max-w-xl border-dashed">
+          <CardHeader>
+            <CardTitle>Configuração necessária</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm text-muted-foreground">
+            <div>
+              Defina <code>NEXT_PUBLIC_SUPABASE_URL</code>/<code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> ou
+              <code>VITE_SUPABASE_URL</code>/<code>VITE_SUPABASE_ANON_KEY</code> no ambiente do projeto.
+            </div>
+            <div>
+              Suportados: <strong>process.env</strong>, <strong>import.meta.env</strong> ou <strong>globalThis</strong> (ex.: <code>window.NEXT_PUBLIC_SUPABASE_URL = "https://..."</code>).
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
