@@ -12,6 +12,7 @@ export async function fetchCoordenadores(): Promise<Coordenador[]> {
     .from('coordenadores')
     .select('*')
     .eq('ativo', true)
+    .is('deleted_at', null)
     .order('nome', { ascending: true });
   
   if (error) throw error;
@@ -44,7 +45,7 @@ export async function updateCoordenador(id: string, coord: Partial<Coordenador>)
 export async function deleteCoordenador(id: string): Promise<void> {
   const { error } = await supabase
     .from('coordenadores')
-    .delete()
+    .update({ deleted_at: new Date().toISOString() })
     .eq('id', id);
   
   if (error) throw error;

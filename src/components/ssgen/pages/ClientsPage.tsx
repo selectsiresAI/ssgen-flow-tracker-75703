@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Save, X } from 'lucide-react';
 import { HeaderBar } from '../shared/HeaderBar';
-import { fetchClients, createClient, updateClient } from '@/lib/clientsApi';
+import { fetchClients, createClient, updateClient, deleteClient } from '@/lib/clientsApi';
 import type { Client } from '@/types/ssgen';
 import { useToast } from '@/hooks/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -368,13 +368,36 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
                       <TableCell>{client.coordenador}</TableCell>
                       <TableCell>{client.status || '—'}</TableCell>
                       <TableCell>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(client)}
-                        >
-                          Editar
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(client)}
+                          >
+                            Editar
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={async () => {
+                              if (confirm('Tem certeza que deseja excluir este cliente?')) {
+                                try {
+                                  await deleteClient(client.ordem_servico_ssgen);
+                                  toast({ title: 'Cliente excluído com sucesso!' });
+                                  loadClients();
+                                } catch (error: any) {
+                                  toast({ 
+                                    title: 'Erro ao excluir cliente', 
+                                    description: error.message,
+                                    variant: 'destructive' 
+                                  });
+                                }
+                              }
+                            }}
+                          >
+                            Excluir
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))

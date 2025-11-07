@@ -12,6 +12,7 @@ export async function fetchRepresentantes(): Promise<Representante[]> {
     .from('representantes')
     .select('*')
     .eq('ativo', true)
+    .is('deleted_at', null)
     .order('nome', { ascending: true });
   
   if (error) throw error;
@@ -44,7 +45,7 @@ export async function updateRepresentante(id: string, rep: Partial<Representante
 export async function deleteRepresentante(id: string): Promise<void> {
   const { error } = await supabase
     .from('representantes')
-    .delete()
+    .update({ deleted_at: new Date().toISOString() })
     .eq('id', id);
   
   if (error) throw error;

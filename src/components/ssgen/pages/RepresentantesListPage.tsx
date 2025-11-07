@@ -2,16 +2,35 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { HeaderBar } from '../shared/HeaderBar';
-import { fetchRepresentantes } from '@/lib/representantesApi';
-import { Mail } from 'lucide-react';
+import { fetchRepresentantes, deleteRepresentante } from '@/lib/representantesApi';
+import { Mail, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 const RepresentantesListPage: React.FC = () => {
   const [query, setQuery] = useState('');
+  const { toast } = useToast();
 
-  const { data: representantes = [] } = useQuery({
+  const { data: representantes = [], refetch } = useQuery({
     queryKey: ['representantes'],
     queryFn: fetchRepresentantes,
   });
+
+  const handleDelete = async (id: string, nome: string) => {
+    if (confirm(`Tem certeza que deseja excluir ${nome}?`)) {
+      try {
+        await deleteRepresentante(id);
+        toast({ title: 'Representante excluído com sucesso!' });
+        refetch();
+      } catch (error: any) {
+        toast({ 
+          title: 'Erro ao excluir representante', 
+          description: error.message,
+          variant: 'destructive' 
+        });
+      }
+    }
+  };
 
   const filtered = representantes.filter((r) =>
     r.nome.toLowerCase().includes(query.toLowerCase())
@@ -23,9 +42,17 @@ const RepresentantesListPage: React.FC = () => {
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filtered.map((rep) => (
-          <Card key={rep.id} className="hover:shadow-lg transition-all hover:border-primary/50 cursor-pointer">
-            <CardHeader className="pb-3">
+          <Card key={rep.id} className="hover:shadow-lg transition-all hover:border-primary/50">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
               <CardTitle className="text-lg font-semibold">{rep.nome}</CardTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleDelete(rep.id, rep.nome)}
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
             </CardHeader>
             <CardContent className="space-y-2">
               {rep.email && (
