@@ -1,9 +1,35 @@
-import { RadialBar, RadialBarChart, PolarAngleAxis } from 'recharts';
+import { useEffect, useState } from 'react';
 
 export function GaugeSLA({ value = 0, label }: { value: number; label: string }) {
   const pct = Math.max(0, Math.min(100, value));
   const data = [{ name: 'SLA', value: pct }];
-  
+
+  const [RC, setRC] = useState<any | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    import('recharts')
+      .then((mod) => {
+        if (mounted) setRC(mod);
+      })
+      .catch((err) => console.error('Failed to load recharts:', err));
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  if (!RC) {
+    return (
+      <div className="bg-zenith-card rounded-2xl p-4 border border-zenith-navy/30">
+        <div className="text-zenith-gold mb-2 text-sm">{label}</div>
+        <div className="h-[140px] flex items-center justify-center text-zenith-gray">Carregando gráfico...</div>
+      </div>
+    );
+  }
+
+  const { RadialBar, RadialBarChart, PolarAngleAxis } = RC as any;
+
   return (
     <div className="bg-zenith-card rounded-2xl p-4 border border-zenith-navy/30">
       <div className="text-zenith-gold mb-2 text-sm">{label}</div>
