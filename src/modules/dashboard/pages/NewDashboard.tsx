@@ -1,18 +1,33 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Search, AlertCircle, TrendingUp, Users, Package, DollarSign, CheckCircle, Clock } from 'lucide-react';
 import { useKpiOrders, useOrdersAging, useMonthlyBillingView } from '@/hooks/useNewKpis';
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function NewDashboard() {
   const [search, setSearch] = useState('');
+  const [RC, setRC] = useState<any | null>(null);
   const { data: kpis, isLoading: loadingKpis } = useKpiOrders();
   const { data: aging = [], isLoading: loadingAging } = useOrdersAging();
   const { data: monthly = [], isLoading: loadingMonthly } = useMonthlyBillingView();
+
+  useEffect(() => {
+    let mounted = true;
+    import('recharts')
+      .then((mod) => {
+        if (mounted) setRC(mod);
+      })
+      .catch((err) => console.error('Failed to load recharts:', err));
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const charts = RC as any;
 
   const criticalOrders = useMemo(() => aging.filter(o => o.overdue), [aging]);
 
@@ -151,39 +166,47 @@ export default function NewDashboard() {
       <div className="grid lg:grid-cols-2 gap-4">
         <Card className="p-4">
           <h3 className="text-lg font-semibold mb-4">Evolução de Faturamento</h3>
-          {loadingMonthly ? (
+          {loadingMonthly || !RC ? (
             <Skeleton className="h-64" />
           ) : (
-            <ResponsiveContainer width="100%" height={250}>
-              <AreaChart data={monthly}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip formatter={(value: any) => `R$ ${Number(value).toFixed(2)}`} />
-                <Area type="monotone" dataKey="total_revenue" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.3} />
-              </AreaChart>
-            </ResponsiveContainer>
+            <charts.ResponsiveContainer width="100%" height={250}>
+              <charts.AreaChart data={monthly}>
+                <charts.CartesianGrid strokeDasharray="3 3" />
+                <charts.XAxis dataKey="month" />
+                <charts.YAxis />
+                <charts.Tooltip formatter={(value: any) => `R$ ${Number(value).toFixed(2)}`} />
+                <charts.Area
+                  type="monotone"
+                  dataKey="total_revenue"
+                  stroke="hsl(var(--primary))"
+                  fill="hsl(var(--primary))"
+                  fillOpacity={0.3}
+                />
+              </charts.AreaChart>
+            </charts.ResponsiveContainer>
           )}
         </Card>
 
         <Card className="p-4">
           <h3 className="text-lg font-semibold mb-4">Abertas vs Concluídas</h3>
-          {loadingKpis ? (
+          {loadingKpis || !RC ? (
             <Skeleton className="h-64" />
           ) : (
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={[
-                { name: 'Status', Abertas: kpis?.open_orders ?? 0, Concluídas: kpis?.closed_orders ?? 0 }
-              ]}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="Abertas" fill="hsl(var(--primary))" />
-                <Bar dataKey="Concluídas" fill="hsl(var(--chart-2))" />
-              </BarChart>
-            </ResponsiveContainer>
+            <charts.ResponsiveContainer width="100%" height={250}>
+              <charts.BarChart
+                data={[
+                  { name: 'Status', Abertas: kpis?.open_orders ?? 0, Concluídas: kpis?.closed_orders ?? 0 }
+                ]}
+              >
+                <charts.CartesianGrid strokeDasharray="3 3" />
+                <charts.XAxis dataKey="name" />
+                <charts.YAxis />
+                <charts.Tooltip />
+                <charts.Legend />
+                <charts.Bar dataKey="Abertas" fill="hsl(var(--primary))" />
+                <charts.Bar dataKey="Concluídas" fill="hsl(var(--chart-2))" />
+              </charts.BarChart>
+            </charts.ResponsiveContainer>
           )}
         </Card>
       </div>
