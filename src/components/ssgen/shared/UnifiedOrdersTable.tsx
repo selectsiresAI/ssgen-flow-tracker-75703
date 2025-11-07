@@ -76,13 +76,15 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
               <th className="p-2 text-left border">Env. Result. Data</th>
               <th className="p-2 text-left border">Env. Result. Status</th>
               <th className="p-2 text-left border">Env. Result. SLA</th>
+              <th className="p-2 text-left border">Receb. Result. Data</th>
+              <th className="p-2 text-left border">Faturamento Data</th>
               <th className="p-2 text-left border">Ações</th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={30} className="p-4 text-center text-muted-foreground">
+                <td colSpan={32} className="p-4 text-center text-muted-foreground">
                   Nenhuma ordem encontrada
                 </td>
               </tr>
@@ -245,6 +247,22 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   </td>
                   <td className="p-2 border">
                     <SLABadge status={row.envio_resultados_status_sla} />
+                  </td>
+                  <td className="p-2 border">
+                    <EditableCell
+                      value={row.dt_receb_resultados}
+                      onSave={(v) => handleCellUpdate(row.ordem_id, 'dt_receb_resultados', v)}
+                      isEditable={isAdmin}
+                      type="date"
+                    />
+                  </td>
+                  <td className="p-2 border">
+                    <EditableCell
+                      value={row.dt_faturamento}
+                      onSave={(v) => handleCellUpdate(row.ordem_id, 'dt_faturamento', v)}
+                      isEditable={isAdmin}
+                      type="date"
+                    />
                   </td>
                   <td className="p-2 border">
                     <Button
