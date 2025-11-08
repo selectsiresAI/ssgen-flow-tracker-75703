@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { ServiceOrder, UnifiedOrder } from '@/types/ssgen';
+import { requireAdmin } from '@/lib/ssgenClient';
 
 export async function fetchUnifiedOrders(): Promise<UnifiedOrder[]> {
   const { data, error } = await supabase
@@ -15,6 +16,7 @@ export async function fetchUnifiedOrders(): Promise<UnifiedOrder[]> {
 }
 
 export async function createServiceOrder(order: Omit<ServiceOrder, 'id' | 'created_at' | 'updated_at'>) {
+  await requireAdmin();
   const { data, error } = await supabase
     .from('service_orders')
     .insert([order])
@@ -26,10 +28,12 @@ export async function createServiceOrder(order: Omit<ServiceOrder, 'id' | 'creat
 }
 
 export async function updateServiceOrder(id: string, updates: Partial<ServiceOrder>) {
+  await requireAdmin();
   const { data, error } = await supabase
     .from('service_orders')
     .update(updates)
     .eq('id', id)
+    .is('deleted_at', null)
     .select()
     .single();
   
@@ -38,10 +42,12 @@ export async function updateServiceOrder(id: string, updates: Partial<ServiceOrd
 }
 
 export async function deleteServiceOrder(id: string) {
+  await requireAdmin();
   const { error } = await supabase
     .from('service_orders')
-    .delete()
-    .eq('id', id);
-  
+    .update({ deleted_at: new Date().toISOString() } as Partial<ServiceOrder> & { deleted_at: string })
+    .eq('id', id)
+    .is('deleted_at', null);
+
   if (error) throw error;
 }

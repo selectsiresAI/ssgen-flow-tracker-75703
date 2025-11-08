@@ -45,6 +45,10 @@ export type PowerRow = {
   NF_NA_NEOGEN?: string | null;
   created_at?: string;
   updated_at?: string;
+  prioridade?: string | null;
+  flag_reagendamento?: boolean | null;
+  issue_text?: string | null;
+  source_table?: string | null;
 };
 
 export const isSet = (v: any) => v !== null && v !== undefined && v !== '';
@@ -121,9 +125,10 @@ export type ServiceOrder = {
   envio_resultados_status?: string | null;
   envio_resultados_data_prova?: string | null;
   envio_resultados_status_sla?: string | null;
-  
+
   created_at?: string;
   updated_at?: string;
+  deleted_at?: string | null;
 };
 
 export type UnifiedOrder = Client & Omit<ServiceOrder, 'ordem_servico_ssgen' | 'ordem_servico_neogen' | 'created_at' | 'updated_at'> & {
@@ -142,6 +147,7 @@ export type UnifiedOrder = Client & Omit<ServiceOrder, 'ordem_servico_ssgen' | '
   issue_text?: string | null;
   dt_faturamento?: string | null;
   dt_receb_resultados?: string | null;
+  source_table?: string | null;
 };
 
 export type TeamLocation = {

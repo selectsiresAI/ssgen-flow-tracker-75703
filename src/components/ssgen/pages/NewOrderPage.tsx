@@ -7,6 +7,7 @@ import { Save } from 'lucide-react';
 import { HeaderBar } from '../shared/HeaderBar';
 import { fetchClients } from '@/lib/clientsApi';
 import { createServiceOrder } from '@/lib/serviceOrdersApi';
+import { getProfile } from '@/lib/ssgenClient';
 import type { Client } from '@/types/ssgen';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -16,6 +17,8 @@ const NewOrderPage: React.FC = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const { toast } = useToast();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [profileChecked, setProfileChecked] = useState(false);
 
   const [formData, setFormData] = useState({
     // Dados básicos
@@ -52,19 +55,32 @@ const NewOrderPage: React.FC = () => {
   });
 
   useEffect(() => {
-    loadClients();
+    const loadInitialData = async () => {
+      const profile = await getProfile();
+      const admin = profile?.role === 'ADM';
+      setIsAdmin(admin);
+      if (admin) {
+        const data = await fetchClients();
+        setClients(data);
+      }
+      setProfileChecked(true);
+    };
+    loadInitialData();
   }, []);
-
-  const loadClients = async () => {
-    const data = await fetchClients();
-    setClients(data);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) {
+      toast({
+        title: 'Acesso negado',
+        description: 'Apenas administradores podem cadastrar ordens.',
+        variant: 'destructive',
+      });
+      return;
+    }
     if (!selectedClient) {
-      toast({ 
-        title: 'Erro', 
+      toast({
+        title: 'Erro',
         description: 'Selecione um cliente',
         variant: 'destructive' 
       });
@@ -134,6 +150,23 @@ const NewOrderPage: React.FC = () => {
       });
     }
   };
+
+  if (!profileChecked) {
+    return <div className="flex items-center justify-center p-8 text-muted-foreground">Carregando...</div>;
+  }
+
+  if (!isAdmin) {
+    return (
+      <Card className="border-dashed">
+        <CardHeader>
+          <CardTitle>Acesso restrito</CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm text-muted-foreground">
+          Apenas administradores podem cadastrar novas ordens de serviço.
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-4">

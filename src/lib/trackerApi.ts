@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { TeamLocation, MapOrder, TrackerTimeline, TrackerKPI } from '@/types/ssgen';
+import { requireAdmin } from '@/lib/ssgenClient';
 
 export async function fetchMapOrders(): Promise<MapOrder[]> {
   const { data, error } = await supabase
@@ -96,40 +97,48 @@ export async function upsertTeamLocation(
 }
 
 export async function updateOrderPriority(
-  orderId: string, 
+  orderId: string,
   prioridade: 'alta' | 'media' | 'baixa'
 ) {
+  await requireAdmin();
   const { error } = await supabase
     .from('service_orders')
     .update({ prioridade } as any)
-    .eq('id', orderId);
-  
+    .eq('id', orderId)
+    .is('deleted_at', null);
+
   if (error) throw error;
 }
 
 export async function toggleReagendamento(orderId: string, flag: boolean) {
+  await requireAdmin();
   const { error } = await supabase
     .from('service_orders')
     .update({ flag_reagendamento: flag } as any)
-    .eq('id', orderId);
-  
+    .eq('id', orderId)
+    .is('deleted_at', null);
+
   if (error) throw error;
 }
 
 export async function updateIssueText(orderId: string, issueText: string) {
+  await requireAdmin();
   const { error } = await supabase
     .from('service_orders')
     .update({ issue_text: issueText } as any)
-    .eq('id', orderId);
-  
+    .eq('id', orderId)
+    .is('deleted_at', null);
+
   if (error) throw error;
 }
 
 export async function deleteServiceOrder(orderId: string) {
+  await requireAdmin();
   const { error } = await supabase
     .from('service_orders')
-    .delete()
-    .eq('id', orderId);
-  
+    .update({ deleted_at: new Date().toISOString() } as any)
+    .eq('id', orderId)
+    .is('deleted_at', null);
+
   if (error) throw error;
 }

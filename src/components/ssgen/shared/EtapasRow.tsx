@@ -27,14 +27,15 @@ interface EtapasRowProps {
 }
 
 export const EtapasRow: React.FC<EtapasRowProps> = ({ row, profile, onStageUpdate }) => {
-  const canEdit = Boolean(row.id);
+  const isAdmin = profile?.role === 'ADM';
+  const canEdit = Boolean(row.id) && isAdmin;
 
   const handlePersist = async (field: keyof PowerRow, value: string | null) => {
     if (!row.id) {
       throw new Error('ID da ordem não encontrado');
     }
 
-    await persistStage(row.id, field, value, profile?.id);
+    await persistStage(row.id, field, value, profile?.id, row[field] as string | null);
     onStageUpdate?.(field, value);
   };
 
@@ -66,7 +67,9 @@ export const EtapasRow: React.FC<EtapasRowProps> = ({ row, profile, onStageUpdat
 
       {!canEdit && (
         <div className="text-xs text-muted-foreground">
-          Não é possível editar as datas porque o identificador da ordem não está disponível.
+          {row.id
+            ? 'Apenas administradores podem editar as etapas das ordens.'
+            : 'Não é possível editar as datas porque o identificador da ordem não está disponível.'}
         </div>
       )}
     </div>

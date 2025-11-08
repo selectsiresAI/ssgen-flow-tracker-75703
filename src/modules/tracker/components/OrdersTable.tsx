@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { TrackerTimeline } from '@/types/ssgen';
 import { useDeleteOrder } from '../hooks/useTrackerData';
 import { Button } from '@/components/ui/button';
@@ -15,14 +15,30 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { OrderTimer } from './OrderTimer';
+import { getProfile } from '@/lib/ssgenClient';
 
 export function OrdersTable({ rows }: { rows: TrackerTimeline[] }) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const deleteMutation = useDeleteOrder();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      const profile = await getProfile();
+      setIsAdmin(profile?.role === 'ADM');
+    };
+    loadProfile();
+  }, []);
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    
+
+    if (!isAdmin) {
+      toast.error('Apenas administradores podem remover ordens.');
+      setDeleteId(null);
+      return;
+    }
+
     try {
       await deleteMutation.mutateAsync(deleteId);
       toast.success('Ordem removida com sucesso');
@@ -30,6 +46,14 @@ export function OrdersTable({ rows }: { rows: TrackerTimeline[] }) {
     } catch (error) {
       toast.error('Erro ao remover ordem');
     }
+  };
+
+  const handleOpenDelete = (id: string) => {
+    if (!isAdmin) {
+      toast.error('Apenas administradores podem remover ordens.');
+      return;
+    }
+    setDeleteId(id);
   };
 
   return (
@@ -91,8 +115,9 @@ export function OrdersTable({ rows }: { rows: TrackerTimeline[] }) {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setDeleteId(r.id)}
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => handleOpenDelete(r.id)}
+                        disabled={!isAdmin}
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 disabled:opacity-50 disabled:hover:bg-transparent"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -115,7 +140,7 @@ export function OrdersTable({ rows }: { rows: TrackerTimeline[] }) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90" disabled={!isAdmin}>
               Remover
             </AlertDialogAction>
           </AlertDialogFooter>
