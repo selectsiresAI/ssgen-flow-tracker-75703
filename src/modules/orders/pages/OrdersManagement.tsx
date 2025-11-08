@@ -23,34 +23,7 @@ import { deleteServiceOrder } from '@/lib/trackerApi';
 import { logOrderChange } from '@/lib/orderAuditApi';
 import { fetchOrders as fetchUnifiedOrderRows, getProfile, POWER_ROW_TO_SERVICE_ORDER_FIELD } from '@/lib/ssgenClient';
 import type { Database } from '@/integrations/supabase/types';
-
-interface PowerRow {
-  id?: string;
-  OS_SSGEN: string;
-  CLIENTE?: string | null;
-  COORD?: string | null;
-  REP?: string | null;
-  PROD_SSG?: string | null;
-  N_AMOSTRAS_SSG?: number | null;
-  DT_SSGEN_OS?: string | null;
-  DT_PREV_RESULT_SSG?: string | null;
-  RESULT_SSG?: string | null;
-  DT_RESULT_SSG?: string | null;
-  FATUR_TIPO?: string | null;
-  FATUR_SSG?: number | null;
-  DT_FATUR_SSG?: string | null;
-  OS_NEOGEN?: string | null;
-  PLAN_NEOGEN?: string | null;
-  DT_CRA?: string | null;
-  DT_PLAN_NEOGEN?: string | null;
-  DT_VRI?: string | null;
-  DT_LPR?: string | null;
-  DT_LR?: string | null;
-  N_VRI?: number | null;
-  N_LPR?: number | null;
-  N_LR?: number | null;
-  LR_RASTREIO?: string | null;
-}
+import type { PowerRow } from '@/types/ssgen';
 
 type ServiceOrderColumn = keyof Database['public']['Tables']['service_orders']['Row'];
 
