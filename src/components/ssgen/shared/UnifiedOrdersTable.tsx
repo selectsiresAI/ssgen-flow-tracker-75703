@@ -6,8 +6,20 @@ import { fmt } from '@/types/ssgen';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { EditableCell } from './EditableCell';
 import { SLABadge } from './SLABadge';
-import { updateServiceOrder } from '@/lib/serviceOrdersApi';
+import { deleteServiceOrder, updateServiceOrder } from '@/lib/serviceOrdersApi';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Trash2 } from 'lucide-react';
 
 interface UnifiedOrdersTableProps {
   rows: UnifiedOrder[];
@@ -37,6 +49,23 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
     } catch (error) {
       console.error('Error updating field:', error);
       toast.error('Erro ao atualizar campo');
+      throw error;
+    }
+  };
+
+  const handleDeleteOrder = async (orderId: string | undefined) => {
+    if (!orderId) {
+      toast.error('ID da ordem não encontrado');
+      return;
+    }
+
+    try {
+      await deleteServiceOrder(orderId);
+      toast.success('Ordem apagada com sucesso');
+      onUpdate?.();
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      toast.error('Erro ao apagar ordem');
       throw error;
     }
   };
@@ -265,13 +294,40 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                     />
                   </td>
                   <td className="p-2 border">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onOpen(row)}
-                    >
-                      Detalhes
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onOpen(row)}
+                      >
+                        Detalhes
+                      </Button>
+                      {isAdmin && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="destructive" size="sm" className="gap-1">
+                              <Trash2 className="h-4 w-4" />
+                              Apagar
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Apagar ordem</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta ação não pode ser desfeita. Tem certeza que deseja remover a ordem
+                                {` ${row.ordem_servico_ssgen ?? ''}`} do sistema?
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteOrder(row.ordem_id)}>
+                                Confirmar
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))
