@@ -51,17 +51,16 @@ interface PowerRow {
 
 type StageConfig = {
   view: keyof PowerRow;
-  rpc: string;
 };
 
 const fieldMap: Record<string, StageConfig> = {
-  CRA: { view: 'DT_CRA', rpc: 'dt_cra' },
-  PLANILHA: { view: 'DT_PLAN_NEOGEN', rpc: 'dt_plan_neogen' },
-  VRI: { view: 'DT_VRI', rpc: 'dt_vri' },
-  LPR: { view: 'DT_LPR', rpc: 'dt_lpr' },
-  LR: { view: 'DT_LR', rpc: 'dt_lr' },
-  RESULTADOS: { view: 'DT_RESULT_SSG', rpc: 'dt_result_ssg' },
-  FATURAR: { view: 'DT_FATUR_SSG', rpc: 'dt_fatur_ssg' },
+  CRA: { view: 'DT_CRA' },
+  PLANILHA: { view: 'DT_PLAN_NEOGEN' },
+  VRI: { view: 'DT_VRI' },
+  LPR: { view: 'DT_LPR' },
+  LR: { view: 'DT_LR' },
+  RESULTADOS: { view: 'DT_RESULT_SSG' },
+  FATURAR: { view: 'DT_FATUR_SSG' },
 };
 
 type StageKey = keyof typeof fieldMap;
@@ -89,26 +88,22 @@ async function getCurrentUserId(): Promise<string | null> {
   }
 }
 
-async function rpcUpdateById(orderId: string, rpcField: string, value: string | null) {
-  const userId = await getCurrentUserId();
-  const { error } = await supabase.rpc('update_order_stage', {
-    p_order_id: orderId,
-    p_field: rpcField,
-    p_value: value,
-    p_user: userId,
-  });
+async function updateOrderById(orderId: string, field: string, value: string | null) {
+  const { error } = await supabase
+    .from('orders')
+    .update({ [field]: value })
+    .eq('id', orderId);
 
   if (error) {
     throw error;
   }
 }
 
-async function rpcFallbackByCode(os_ssgen: string, viewField: string, value: string | null) {
-  const { error } = await supabase.rpc('update_order_date', {
-    p_os_ssgen: os_ssgen,
-    p_field: viewField,
-    p_value: value,
-  });
+async function updateOrderByCode(os_ssgen: string, field: string, value: string | null) {
+  const { error } = await supabase
+    .from('orders')
+    .update({ [field]: value })
+    .eq('os_ssgen', os_ssgen);
 
   if (error) {
     throw error;
@@ -126,7 +121,7 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete }) => {
   const [errorStage, setErrorStage] = useState<StageKey | null>(null);
 
   const persistField = async (label: StageKey, value: string | null) => {
-    const { view, rpc } = fieldMap[label];
+    const { view } = fieldMap[label];
     const updated = { ...row, [view]: value } as PowerRow;
     onChange(updated);
     setSaving(label);
@@ -134,9 +129,9 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete }) => {
 
     try {
       if (row.id) {
-        await rpcUpdateById(row.id, rpc, value);
+        await updateOrderById(row.id, String(view).toLowerCase(), value);
       } else {
-        await rpcFallbackByCode(row.OS_SSGEN, String(view), value);
+        await updateOrderByCode(row.OS_SSGEN, String(view).toLowerCase(), value);
       }
     } catch (error) {
       console.error(`Erro ao salvar etapa ${label}`, error);
