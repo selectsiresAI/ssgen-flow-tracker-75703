@@ -313,6 +313,7 @@ export async function importServiceOrders(orders: any[]): Promise<ImportResult> 
         .from('service_orders')
         .select('id')
         .eq('ordem_servico_ssgen', order.ordem_servico_ssgen)
+        .is('deleted_at', null)
         .maybeSingle();
 
       if (existing) {
@@ -320,7 +321,8 @@ export async function importServiceOrders(orders: any[]): Promise<ImportResult> 
         const { error } = await supabase
           .from('service_orders')
           .update(order)
-          .eq('ordem_servico_ssgen', order.ordem_servico_ssgen);
+          .eq('ordem_servico_ssgen', order.ordem_servico_ssgen)
+          .is('deleted_at', null);
 
         if (error) throw error;
       } else {

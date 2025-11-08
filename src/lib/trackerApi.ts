@@ -102,7 +102,8 @@ export async function updateOrderPriority(
   const { error } = await supabase
     .from('service_orders')
     .update({ prioridade } as any)
-    .eq('id', orderId);
+    .eq('id', orderId)
+    .is('deleted_at', null);
   
   if (error) throw error;
 }
@@ -111,7 +112,8 @@ export async function toggleReagendamento(orderId: string, flag: boolean) {
   const { error } = await supabase
     .from('service_orders')
     .update({ flag_reagendamento: flag } as any)
-    .eq('id', orderId);
+    .eq('id', orderId)
+    .is('deleted_at', null);
   
   if (error) throw error;
 }
@@ -120,16 +122,43 @@ export async function updateIssueText(orderId: string, issueText: string) {
   const { error } = await supabase
     .from('service_orders')
     .update({ issue_text: issueText } as any)
-    .eq('id', orderId);
+    .eq('id', orderId)
+    .is('deleted_at', null);
   
   if (error) throw error;
 }
 
 export async function deleteServiceOrder(orderId: string) {
-  const { error } = await supabase
+  const deletedAt = new Date().toISOString();
+
+  const { data: deletedServiceOrder, error: serviceOrderError } = await supabase
     .from('service_orders')
-    .delete()
-    .eq('id', orderId);
-  
-  if (error) throw error;
+    .update({ deleted_at: deletedAt } as any)
+    .eq('id', orderId)
+    .is('deleted_at', null)
+    .select('id, ordem_servico_ssgen')
+    .maybeSingle();
+
+  if (serviceOrderError) throw serviceOrderError;
+
+  if (deletedServiceOrder?.ordem_servico_ssgen) {
+    const { error: orderByOsError } = await supabase
+      .from('orders')
+      .update({ deleted_at: deletedAt } as any)
+      .eq('os_ssgen', String(deletedServiceOrder.ordem_servico_ssgen))
+      .is('deleted_at', null);
+
+    if (orderByOsError) throw orderByOsError;
+    return;
+  }
+
+  if (deletedServiceOrder) return;
+
+  const { error: orderError } = await supabase
+    .from('orders')
+    .update({ deleted_at: deletedAt } as any)
+    .eq('id', orderId)
+    .is('deleted_at', null);
+
+  if (orderError) throw orderError;
 }

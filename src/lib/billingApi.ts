@@ -115,7 +115,8 @@ export async function invoiceOrder(orderId: string, dt_faturamento: string): Pro
   const { error } = await supabase
     .from('service_orders')
     .update({ dt_faturamento } as any)
-    .eq('id', orderId);
+    .eq('id', orderId)
+    .is('deleted_at', null);
   
   if (error) throw error;
 }

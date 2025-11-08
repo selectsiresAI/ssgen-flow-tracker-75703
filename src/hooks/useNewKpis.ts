@@ -194,7 +194,8 @@ export function useUpdateOrderStage() {
       const { error: updateError } = await supabase
         .from('service_orders')
         .update(updates)
-        .eq('id', orderId);
+        .eq('id', orderId)
+        .is('deleted_at', null);
       
       if (updateError) throw updateError;
       
