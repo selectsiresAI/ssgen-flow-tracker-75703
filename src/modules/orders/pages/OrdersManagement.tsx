@@ -21,7 +21,8 @@ import ImportDialog from '@/components/ssgen/import/ImportDialog';
 import { HeaderBar } from '@/components/ssgen/shared/HeaderBar';
 import { deleteServiceOrder } from '@/lib/trackerApi';
 import { logOrderChange } from '@/lib/orderAuditApi';
-import { getProfile } from '@/lib/ssgenClient';
+import { getProfile, POWER_ROW_TO_SERVICE_ORDER_FIELD } from '@/lib/ssgenClient';
+import type { Database } from '@/integrations/supabase/types';
 
 interface PowerRow {
   id?: string;
@@ -51,18 +52,21 @@ interface PowerRow {
   LR_RASTREIO?: string | null;
 }
 
+type ServiceOrderColumn = keyof Database['public']['Tables']['service_orders']['Row'];
+
 type StageConfig = {
   view: keyof PowerRow;
+  column?: ServiceOrderColumn;
 };
 
 const fieldMap: Record<string, StageConfig> = {
-  CRA: { view: 'DT_CRA' },
-  PLANILHA: { view: 'DT_PLAN_NEOGEN' },
-  VRI: { view: 'DT_VRI' },
-  LPR: { view: 'DT_LPR' },
-  LR: { view: 'DT_LR' },
-  RESULTADOS: { view: 'DT_RESULT_SSG' },
-  FATURAR: { view: 'DT_FATUR_SSG' },
+  CRA: { view: 'DT_CRA', column: POWER_ROW_TO_SERVICE_ORDER_FIELD.DT_CRA },
+  PLANILHA: { view: 'DT_PLAN_NEOGEN', column: POWER_ROW_TO_SERVICE_ORDER_FIELD.DT_PLAN_NEOGEN },
+  VRI: { view: 'DT_VRI', column: POWER_ROW_TO_SERVICE_ORDER_FIELD.DT_VRI },
+  LPR: { view: 'DT_LPR', column: POWER_ROW_TO_SERVICE_ORDER_FIELD.DT_LPR },
+  LR: { view: 'DT_LR', column: POWER_ROW_TO_SERVICE_ORDER_FIELD.DT_LR },
+  RESULTADOS: { view: 'DT_RESULT_SSG', column: POWER_ROW_TO_SERVICE_ORDER_FIELD.DT_RESULT_SSG },
+  FATURAR: { view: 'DT_FATUR_SSG', column: POWER_ROW_TO_SERVICE_ORDER_FIELD.DT_FATUR_SSG },
 };
 
 type StageKey = keyof typeof fieldMap;
@@ -90,10 +94,15 @@ async function getCurrentUserId(): Promise<string | null> {
   }
 }
 
-async function updateOrderById(orderId: string, field: string, oldValue: string | null, value: string | null) {
+async function updateOrderById(
+  orderId: string,
+  column: ServiceOrderColumn,
+  oldValue: string | null,
+  value: string | null
+) {
   const { error } = await supabase
-    .from('orders')
-    .update({ [field]: value })
+    .from('service_orders')
+    .update({ [column]: value })
     .eq('id', orderId);
 
   if (error) {
@@ -103,17 +112,22 @@ async function updateOrderById(orderId: string, field: string, oldValue: string 
   // Log audit trail
   await logOrderChange({
     order_id: orderId,
-    field_name: field,
+    field_name: column,
     old_value: oldValue,
     new_value: value,
   });
 }
 
-async function updateOrderByCode(os_ssgen: string, field: string, oldValue: string | null, value: string | null) {
+async function updateOrderByCode(
+  os_ssgen: number,
+  column: ServiceOrderColumn,
+  oldValue: string | null,
+  value: string | null
+) {
   const { error } = await supabase
-    .from('orders')
-    .update({ [field]: value })
-    .eq('os_ssgen', os_ssgen);
+    .from('service_orders')
+    .update({ [column]: value })
+    .eq('ordem_servico_ssgen', os_ssgen);
 
   if (error) {
     throw error;
@@ -122,7 +136,7 @@ async function updateOrderByCode(os_ssgen: string, field: string, oldValue: stri
   // Log audit trail
   await logOrderChange({
     ordem_servico_ssgen: os_ssgen,
-    field_name: field,
+    field_name: column,
     old_value: oldValue,
     new_value: value,
   });
@@ -145,7 +159,13 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin 
       return;
     }
 
-    const { view } = fieldMap[label];
+    const { view, column } = fieldMap[label];
+
+    if (!column) {
+      toast.error('Campo não configurado para atualização.');
+      return;
+    }
+
     const oldValue = row[view] as string | null;
     const updated = { ...row, [view]: value } as PowerRow;
     onChange(updated);
@@ -154,9 +174,17 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin 
 
     try {
       if (row.id) {
-        await updateOrderById(row.id, String(view).toLowerCase(), oldValue, value);
+        await updateOrderById(row.id, column, oldValue, value);
       } else {
-        await updateOrderByCode(row.OS_SSGEN, String(view).toLowerCase(), oldValue, value);
+        const osValue = typeof row.OS_SSGEN === 'number'
+          ? row.OS_SSGEN
+          : Number.parseInt(row.OS_SSGEN ?? '', 10);
+
+        if (!Number.isFinite(osValue)) {
+          throw new Error('Número da ordem inválido para atualização.');
+        }
+
+        await updateOrderByCode(osValue, column, oldValue, value);
       }
       toast.success(`Etapa ${label} atualizada com sucesso.`);
     } catch (error) {
@@ -253,7 +281,12 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin 
       <td className="p-3">
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm" className="gap-1" disabled={!row.id}>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="gap-1"
+              disabled={!row.id || !isAdmin}
+            >
               <Trash2 className="h-4 w-4" />
               <span className="hidden 2xl:inline">Apagar</span>
             </Button>
@@ -312,6 +345,11 @@ const OrdersManagement: React.FC = () => {
   }, [query, rows]);
 
   const handleDeleteRow = async (row: PowerRow) => {
+    if (!isAdmin) {
+      toast.error('Apenas administradores podem apagar ordens.');
+      return;
+    }
+
     if (!row.id) {
       toast.error('Não é possível apagar esta ordem porque o ID não foi encontrado.');
       return;
@@ -332,9 +370,11 @@ const OrdersManagement: React.FC = () => {
   return (
     <div className="space-y-4 p-6">
       <HeaderBar title="Gestão de Ordens" query={query} setQuery={setQuery}>
-        <Button variant="outline" className="gap-2" onClick={() => setImportOpen(true)}>
-          <Upload className="w-4 h-4" /> Importar Excel
-        </Button>
+        {isAdmin && (
+          <Button variant="outline" className="gap-2" onClick={() => setImportOpen(true)}>
+            <Upload className="w-4 h-4" /> Importar Excel
+          </Button>
+        )}
       </HeaderBar>
 
       <div className="overflow-x-auto rounded-xl border">
