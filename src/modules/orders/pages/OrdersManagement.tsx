@@ -345,7 +345,8 @@ const OrdersManagement: React.FC = () => {
     }
 
     try {
-      await deleteServiceOrder(row.id);
+      const sourceTable = row.source_table === 'orders' ? 'orders' : 'service_orders';
+      await deleteServiceOrder(row.id, sourceTable);
       setRows((prev) =>
         prev.filter((item) => (item.id ?? item.OS_SSGEN) !== (row.id ?? row.OS_SSGEN)),
       );

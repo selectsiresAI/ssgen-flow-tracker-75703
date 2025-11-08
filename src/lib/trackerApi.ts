@@ -132,10 +132,16 @@ export async function updateIssueText(orderId: string, issueText: string) {
   if (error) throw error;
 }
 
-export async function deleteServiceOrder(orderId: string) {
+export async function deleteServiceOrder(
+  orderId: string,
+  source: 'service_orders' | 'orders' = 'service_orders',
+) {
   await requireAdmin();
+
+  const table = source === 'orders' ? 'orders' : 'service_orders';
+
   const { error } = await supabase
-    .from('service_orders')
+    .from(table)
     .update({ deleted_at: new Date().toISOString() } as any)
     .eq('id', orderId)
     .is('deleted_at', null);
