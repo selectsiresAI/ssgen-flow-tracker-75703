@@ -184,6 +184,7 @@ export type TrackerTimeline = {
   prioridade?: string | null;
   flag_reagendamento?: boolean;
   issue_text?: string | null;
+  source_table?: string | null;
   etapa1_cra_data?: string | null;
   etapa2_envio_planilha_data?: string | null;
   etapa3_vri_data?: string | null;

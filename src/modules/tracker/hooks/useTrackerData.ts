@@ -54,10 +54,16 @@ export function useUpdatePriority() {
   });
 }
 
+type DeleteOrderInput = {
+  orderId: string;
+  sourceTable?: 'service_orders' | 'orders';
+};
+
 export function useDeleteOrder() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (orderId: string) => deleteServiceOrder(orderId),
+    mutationFn: ({ orderId, sourceTable }: DeleteOrderInput) =>
+      deleteServiceOrder(orderId, sourceTable),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tracker_timelines'] });
       queryClient.invalidateQueries({ queryKey: ['tracker_map_orders'] });
