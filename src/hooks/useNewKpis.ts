@@ -36,15 +36,55 @@ export interface MonthlyBilling {
 
 export function useKpiOrders() {
   return useQuery({
-    queryKey: ['v_kpi_orders'],
+    queryKey: ['kpi_orders_unified'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('v_kpi_orders' as any)
-        .select('*')
-        .single();
+      // Get data from vw_orders_unified instead
+      const { data: orders, error } = await supabase
+        .from('vw_orders_unified' as any)
+        .select('*');
       
       if (error) throw error;
-      return data as unknown as KpiOrders;
+      
+      const ordersData = orders || [];
+      
+      // Calculate KPIs from unified orders
+      const total_orders = ordersData.length;
+      const open_orders = ordersData.filter((o: any) => !o.DT_FATUR_SSG).length;
+      const closed_orders = ordersData.filter((o: any) => o.DT_FATUR_SSG).length;
+      const total_samples = ordersData.reduce((acc: number, o: any) => acc + (o.N_AMOSTRAS_SSG || 0), 0);
+      const active_clients = new Set(ordersData.map((o: any) => o.CLIENTE).filter(Boolean)).size;
+      const em_processamento = ordersData.filter((o: any) => o.DT_SSGEN_OS && !o.DT_RESULT_SSG).length;
+      const a_faturar = ordersData.filter((o: any) => o.DT_RESULT_SSG && !o.DT_FATUR_SSG).length;
+      
+      const today = new Date().toISOString().split('T')[0];
+      const concluidas_hoje = ordersData.filter((o: any) => 
+        o.DT_FATUR_SSG && o.DT_FATUR_SSG.split('T')[0] === today
+      ).length;
+      
+      // Calculate average TAT
+      const completedOrders = ordersData.filter((o: any) => o.DT_FATUR_SSG && o.DT_SSGEN_OS);
+      const avg_tat_days = completedOrders.length > 0
+        ? completedOrders.reduce((acc: number, o: any) => {
+            const start = new Date(o.DT_SSGEN_OS).getTime();
+            const end = new Date(o.DT_FATUR_SSG).getTime();
+            return acc + (end - start) / (1000 * 60 * 60 * 24);
+          }, 0) / completedOrders.length
+        : 0;
+      
+      const sla_on_time_ratio = total_orders > 0 ? closed_orders / total_orders : 0;
+      
+      return {
+        total_orders,
+        open_orders,
+        closed_orders,
+        avg_tat_days,
+        sla_on_time_ratio,
+        total_samples,
+        active_clients,
+        em_processamento,
+        a_faturar,
+        concluidas_hoje,
+      } as KpiOrders;
     },
     refetchInterval: 30000,
   });
@@ -52,15 +92,60 @@ export function useKpiOrders() {
 
 export function useOrdersAging() {
   return useQuery({
-    queryKey: ['v_orders_aging'],
+    queryKey: ['orders_aging_unified'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('v_orders_aging' as any)
+        .from('vw_orders_unified' as any)
         .select('*')
-        .order('aging_days', { ascending: false });
+        .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return (data as unknown as OrderAging[]) || [];
+      
+      const ordersData = (data || []).map((o: any) => {
+        // Calculate aging based on most recent stage
+        const stages = [
+          o.DT_FATUR_SSG,
+          o.DT_RESULT_SSG,
+          o.DT_LR,
+          o.DT_LPR,
+          o.DT_VRI,
+          o.DT_PLAN_NEOGEN,
+          o.DT_CRA,
+          o.DT_SSGEN_OS
+        ].filter(Boolean);
+        
+        const mostRecentStage = stages.length > 0 ? stages[0] : o.created_at;
+        const agingMs = Date.now() - new Date(mostRecentStage).getTime();
+        const aging_days = agingMs / (1000 * 60 * 60 * 24);
+        
+        // Determine current stage
+        let etapa_atual = 'Recebida';
+        if (o.DT_FATUR_SSG) etapa_atual = 'Faturada';
+        else if (o.DT_RESULT_SSG) etapa_atual = 'Resultados Enviados';
+        else if (o.DT_LR) etapa_atual = 'LR';
+        else if (o.DT_LPR) etapa_atual = 'LPR';
+        else if (o.DT_VRI) etapa_atual = 'VRI';
+        else if (o.DT_PLAN_NEOGEN) etapa_atual = 'Planilha Enviada';
+        else if (o.DT_CRA) etapa_atual = 'CRA';
+        
+        const overdue = aging_days > 15; // Consider 15 days as threshold
+        
+        return {
+          id: o.id,
+          ordem_servico_ssgen: o.OS_SSGEN,
+          etapa_atual,
+          sla_days: 15,
+          received_at: o.DT_SSGEN_OS,
+          completed_at: o.DT_FATUR_SSG,
+          etapa_started_at: mostRecentStage,
+          aging_days,
+          overdue,
+          cliente_nome: o.CLIENTE,
+          prioridade: 'media',
+        };
+      });
+      
+      return ordersData as OrderAging[];
     },
     refetchInterval: 30000,
   });

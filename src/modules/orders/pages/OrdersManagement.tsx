@@ -20,6 +20,8 @@ import { toast } from 'sonner';
 import ImportDialog from '@/components/ssgen/import/ImportDialog';
 import { HeaderBar } from '@/components/ssgen/shared/HeaderBar';
 import { deleteServiceOrder } from '@/lib/trackerApi';
+import { logOrderChange } from '@/lib/orderAuditApi';
+import { getProfile } from '@/lib/ssgenClient';
 
 interface PowerRow {
   id?: string;
@@ -88,7 +90,7 @@ async function getCurrentUserId(): Promise<string | null> {
   }
 }
 
-async function updateOrderById(orderId: string, field: string, value: string | null) {
+async function updateOrderById(orderId: string, field: string, oldValue: string | null, value: string | null) {
   const { error } = await supabase
     .from('orders')
     .update({ [field]: value })
@@ -97,9 +99,17 @@ async function updateOrderById(orderId: string, field: string, value: string | n
   if (error) {
     throw error;
   }
+
+  // Log audit trail
+  await logOrderChange({
+    order_id: orderId,
+    field_name: field,
+    old_value: oldValue,
+    new_value: value,
+  });
 }
 
-async function updateOrderByCode(os_ssgen: string, field: string, value: string | null) {
+async function updateOrderByCode(os_ssgen: string, field: string, oldValue: string | null, value: string | null) {
   const { error } = await supabase
     .from('orders')
     .update({ [field]: value })
@@ -108,20 +118,35 @@ async function updateOrderByCode(os_ssgen: string, field: string, value: string 
   if (error) {
     throw error;
   }
+
+  // Log audit trail
+  await logOrderChange({
+    ordem_servico_ssgen: os_ssgen,
+    field_name: field,
+    old_value: oldValue,
+    new_value: value,
+  });
 }
 
 interface EtapasRowProps {
   row: PowerRow;
   onChange: (row: PowerRow) => void;
   onDelete: (row: PowerRow) => Promise<void>;
+  isAdmin: boolean;
 }
 
-const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete }) => {
+const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin }) => {
   const [saving, setSaving] = useState<StageKey | null>(null);
   const [errorStage, setErrorStage] = useState<StageKey | null>(null);
 
   const persistField = async (label: StageKey, value: string | null) => {
+    if (!isAdmin) {
+      toast.error('Apenas administradores podem editar as etapas das ordens.');
+      return;
+    }
+
     const { view } = fieldMap[label];
+    const oldValue = row[view] as string | null;
     const updated = { ...row, [view]: value } as PowerRow;
     onChange(updated);
     setSaving(label);
@@ -129,14 +154,16 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete }) => {
 
     try {
       if (row.id) {
-        await updateOrderById(row.id, String(view).toLowerCase(), value);
+        await updateOrderById(row.id, String(view).toLowerCase(), oldValue, value);
       } else {
-        await updateOrderByCode(row.OS_SSGEN, String(view).toLowerCase(), value);
+        await updateOrderByCode(row.OS_SSGEN, String(view).toLowerCase(), oldValue, value);
       }
+      toast.success(`Etapa ${label} atualizada com sucesso.`);
     } catch (error) {
       console.error(`Erro ao salvar etapa ${label}`, error);
       setErrorStage(label);
       onChange(row);
+      toast.error(`Erro ao salvar etapa ${label}.`);
     } finally {
       setSaving(null);
     }
@@ -189,11 +216,12 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete }) => {
             className="border rounded-md px-2 py-1 bg-background"
             value={formatDate(value as string | null)}
             onChange={(event) => persistField(label, event.target.value || null)}
+            disabled={!isAdmin}
           />
           <Button
             size="sm"
             variant="ghost"
-            disabled={savingThisField}
+            disabled={savingThisField || !isAdmin}
             onClick={() => persistField(label, null)}
           >
             Limpar
@@ -252,11 +280,16 @@ const OrdersManagement: React.FC = () => {
   const [rows, setRows] = useState<PowerRow[]>([]);
   const [importOpen, setImportOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const load = async () => {
       const data = await fetchOrders();
       setRows(data);
+      
+      // Check if user is ADM
+      const profile = await getProfile();
+      setIsAdmin(profile?.role === 'ADM');
     };
     load();
   }, []);
@@ -326,7 +359,7 @@ const OrdersManagement: React.FC = () => {
           </thead>
           <tbody>
             {filteredRows.map((row) => (
-              <EtapasRow key={row.id ?? row.OS_SSGEN} row={row} onChange={updateRow} onDelete={handleDeleteRow} />
+              <EtapasRow key={row.id ?? row.OS_SSGEN} row={row} onChange={updateRow} onDelete={handleDeleteRow} isAdmin={isAdmin} />
             ))}
           </tbody>
         </table>

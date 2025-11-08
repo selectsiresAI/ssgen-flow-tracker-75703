@@ -5,13 +5,13 @@ export async function fetchUnifiedOrders(): Promise<UnifiedOrder[]> {
   const { data, error } = await supabase
     .from('vw_orders_unified')
     .select('*')
-    .order('data_cadastro', { ascending: false });
+    .order('created_at', { ascending: false });
   
   if (error) {
     console.error('Error fetching unified orders:', error);
     return [];
   }
-  return data as UnifiedOrder[];
+  return data as any as UnifiedOrder[];
 }
 
 export async function createServiceOrder(order: Omit<ServiceOrder, 'id' | 'created_at' | 'updated_at'>) {

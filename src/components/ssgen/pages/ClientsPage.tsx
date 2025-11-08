@@ -41,24 +41,26 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
   const { data: coordenadores = [] } = useQuery({
     queryKey: ['coordenadores'],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data: coordenadores = [] } = await supabase
         .from('coordenadores')
         .select('nome')
         .eq('ativo', true)
+        .is('deleted_at', null)
         .order('nome');
-      return data || [];
+      return coordenadores;
     },
   });
 
   const { data: representantes = [] } = useQuery({
     queryKey: ['representantes'],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data: representantes = [] } = await supabase
         .from('representantes')
         .select('nome')
         .eq('ativo', true)
+        .is('deleted_at', null)
         .order('nome');
-      return data || [];
+      return representantes;
     },
   });
 
