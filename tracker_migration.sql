@@ -32,6 +32,79 @@ CREATE INDEX IF NOT EXISTS idx_service_orders_deleted_at
   ON public.service_orders (deleted_at)
   WHERE deleted_at IS NULL;
 
+CREATE OR REPLACE FUNCTION public.soft_delete_service_order(p_target_id text)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_deleted_at timestamptz := now();
+  v_service_order_id uuid;
+  v_os_ssgen text;
+  v_os_numeric numeric;
+BEGIN
+  BEGIN
+    v_service_order_id := p_target_id::uuid;
+  EXCEPTION
+    WHEN others THEN
+      v_service_order_id := NULL;
+  END;
+
+  IF v_service_order_id IS NOT NULL THEN
+    UPDATE public.service_orders
+    SET deleted_at = v_deleted_at
+    WHERE id = v_service_order_id
+      AND deleted_at IS NULL
+    RETURNING ordem_servico_ssgen::text INTO v_os_ssgen;
+  END IF;
+
+  IF v_os_ssgen IS NULL THEN
+    SELECT os_ssgen
+    INTO v_os_ssgen
+    FROM public.orders
+    WHERE id::text = p_target_id
+      AND deleted_at IS NULL;
+  END IF;
+
+  IF v_os_ssgen IS NOT NULL THEN
+    UPDATE public.orders
+    SET deleted_at = v_deleted_at
+    WHERE os_ssgen = v_os_ssgen
+      AND deleted_at IS NULL;
+
+    BEGIN
+      v_os_numeric := v_os_ssgen::numeric;
+    EXCEPTION
+      WHEN others THEN
+        v_os_numeric := NULL;
+    END;
+
+    IF v_os_numeric IS NOT NULL THEN
+      UPDATE public.service_orders
+      SET deleted_at = v_deleted_at
+      WHERE ordem_servico_ssgen = v_os_numeric
+        AND deleted_at IS NULL;
+    END IF;
+  ELSE
+    IF v_service_order_id IS NOT NULL THEN
+      UPDATE public.service_orders
+      SET deleted_at = v_deleted_at
+      WHERE id = v_service_order_id
+        AND deleted_at IS NULL;
+    END IF;
+
+    UPDATE public.orders
+    SET deleted_at = v_deleted_at
+    WHERE id::text = p_target_id
+      AND deleted_at IS NULL;
+  END IF;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.soft_delete_service_order(text)
+  TO anon, authenticated, service_role;
+
 CREATE INDEX IF NOT EXISTS idx_service_orders_cliente_geo ON public.service_orders (cliente_lat, cliente_lon) WHERE cliente_lat IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_service_orders_prioridade ON public.service_orders (prioridade);
 

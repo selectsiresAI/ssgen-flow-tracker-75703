@@ -83,35 +83,11 @@ export async function updateServiceOrderNew(id: string, updates: Partial<Service
 }
 
 export async function deleteServiceOrderNew(id: string) {
-  const deletedAt = new Date().toISOString();
-
-  const { data, error } = await supabase
-    .from('service_orders')
-    .update({ deleted_at: deletedAt })
-    .eq('id', id)
-    .is('deleted_at', null)
-    .select('ordem_servico_ssgen')
-    .maybeSingle();
+  const { error } = await supabase.rpc('soft_delete_service_order', {
+    p_target_id: id,
+  });
 
   if (error) throw error;
-
-  if (data?.ordem_servico_ssgen) {
-    const { error: orderError } = await supabase
-      .from('orders')
-      .update({ deleted_at: deletedAt })
-      .eq('os_ssgen', String(data.ordem_servico_ssgen))
-      .is('deleted_at', null);
-
-    if (orderError) throw orderError;
-  } else {
-    const { error: orderError } = await supabase
-      .from('orders')
-      .update({ deleted_at: deletedAt })
-      .eq('id', id)
-      .is('deleted_at', null);
-
-    if (orderError) throw orderError;
-  }
 }
 
 export async function upsertServiceOrderFromExcel(row: any) {

@@ -129,36 +129,9 @@ export async function updateIssueText(orderId: string, issueText: string) {
 }
 
 export async function deleteServiceOrder(orderId: string) {
-  const deletedAt = new Date().toISOString();
+  const { error } = await supabase.rpc('soft_delete_service_order', {
+    p_target_id: orderId,
+  });
 
-  const { data: deletedServiceOrder, error: serviceOrderError } = await supabase
-    .from('service_orders')
-    .update({ deleted_at: deletedAt } as any)
-    .eq('id', orderId)
-    .is('deleted_at', null)
-    .select('id, ordem_servico_ssgen')
-    .maybeSingle();
-
-  if (serviceOrderError) throw serviceOrderError;
-
-  if (deletedServiceOrder?.ordem_servico_ssgen) {
-    const { error: orderByOsError } = await supabase
-      .from('orders')
-      .update({ deleted_at: deletedAt } as any)
-      .eq('os_ssgen', String(deletedServiceOrder.ordem_servico_ssgen))
-      .is('deleted_at', null);
-
-    if (orderByOsError) throw orderByOsError;
-    return;
-  }
-
-  if (deletedServiceOrder) return;
-
-  const { error: orderError } = await supabase
-    .from('orders')
-    .update({ deleted_at: deletedAt } as any)
-    .eq('id', orderId)
-    .is('deleted_at', null);
-
-  if (orderError) throw orderError;
+  if (error) throw error;
 }

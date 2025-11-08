@@ -1232,6 +1232,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      soft_delete_service_order: {
+        Args: { p_target_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "ADM" | "GERENTE" | "REPRESENTANTE"
