@@ -55,26 +55,21 @@ const getFirstAvailableEnvVar = (keys: string[]): string | undefined => {
   return undefined;
 };
 
-const DEFAULT_SUPABASE_URL = 'https://cevsigsqiroeomtbrzpe.supabase.co';
-const DEFAULT_SUPABASE_ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNldnNpZ3NxaXJvZW9tdGJyenBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3MDU3NzQsImV4cCI6MjA3NzI4MTc3NH0.ONNsDNzS6e6gKXU7DoUyzmYlTU_n0VElOvpt914yGbE';
-
 export const SUPABASE_URL =
   getFirstAvailableEnvVar([
     'NEXT_PUBLIC_SUPABASE_URL',
     'VITE_SUPABASE_URL',
     'SUPABASE_URL',
-  ]) ?? DEFAULT_SUPABASE_URL;
+  ]) ?? '';
 
 export const SUPABASE_ANON_KEY =
   getFirstAvailableEnvVar([
     'NEXT_PUBLIC_SUPABASE_ANON_KEY',
     'VITE_SUPABASE_ANON_KEY',
     'SUPABASE_ANON_KEY',
-  ]) ?? DEFAULT_SUPABASE_ANON_KEY;
+  ]) ?? '';
 
-const hasCustomSupabaseConfig =
-  SUPABASE_URL !== DEFAULT_SUPABASE_URL || SUPABASE_ANON_KEY !== DEFAULT_SUPABASE_ANON_KEY;
+const hasCustomSupabaseConfig = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 
 export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 export const isUsingDefaultSupabaseConfig = !hasCustomSupabaseConfig;
