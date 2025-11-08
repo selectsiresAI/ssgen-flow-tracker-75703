@@ -119,7 +119,7 @@ async function updateOrderById(
 }
 
 async function updateOrderByCode(
-  os_ssgen: string,
+  os_ssgen: number,
   column: ServiceOrderColumn,
   oldValue: string | null,
   value: string | null
@@ -176,7 +176,15 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin 
       if (row.id) {
         await updateOrderById(row.id, column, oldValue, value);
       } else {
-        await updateOrderByCode(row.OS_SSGEN, column, oldValue, value);
+        const osValue = typeof row.OS_SSGEN === 'number'
+          ? row.OS_SSGEN
+          : Number.parseInt(row.OS_SSGEN ?? '', 10);
+
+        if (!Number.isFinite(osValue)) {
+          throw new Error('Número da ordem inválido para atualização.');
+        }
+
+        await updateOrderByCode(osValue, column, oldValue, value);
       }
       toast.success(`Etapa ${label} atualizada com sucesso.`);
     } catch (error) {
@@ -273,7 +281,12 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin 
       <td className="p-3">
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm" className="gap-1" disabled={!row.id}>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="gap-1"
+              disabled={!row.id || !isAdmin}
+            >
               <Trash2 className="h-4 w-4" />
               <span className="hidden 2xl:inline">Apagar</span>
             </Button>
@@ -332,6 +345,11 @@ const OrdersManagement: React.FC = () => {
   }, [query, rows]);
 
   const handleDeleteRow = async (row: PowerRow) => {
+    if (!isAdmin) {
+      toast.error('Apenas administradores podem apagar ordens.');
+      return;
+    }
+
     if (!row.id) {
       toast.error('Não é possível apagar esta ordem porque o ID não foi encontrado.');
       return;
@@ -352,9 +370,11 @@ const OrdersManagement: React.FC = () => {
   return (
     <div className="space-y-4 p-6">
       <HeaderBar title="Gestão de Ordens" query={query} setQuery={setQuery}>
-        <Button variant="outline" className="gap-2" onClick={() => setImportOpen(true)}>
-          <Upload className="w-4 h-4" /> Importar Excel
-        </Button>
+        {isAdmin && (
+          <Button variant="outline" className="gap-2" onClick={() => setImportOpen(true)}>
+            <Upload className="w-4 h-4" /> Importar Excel
+          </Button>
+        )}
       </HeaderBar>
 
       <div className="overflow-x-auto rounded-xl border">
