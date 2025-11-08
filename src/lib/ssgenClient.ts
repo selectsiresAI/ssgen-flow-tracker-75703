@@ -1,5 +1,19 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Profile, PowerRow } from '@/types/ssgen';
+import type { Database } from '@/integrations/supabase/types';
+
+type ServiceOrderColumn = keyof Database['public']['Tables']['service_orders']['Row'];
+
+export const POWER_ROW_TO_SERVICE_ORDER_FIELD: Partial<Record<keyof PowerRow, ServiceOrderColumn>> = {
+  DT_CRA: 'cra_data',
+  DT_PLAN_NEOGEN: 'envio_planilha_data',
+  DT_VRI: 'vri_data',
+  DT_LPR: 'lpr_data',
+  DT_LR: 'liberacao_data',
+  DT_RESULT_SSG: 'envio_resultados_data',
+  DT_PREV_RESULT_SSG: 'envio_resultados_previsao',
+  DT_FATUR_SSG: 'dt_faturamento',
+};
 
 export async function getProfile(): Promise<Profile | null> {
   const { data: { user } } = await supabase.auth.getUser();
@@ -38,10 +52,15 @@ export async function persistStage(
   value: string | null,
   userId?: string
 ) {
-  // Update the field directly on the orders table
+  const serviceOrderField = POWER_ROW_TO_SERVICE_ORDER_FIELD[field];
+
+  if (!serviceOrderField) {
+    throw new Error(`Campo ${String(field)} não está mapeado para service_orders.`);
+  }
+
   const { error } = await supabase
-    .from('orders')
-    .update({ [field]: value })
+    .from('service_orders')
+    .update({ [serviceOrderField]: value })
     .eq('id', orderId);
 
   if (error) throw error;
