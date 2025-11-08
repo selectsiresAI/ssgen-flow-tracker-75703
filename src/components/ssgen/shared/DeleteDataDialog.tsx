@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Trash2, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { requireAdmin } from '@/lib/ssgenClient';
 
 interface DeleteDataDialogProps {
   open: boolean;
@@ -26,7 +27,11 @@ export const DeleteDataDialog: React.FC<DeleteDataDialogProps> = ({ open, onOpen
   const handleDeleteClients = async () => {
     setDeleting(true);
     try {
-      const { error } = await supabase.from('clients').delete().neq('ordem_servico_ssgen', 0);
+      await requireAdmin();
+      const { error } = await supabase
+        .from('clients')
+        .update({ deleted_at: new Date().toISOString() })
+        .neq('ordem_servico_ssgen', 0);
       
       if (error) throw error;
       
@@ -48,7 +53,11 @@ export const DeleteDataDialog: React.FC<DeleteDataDialogProps> = ({ open, onOpen
   const handleDeleteOrders = async () => {
     setDeleting(true);
     try {
-      const { error } = await supabase.from('service_orders').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await requireAdmin();
+      const { error } = await supabase
+        .from('service_orders')
+        .update({ deleted_at: new Date().toISOString() })
+        .neq('id', '00000000-0000-0000-0000-000000000000');
       
       if (error) throw error;
       
@@ -71,10 +80,17 @@ export const DeleteDataDialog: React.FC<DeleteDataDialogProps> = ({ open, onOpen
     setDeleting(true);
     try {
       // Primeiro apaga ordens, depois clientes (por causa das foreign keys)
-      const { error: ordersError } = await supabase.from('service_orders').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await requireAdmin();
+      const { error: ordersError } = await supabase
+        .from('service_orders')
+        .update({ deleted_at: new Date().toISOString() })
+        .neq('id', '00000000-0000-0000-0000-000000000000');
       if (ordersError) throw ordersError;
-      
-      const { error: clientsError } = await supabase.from('clients').delete().neq('ordem_servico_ssgen', 0);
+
+      const { error: clientsError } = await supabase
+        .from('clients')
+        .update({ deleted_at: new Date().toISOString() })
+        .neq('ordem_servico_ssgen', 0);
       if (clientsError) throw clientsError;
       
       toast({

@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { requireAdmin } from '@/lib/ssgenClient';
 
 export interface BillingSummary {
   total_ordens_faturadas: number;
@@ -77,7 +78,7 @@ export async function fetchReadyToInvoice(): Promise<ReadyToInvoice[]> {
 
 export async function fetchBillingMonthly(): Promise<BillingMonthly[]> {
   const { data, error } = await supabase
-    .from('v_billing_monthly' as any)
+    .from('v_monthly_billing' as any)
     .select('*');
   
   if (error) {
@@ -112,10 +113,12 @@ export async function fetchBillingByCoord(): Promise<BillingByCoord[]> {
 }
 
 export async function invoiceOrder(orderId: string, dt_faturamento: string): Promise<void> {
+  await requireAdmin();
   const { error } = await supabase
     .from('service_orders')
     .update({ dt_faturamento } as any)
-    .eq('id', orderId);
-  
+    .eq('id', orderId)
+    .is('deleted_at', null);
+
   if (error) throw error;
 }

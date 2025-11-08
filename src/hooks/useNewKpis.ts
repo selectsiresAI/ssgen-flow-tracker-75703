@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchOrders as fetchUnifiedOrderRows } from '@/lib/ssgenClient';
 
 export interface KpiOrders {
   total_orders: number;
@@ -38,14 +39,7 @@ export function useKpiOrders() {
   return useQuery({
     queryKey: ['kpi_orders_unified'],
     queryFn: async () => {
-      // Get data from vw_orders_unified instead
-      const { data: orders, error } = await supabase
-        .from('vw_orders_unified' as any)
-        .select('*');
-      
-      if (error) throw error;
-      
-      const ordersData = orders || [];
+      const ordersData = await fetchUnifiedOrderRows();
       
       // Calculate KPIs from unified orders
       const total_orders = ordersData.length;
@@ -94,14 +88,12 @@ export function useOrdersAging() {
   return useQuery({
     queryKey: ['orders_aging_unified'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('vw_orders_unified' as any)
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      const ordersData = (data || []).map((o: any) => {
+      const rawOrders = await fetchUnifiedOrderRows();
+      const ordersData = [...rawOrders].sort((a, b) => {
+        const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return bTime - aTime;
+      }).map((o) => {
         // Calculate aging based on most recent stage
         const stages = [
           o.DT_FATUR_SSG,

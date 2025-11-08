@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { requireAdmin } from '@/lib/ssgenClient';
 
 export interface ServiceOrderFull {
   id: string;
@@ -34,12 +35,14 @@ export interface ServiceOrderFull {
   envio_resultados_status: string | null;
   created_at: string;
   updated_at: string;
+  deleted_at?: string | null;
 }
 
 export async function fetchAllServiceOrders(): Promise<ServiceOrderFull[]> {
   const { data, error } = await supabase
     .from('service_orders')
     .select('*')
+    .is('deleted_at', null)
     .order('created_at', { ascending: false });
   
   if (error) throw error;
@@ -47,6 +50,7 @@ export async function fetchAllServiceOrders(): Promise<ServiceOrderFull[]> {
 }
 
 export async function createServiceOrderNew(order: Partial<ServiceOrderFull>) {
+  await requireAdmin();
   // Se não tiver ordem_servico_ssgen, pegar próximo número
   let osNumber = order.ordem_servico_ssgen;
   
@@ -69,10 +73,12 @@ export async function createServiceOrderNew(order: Partial<ServiceOrderFull>) {
 }
 
 export async function updateServiceOrderNew(id: string, updates: Partial<ServiceOrderFull>) {
+  await requireAdmin();
   const { data, error } = await supabase
     .from('service_orders')
     .update(updates)
     .eq('id', id)
+    .is('deleted_at', null)
     .select()
     .single();
   
@@ -81,15 +87,18 @@ export async function updateServiceOrderNew(id: string, updates: Partial<Service
 }
 
 export async function deleteServiceOrderNew(id: string) {
+  await requireAdmin();
   const { error } = await supabase
     .from('service_orders')
-    .delete()
-    .eq('id', id);
-  
+    .update({ deleted_at: new Date().toISOString() } as Partial<ServiceOrderFull> & { deleted_at: string })
+    .eq('id', id)
+    .is('deleted_at', null);
+
   if (error) throw error;
 }
 
 export async function upsertServiceOrderFromExcel(row: any) {
+  await requireAdmin();
   // Se tiver ordem_servico_ssgen, fazer upsert
   if (row.ordem_servico_ssgen) {
     const { data, error } = await supabase

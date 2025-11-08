@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Client } from '@/types/ssgen';
+import { requireAdmin } from '@/lib/ssgenClient';
 
 export interface ImportResult {
   success: number;
@@ -120,6 +121,7 @@ export async function validateClients(clients: any[]): Promise<ValidationError[]
 
 export async function importClients(clients: any[]): Promise<ImportResult> {
   const result: ImportResult = { success: 0, errors: [] };
+  await requireAdmin();
 
   for (let i = 0; i < clients.length; i++) {
     try {
@@ -138,6 +140,7 @@ export async function importClients(clients: any[]): Promise<ImportResult> {
         codigo: rawClient.codigo ? parseInt(String(rawClient.codigo), 10) : null,
         status: rawClient.status || null,
         id_conta_ssgen: rawClient.id_conta_ssgen ? parseInt(String(rawClient.id_conta_ssgen), 10) : null,
+        deleted_at: null,
       };
       
       // Verificar se já existe
@@ -179,6 +182,7 @@ export async function importClients(clients: any[]): Promise<ImportResult> {
 
 export async function importCoordenadores(coordenadores: any[]): Promise<ImportResult> {
   const result: ImportResult = { success: 0, errors: [] };
+  await requireAdmin();
 
   for (let i = 0; i < coordenadores.length; i++) {
     try {
@@ -223,6 +227,7 @@ export async function importCoordenadores(coordenadores: any[]): Promise<ImportR
 
 export async function importRepresentantes(representantes: any[]): Promise<ImportResult> {
   const result: ImportResult = { success: 0, errors: [] };
+  await requireAdmin();
 
   for (let i = 0; i < representantes.length; i++) {
     try {
@@ -267,6 +272,7 @@ export async function importRepresentantes(representantes: any[]): Promise<Impor
 
 export async function importServiceOrders(orders: any[]): Promise<ImportResult> {
   const result: ImportResult = { success: 0, errors: [] };
+  await requireAdmin();
 
   for (let i = 0; i < orders.length; i++) {
     try {
@@ -306,6 +312,7 @@ export async function importServiceOrders(orders: any[]): Promise<ImportResult> 
         envio_resultados_previsao: parseExcelDate(rawOrder.envio_resultados_previsao),
         envio_resultados_status: rawOrder.envio_resultados_status || null,
         envio_resultados_data_prova: rawOrder.envio_resultados_data_prova || null,
+        deleted_at: null,
       };
 
       // Verificar se já existe

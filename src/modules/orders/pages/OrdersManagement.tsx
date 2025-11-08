@@ -21,36 +21,9 @@ import ImportDialog from '@/components/ssgen/import/ImportDialog';
 import { HeaderBar } from '@/components/ssgen/shared/HeaderBar';
 import { deleteServiceOrder } from '@/lib/trackerApi';
 import { logOrderChange } from '@/lib/orderAuditApi';
-import { getProfile, POWER_ROW_TO_SERVICE_ORDER_FIELD } from '@/lib/ssgenClient';
+import { fetchOrders as fetchUnifiedOrderRows, getProfile, POWER_ROW_TO_SERVICE_ORDER_FIELD } from '@/lib/ssgenClient';
 import type { Database } from '@/integrations/supabase/types';
-
-interface PowerRow {
-  id?: string;
-  OS_SSGEN: string;
-  CLIENTE?: string | null;
-  COORD?: string | null;
-  REP?: string | null;
-  PROD_SSG?: string | null;
-  N_AMOSTRAS_SSG?: number | null;
-  DT_SSGEN_OS?: string | null;
-  DT_PREV_RESULT_SSG?: string | null;
-  RESULT_SSG?: string | null;
-  DT_RESULT_SSG?: string | null;
-  FATUR_TIPO?: string | null;
-  FATUR_SSG?: number | null;
-  DT_FATUR_SSG?: string | null;
-  OS_NEOGEN?: string | null;
-  PLAN_NEOGEN?: string | null;
-  DT_CRA?: string | null;
-  DT_PLAN_NEOGEN?: string | null;
-  DT_VRI?: string | null;
-  DT_LPR?: string | null;
-  DT_LR?: string | null;
-  N_VRI?: number | null;
-  N_LPR?: number | null;
-  N_LR?: number | null;
-  LR_RASTREIO?: string | null;
-}
+import type { PowerRow } from '@/types/ssgen';
 
 type ServiceOrderColumn = keyof Database['public']['Tables']['service_orders']['Row'];
 
@@ -75,25 +48,6 @@ const stageOrder: StageKey[] = ['CRA', 'PLANILHA', 'VRI', 'LPR', 'LR', 'RESULTAD
 
 const formatDate = (value?: string | null) => (value ? new Date(value).toISOString().slice(0, 10) : '');
 
-async function fetchOrders(): Promise<PowerRow[]> {
-  const { data, error } = await supabase.from('vw_orders_powerbi').select('*');
-  if (error) {
-    console.error('Erro ao carregar ordens', error);
-    return [];
-  }
-  return (data ?? []) as PowerRow[];
-}
-
-async function getCurrentUserId(): Promise<string | null> {
-  try {
-    const { data } = await supabase.auth.getUser();
-    return data.user?.id ?? null;
-  } catch (error) {
-    console.error('Erro ao buscar usuário atual', error);
-    return null;
-  }
-}
-
 async function updateOrderById(
   orderId: string,
   column: ServiceOrderColumn,
@@ -103,7 +57,8 @@ async function updateOrderById(
   const { error } = await supabase
     .from('service_orders')
     .update({ [column]: value })
-    .eq('id', orderId);
+    .eq('id', orderId)
+    .is('deleted_at', null);
 
   if (error) {
     throw error;
@@ -127,7 +82,8 @@ async function updateOrderByCode(
   const { error } = await supabase
     .from('service_orders')
     .update({ [column]: value })
-    .eq('ordem_servico_ssgen', os_ssgen);
+    .eq('ordem_servico_ssgen', os_ssgen)
+    .is('deleted_at', null);
 
   if (error) {
     throw error;
@@ -230,6 +186,12 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin 
     return Math.round(diff / 86_400_000);
   }, [agingBase]);
 
+  const priorityLabel = useMemo(() => {
+    const base = row.prioridade ?? 'media';
+    const normalized = base === 'media' ? 'média' : base;
+    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+  }, [row.prioridade]);
+
   const renderField = (label: StageKey) => {
     const { view } = fieldMap[label];
     const value = row[view];
@@ -267,7 +229,7 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin 
       <td className="p-3 whitespace-nowrap">{row.PROD_SSG || 'SSGEN'}</td>
       <td className="p-3 whitespace-nowrap">{currentStage}</td>
       {stageOrder.map((label) => renderField(label))}
-      <td className="p-3"><Badge variant="outline">média</Badge></td>
+      <td className="p-3"><Badge variant="outline">{priorityLabel}</Badge></td>
       <td className="p-3">
         <Badge variant="outline">{aging === null ? '—' : `${aging}d`}</Badge>
       </td>
@@ -317,9 +279,9 @@ const OrdersManagement: React.FC = () => {
 
   useEffect(() => {
     const load = async () => {
-      const data = await fetchOrders();
+      const data = await fetchUnifiedOrderRows();
       setRows(data);
-      
+
       // Check if user is ADM
       const profile = await getProfile();
       setIsAdmin(profile?.role === 'ADM');
@@ -356,7 +318,8 @@ const OrdersManagement: React.FC = () => {
     }
 
     try {
-      await deleteServiceOrder(row.id);
+      const sourceTable = row.source_table === 'orders' ? 'orders' : 'service_orders';
+      await deleteServiceOrder(row.id, sourceTable);
       setRows((prev) =>
         prev.filter((item) => (item.id ?? item.OS_SSGEN) !== (row.id ?? row.OS_SSGEN)),
       );
