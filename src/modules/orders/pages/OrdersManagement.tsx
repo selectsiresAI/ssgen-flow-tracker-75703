@@ -1,12 +1,25 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Upload } from 'lucide-react';
+import { Trash2, Upload } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 import ImportDialog from '@/components/ssgen/import/ImportDialog';
 import { HeaderBar } from '@/components/ssgen/shared/HeaderBar';
+import { deleteServiceOrder } from '@/lib/trackerApi';
 
 interface PowerRow {
   id?: string;
@@ -105,9 +118,10 @@ async function rpcFallbackByCode(os_ssgen: string, viewField: string, value: str
 interface EtapasRowProps {
   row: PowerRow;
   onChange: (row: PowerRow) => void;
+  onDelete: (row: PowerRow) => Promise<void>;
 }
 
-const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange }) => {
+const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete }) => {
   const [saving, setSaving] = useState<StageKey | null>(null);
   const [errorStage, setErrorStage] = useState<StageKey | null>(null);
 
@@ -213,6 +227,28 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange }) => {
           <Badge variant="success">OK</Badge>
         )}
       </td>
+      <td className="p-3">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" size="sm" className="gap-1" disabled={!row.id}>
+              <Trash2 className="h-4 w-4" />
+              <span className="hidden 2xl:inline">Apagar</span>
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Apagar ordem</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta ação não pode ser desfeita. Tem certeza que deseja apagar a ordem {row.OS_SSGEN}?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={() => onDelete(row)}>Confirmar</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </td>
     </tr>
   );
 };
@@ -247,6 +283,24 @@ const OrdersManagement: React.FC = () => {
     });
   }, [query, rows]);
 
+  const handleDeleteRow = async (row: PowerRow) => {
+    if (!row.id) {
+      toast.error('Não é possível apagar esta ordem porque o ID não foi encontrado.');
+      return;
+    }
+
+    try {
+      await deleteServiceOrder(row.id);
+      setRows((prev) =>
+        prev.filter((item) => (item.id ?? item.OS_SSGEN) !== (row.id ?? row.OS_SSGEN)),
+      );
+      toast.success('Ordem apagada com sucesso.');
+    } catch (error) {
+      console.error('Erro ao apagar ordem', error);
+      toast.error('Erro ao apagar ordem. Tente novamente.');
+    }
+  };
+
   return (
     <div className="space-y-4 p-6">
       <HeaderBar title="Gestão de Ordens" query={query} setQuery={setQuery}>
@@ -272,11 +326,12 @@ const OrdersManagement: React.FC = () => {
               <th className="p-3">Prioridade</th>
               <th className="p-3">Aging</th>
               <th className="p-3">Status</th>
+              <th className="p-3">Ações</th>
             </tr>
           </thead>
           <tbody>
             {filteredRows.map((row) => (
-              <EtapasRow key={row.id ?? row.OS_SSGEN} row={row} onChange={updateRow} />
+              <EtapasRow key={row.id ?? row.OS_SSGEN} row={row} onChange={updateRow} onDelete={handleDeleteRow} />
             ))}
           </tbody>
         </table>
