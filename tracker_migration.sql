@@ -17,6 +17,21 @@ ALTER TABLE public.service_orders
   ADD COLUMN IF NOT EXISTS dt_faturamento date,
   ADD COLUMN IF NOT EXISTS dt_receb_resultados date;
 
+-- Suporte a exclusão lógica
+ALTER TABLE public.orders
+  ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
+
+ALTER TABLE public.service_orders
+  ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
+
+CREATE INDEX IF NOT EXISTS idx_orders_deleted_at
+  ON public.orders (deleted_at)
+  WHERE deleted_at IS NULL;
+
+CREATE INDEX IF NOT EXISTS idx_service_orders_deleted_at
+  ON public.service_orders (deleted_at)
+  WHERE deleted_at IS NULL;
+
 CREATE INDEX IF NOT EXISTS idx_service_orders_cliente_geo ON public.service_orders (cliente_lat, cliente_lon) WHERE cliente_lat IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_service_orders_prioridade ON public.service_orders (prioridade);
 
@@ -75,3 +90,96 @@ SELECT total_os, em_processamento, a_faturar, concluidas_hoje, reagendamentos, a
   CASE WHEN total_os > 0 THEN ROUND((sla_vri_ok::numeric / total_os) * 100, 1) ELSE 0 END AS pct_sla_vri_ok, 0 AS sla_vri_atrasado,
   CASE WHEN total_os > 0 THEN ROUND((sla_lpr_ok::numeric / total_os) * 100, 1) ELSE 0 END AS pct_sla_lpr_ok, 0 AS sla_lpr_atrasado,
   0 AS pct_sla_envio_res_ok, 0 AS sla_envio_res_atrasado, ROUND(tma_dias::numeric, 1) AS tma_dias FROM stats;
+
+CREATE OR REPLACE VIEW public.vw_orders_powerbi
+WITH (security_invoker=true) AS
+SELECT
+  id::TEXT,
+  ord AS "Ord",
+  os_ssgen AS "OS_SSGEN",
+  dt_ssgen_os AS "DT_SSGEN_OS",
+  cod_ssb AS "COD_SSB",
+  cliente AS "CLIENTE",
+  lib_cad_cliente AS "LIB_CAD_CLIENTE",
+  plan_ssg AS "PLAN_SSG",
+  dt_plan_ssg AS "DT_PLAN_SSG",
+  prod_ssg AS "PROD_SSG",
+  n_amostras_ssg AS "N_AMOSTRAS_SSG",
+  dt_prev_result_ssg AS "DT_PREV_RESULT_SSG",
+  result_ssg AS "RESULT_SSG",
+  dt_result_ssg AS "DT_RESULT_SSG",
+  fatur_tipo AS "FATUR_TIPO",
+  fatur_ssg AS "FATUR_SSG",
+  dt_fatur_ssg AS "DT_FATUR_SSG",
+  rep AS "REP",
+  coord AS "COORD",
+  os_neogen AS "OS_NEOGEN",
+  prod_neogen AS "PROD_NEOGEN",
+  n_amostras_neogen AS "N_AMOSTRAS_NEOGEN",
+  dt_cra AS "DT_CRA",
+  plan_neogen AS "PLAN_NEOGEN",
+  dt_plan_neogen AS "DT_PLAN_NEOGEN",
+  n_vri AS "N_VRI",
+  dt_vri AS "DT_VRI",
+  n_lpr AS "N_LPR",
+  dt_lpr AS "DT_LPR",
+  n_lr AS "N_LR",
+  dt_lr AS "DT_LR",
+  lr_rastreio AS "LR_RASTREIO",
+  nf_neogem AS "NF_NEOGEM",
+  nf_na_neogen AS "NF_NA_NEOGEN",
+  created_at,
+  updated_at
+FROM public.orders
+WHERE deleted_at IS NULL;
+
+CREATE OR REPLACE VIEW public.vw_orders_unified AS
+SELECT
+  c.codigo,
+  c.representante,
+  c.ordem_servico_ssgen,
+  c.data AS data_cadastro,
+  c.ordem_servico_neogen,
+  c.cpf_cnpj,
+  c.ie_rg,
+  c.coordenador,
+  c.nome AS cliente_nome,
+  c.status AS cliente_status,
+  c.id_conta_ssgen,
+  c.created_at AS client_created_at,
+  c.updated_at,
+  so.id AS ordem_id,
+  so.nome_produto,
+  so.numero_amostras,
+  so.numero_nf_neogen,
+  so.cra_data,
+  so.cra_status,
+  so.envio_planilha_data,
+  so.envio_planilha_status,
+  so.envio_planilha_status_sla,
+  so.vri_data,
+  so.vri_n_amostras,
+  so.vri_resolvido_data,
+  so.vri_status_sla,
+  so.lpr_data,
+  so.lpr_n_amostras,
+  so.lpr_status_sla,
+  so.envio_resultados_ordem_id,
+  so.envio_resultados_data,
+  so.envio_resultados_previsao,
+  so.envio_resultados_status,
+  so.envio_resultados_status_sla,
+  so.envio_resultados_data_prova,
+  so.cliente_lat,
+  so.cliente_lon,
+  so.prioridade,
+  so.flag_reagendamento,
+  so.issue_text,
+  so.dt_faturamento,
+  so.dt_receb_resultados,
+  so.created_at AS order_created_at,
+  so.updated_at AS order_updated_at
+FROM public.clients c
+LEFT JOIN public.service_orders so
+  ON c.ordem_servico_ssgen = so.ordem_servico_ssgen
+ AND so.deleted_at IS NULL;

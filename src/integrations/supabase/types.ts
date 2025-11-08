@@ -221,6 +221,7 @@ export type Database = {
           cod_ssb: string | null
           coord: string
           created_at: string
+          deleted_at: string | null
           dt_cra: string | null
           dt_fatur_ssg: string | null
           dt_lpr: string | null
@@ -259,6 +260,7 @@ export type Database = {
           cod_ssb?: string | null
           coord: string
           created_at?: string
+          deleted_at?: string | null
           dt_cra?: string | null
           dt_fatur_ssg?: string | null
           dt_lpr?: string | null
@@ -297,6 +299,7 @@ export type Database = {
           cod_ssb?: string | null
           coord?: string
           created_at?: string
+          deleted_at?: string | null
           dt_cra?: string | null
           dt_fatur_ssg?: string | null
           dt_lpr?: string | null
@@ -613,6 +616,7 @@ export type Database = {
           cra_data: string | null
           cra_status: string | null
           created_at: string
+          deleted_at: string | null
           dt_faturamento: string | null
           dt_receb_resultados: string | null
           envio_planilha_data: string | null
@@ -654,6 +658,7 @@ export type Database = {
           cra_data?: string | null
           cra_status?: string | null
           created_at?: string
+          deleted_at?: string | null
           dt_faturamento?: string | null
           dt_receb_resultados?: string | null
           envio_planilha_data?: string | null
@@ -695,6 +700,7 @@ export type Database = {
           cra_data?: string | null
           cra_status?: string | null
           created_at?: string
+          deleted_at?: string | null
           dt_faturamento?: string | null
           dt_receb_resultados?: string | null
           envio_planilha_data?: string | null
