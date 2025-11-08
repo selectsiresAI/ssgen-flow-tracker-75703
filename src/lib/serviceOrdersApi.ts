@@ -5,7 +5,8 @@ export async function fetchUnifiedOrders(): Promise<UnifiedOrder[]> {
   const { data, error } = await supabase
     .from('vw_orders_unified')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('order_created_at', { ascending: false, nullsLast: true })
+    .order('client_created_at', { ascending: false, nullsLast: true });
   
   if (error) {
     console.error('Error fetching unified orders:', error);

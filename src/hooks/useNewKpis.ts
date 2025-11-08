@@ -97,7 +97,8 @@ export function useOrdersAging() {
       const { data, error } = await supabase
         .from('vw_orders_unified' as any)
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('order_created_at', { ascending: false, nullsLast: true })
+        .order('client_created_at', { ascending: false, nullsLast: true });
       
       if (error) throw error;
       
