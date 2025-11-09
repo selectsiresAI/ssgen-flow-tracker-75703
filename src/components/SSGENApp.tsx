@@ -15,11 +15,11 @@ import { EtapasRow } from '@/components/ssgen/shared/EtapasRow';
 const AdminDashboard = React.lazy(() => import('@/components/ssgen/dashboards/AdminDashboard'));
 const ManagerDashboard = React.lazy(() => import('@/components/ssgen/dashboards/ManagerDashboard'));
 const RepDashboard = React.lazy(() => import('@/components/ssgen/dashboards/RepDashboard'));
-const OrdersPage = React.lazy(() => import('@/components/ssgen/pages/OrdersPage'));
 const CatalogPage = React.lazy(() => import('@/components/ssgen/pages/CatalogPage'));
 const ConfigPage = React.lazy(() => import('@/components/ssgen/pages/ConfigPage'));
 const ClientsPage = React.lazy(() => import('@/components/ssgen/pages/ClientsPage'));
 const NewOrderPage = React.lazy(() => import('@/components/ssgen/pages/NewOrderPage'));
+const OrdersListPage = React.lazy(() => import('@/components/ssgen/pages/OrdersListPage'));
 const CoordenadoresPage = React.lazy(() => import('@/components/ssgen/pages/CoordenadoresPage'));
 const RepresentantesPage = React.lazy(() => import('@/components/ssgen/pages/RepresentantesPage'));
 const CoordenadoresListPage = React.lazy(() => import('@/components/ssgen/pages/CoordenadoresListPage'));
@@ -30,7 +30,6 @@ const TrackerDashboard = React.lazy(() => import('@/modules/tracker/pages/Dashbo
 const MapPage = React.lazy(() => import('@/modules/tracker/pages/MapPage'));
 const BillingPage = React.lazy(() => import('@/modules/billing/pages/BillingPage'));
 const NewDashboard = React.lazy(() => import('@/modules/dashboard/pages/NewDashboard'));
-const OrdersManagement = React.lazy(() => import('@/modules/orders/pages/OrdersManagement'));
 
 export default function SSGENTrackApp() {
   const navigate = useNavigate();
@@ -123,7 +122,7 @@ export default function SSGENTrackApp() {
     if (current === 'ordens') {
       return (
         <React.Suspense fallback={<div>Carregando...</div>}>
-          <OrdersManagement />
+          <OrdersListPage />
         </React.Suspense>
       );
     }
