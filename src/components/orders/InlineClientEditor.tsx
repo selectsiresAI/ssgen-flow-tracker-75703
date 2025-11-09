@@ -2,15 +2,16 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 
-type InlineClientEditorProps = {
+export default function InlineClientEditor({
+  orderId,
+  initialName,
+  onCommitted,
+}: {
   orderId: string;
   initialName: string | null;
   onCommitted: (payload: { client_name: string | null; client_id: string | null }) => void;
-};
-
-export default function InlineClientEditor({ orderId, initialName, onCommitted }: InlineClientEditorProps) {
+}) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(initialName ?? "");
   const [saving, setSaving] = useState(false);
@@ -19,7 +20,6 @@ export default function InlineClientEditor({ orderId, initialName, onCommitted }
     setName(initialName ?? "");
     setEditing(true);
   };
-
   const cancel = () => {
     setName(initialName ?? "");
     setEditing(false);
@@ -29,7 +29,7 @@ export default function InlineClientEditor({ orderId, initialName, onCommitted }
     setSaving(true);
     const { data, error } = await supabase.rpc("link_order_to_client", {
       p_order_id: orderId,
-      p_client_name: name,
+      p_client_name: name, // vazio => desvincular
     });
     setSaving(false);
 
@@ -38,7 +38,7 @@ export default function InlineClientEditor({ orderId, initialName, onCommitted }
       const msg = /permission/i.test(error.message)
         ? "Permissão negada ao alterar cliente da OS."
         : `Erro ao alterar cliente da OS: ${error.message}`;
-      toast.error(msg);
+      alert(msg);
       return;
     }
 

@@ -21,7 +21,9 @@ import ImportDialog from '@/components/ssgen/import/ImportDialog';
 import { HeaderBar } from '@/components/ssgen/shared/HeaderBar';
 import { deleteServiceOrder } from '@/lib/trackerApi';
 import { logOrderChange } from '@/lib/orderAuditApi';
-import { fetchOrders as fetchUnifiedOrderRows, getProfile, POWER_ROW_TO_SERVICE_ORDER_FIELD } from '@/lib/ssgenClient';
+import InlineClientEditor from '@/components/orders/InlineClientEditor';
+import { getProfile, POWER_ROW_TO_SERVICE_ORDER_FIELD } from '@/lib/ssgenClient';
+import { fetchManagementOrders, type ManagementOrderRow } from '@/lib/fetchOrders';
 import type { Database } from '@/integrations/supabase/types';
 import type { PowerRow } from '@/types/ssgen';
 
@@ -99,9 +101,9 @@ async function updateOrderByCode(
 }
 
 interface EtapasRowProps {
-  row: PowerRow;
-  onChange: (row: PowerRow) => void;
-  onDelete: (row: PowerRow) => Promise<void>;
+  row: ManagementOrderRow;
+  onChange: (row: ManagementOrderRow) => void;
+  onDelete: (row: ManagementOrderRow) => Promise<void>;
   isAdmin: boolean;
 }
 
@@ -123,7 +125,7 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin 
     }
 
     const oldValue = row[view] as string | null;
-    const updated = { ...row, [view]: value } as PowerRow;
+    const updated = { ...row, [view]: value } as ManagementOrderRow;
     onChange(updated);
     setSaving(label);
     setErrorStage(null);
@@ -226,6 +228,23 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin 
   return (
     <tr className="border-t align-top">
       <td className="p-3 font-medium whitespace-nowrap">{row.OS_SSGEN}</td>
+      <td className="p-3 whitespace-nowrap">
+        {row.id ? (
+          <InlineClientEditor
+            orderId={row.id}
+            initialName={row.CLIENTE || null}
+            onCommitted={(payload) =>
+              onChange({
+                ...row,
+                CLIENTE: payload.client_name ?? '',
+                client_id: payload.client_id ?? null,
+              })
+            }
+          />
+        ) : (
+          row.CLIENTE || '—'
+        )}
+      </td>
       <td className="p-3 whitespace-nowrap">{row.PROD_SSG || 'SSGEN'}</td>
       <td className="p-3 whitespace-nowrap">{currentStage}</td>
       {stageOrder.map((label) => renderField(label))}
@@ -272,15 +291,21 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin 
 };
 
 const OrdersManagement: React.FC = () => {
-  const [rows, setRows] = useState<PowerRow[]>([]);
+  const [rows, setRows] = useState<ManagementOrderRow[]>([]);
   const [importOpen, setImportOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const load = async () => {
-      const data = await fetchUnifiedOrderRows();
-      setRows(data);
+      try {
+        const data = await fetchManagementOrders();
+        setRows(data);
+      } catch (error: unknown) {
+        console.error('Erro ao carregar ordens', error);
+        const message = error instanceof Error ? error.message : 'Erro ao carregar ordens';
+        toast.error(message);
+      }
 
       // Check if user is ADM
       const profile = await getProfile();
@@ -289,7 +314,7 @@ const OrdersManagement: React.FC = () => {
     load();
   }, []);
 
-  const updateRow = (updated: PowerRow) => {
+  const updateRow = (updated: ManagementOrderRow) => {
     setRows((prev) =>
       prev.map((row) =>
         row.id === updated.id || row.OS_SSGEN === updated.OS_SSGEN ? updated : row,
@@ -306,7 +331,7 @@ const OrdersManagement: React.FC = () => {
     });
   }, [query, rows]);
 
-  const handleDeleteRow = async (row: PowerRow) => {
+  const handleDeleteRow = async (row: ManagementOrderRow) => {
     if (!isAdmin) {
       toast.error('Apenas administradores podem apagar ordens.');
       return;
@@ -345,6 +370,7 @@ const OrdersManagement: React.FC = () => {
           <thead className="bg-muted/40 sticky top-0">
             <tr className="text-left">
               <th className="p-3">OS SSGEN</th>
+              <th className="p-3">Nome do cliente</th>
               <th className="p-3">Produto</th>
               <th className="p-3">Etapa</th>
               <th className="p-3">CRA</th>
