@@ -6,10 +6,10 @@ import { toast } from "sonner";
 type Row = {
   id: string;
   ordem_servico_ssgen: number;
-  client_id: string | null;
   client_name: string | null;
   created_at: string;
   deleted_at: string | null;
+  client_id?: string | null;
 };
 
 export default function OrdersListPage() {
@@ -24,7 +24,7 @@ export default function OrdersListPage() {
       setLoading(true);
       const { data, error } = await supabase
         .from("v_map_orders")
-        .select("id, ordem_servico_ssgen, client_id, client_name, created_at, deleted_at")
+        .select("id, ordem_servico_ssgen, client_name, created_at, deleted_at")
         .order("created_at", { ascending: false });
 
       if (!active) return;
@@ -64,7 +64,7 @@ export default function OrdersListPage() {
     payload: { client_name: string | null; client_id: string | null },
   ) => {
     setRows((prev) =>
-      prev.map((r) => (r.id === orderId ? { ...r, client_name: payload.client_name, client_id: payload.client_id } : r)),
+      prev.map((r) => (r.id === orderId ? { ...r, client_name: payload.client_name } : r)),
     );
   };
 

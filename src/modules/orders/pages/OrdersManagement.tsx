@@ -39,8 +39,8 @@ type StageConfig = {
 };
 
 type OrdersManagementRow = PowerRow & {
-  client_id: string | null;
   client_name: string | null;
+  client_id?: string | null;
 };
 
 const fieldMap: Record<string, StageConfig> = {
@@ -252,7 +252,6 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin 
                 ...row,
                 CLIENTE: payload.client_name ?? '',
                 client_name: payload.client_name ?? null,
-                client_id: payload.client_id ?? null,
               })
             }
           />
@@ -341,7 +340,6 @@ const OrdersManagement: React.FC = () => {
           ...row,
           CLIENTE: resolvedClientName ?? '',
           client_name: resolvedClientName,
-          client_id: view?.client_id ?? null,
         } satisfies OrdersManagementRow;
       });
 
