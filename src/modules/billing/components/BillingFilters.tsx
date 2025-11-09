@@ -30,11 +30,13 @@ export function BillingFilters({
             </SelectTrigger>
             <SelectContent className="bg-zenith-card border-zenith-navy">
               <SelectItem value="all" className="text-white">Todos</SelectItem>
-              {representantes.map((rep) => (
-                <SelectItem key={rep} value={rep} className="text-white">
-                  {rep}
-                </SelectItem>
-              ))}
+              {representantes
+                .filter((rep) => rep && rep.trim() !== '')
+                .map((rep) => (
+                  <SelectItem key={rep} value={String(rep)} className="text-white">
+                    {rep}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>
@@ -47,11 +49,13 @@ export function BillingFilters({
             </SelectTrigger>
             <SelectContent className="bg-zenith-card border-zenith-navy">
               <SelectItem value="all" className="text-white">Todos</SelectItem>
-              {coordenadores.map((coord) => (
-                <SelectItem key={coord} value={coord} className="text-white">
-                  {coord}
-                </SelectItem>
-              ))}
+              {coordenadores
+                .filter((coord) => coord && coord.trim() !== '')
+                .map((coord) => (
+                  <SelectItem key={coord} value={String(coord)} className="text-white">
+                    {coord}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>

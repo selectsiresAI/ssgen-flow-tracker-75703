@@ -173,14 +173,14 @@ const NewOrderPage: React.FC = () => {
             <div className="space-y-2">
               <Label>Cliente</Label>
               <Select
-                value={selectedClient ? selectedClient.id : 'no-client'}
+                value={selectedClient ? String(selectedClient.id) : 'no-client'}
                 onValueChange={(value) => {
                   if (value === 'no-client') {
                     setSelectedClient(null);
                     return;
                   }
 
-                  const client = clients.find(c => c.id === value);
+                  const client = clients.find(c => String(c.id) === value);
                   setSelectedClient(client || null);
                 }}
               >
@@ -189,8 +189,10 @@ const NewOrderPage: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="no-client">Sem cliente</SelectItem>
-                  {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
+                  {clients
+                    .filter(client => client.id && String(client.id).trim() !== '')
+                    .map((client) => (
+                      <SelectItem key={client.id} value={String(client.id)}>
                       {client.nome}
                     </SelectItem>
                   ))}
