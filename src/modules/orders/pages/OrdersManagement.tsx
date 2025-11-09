@@ -91,7 +91,7 @@ async function updateOrderByCode(
 
   // Log audit trail
   await logOrderChange({
-    ordem_servico_ssgen: os_ssgen,
+    ordem_servico_ssgen: String(os_ssgen),
     field_name: column,
     old_value: oldValue,
     new_value: value,

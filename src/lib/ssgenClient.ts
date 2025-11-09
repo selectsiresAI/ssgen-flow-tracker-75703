@@ -161,7 +161,7 @@ async function fetchServiceOrders(): Promise<PowerRow[]> {
 
 async function fetchLegacyOrders(serviceOrderCodes: Set<string>): Promise<PowerRow[]> {
   const { data, error } = await supabase
-    .from<OrdersRow>('orders')
+    .from('orders')
     .select('*')
     .is('deleted_at', null)
     .order('created_at', { ascending: false });

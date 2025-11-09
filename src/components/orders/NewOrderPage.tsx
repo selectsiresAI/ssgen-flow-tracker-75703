@@ -11,10 +11,11 @@ export default function NewOrderPage() {
 
   const createOrder = async () => {
     setLoading(true);
+    const payload: any = clientId ? { client_id: clientId } : {};
     const { data, error } = await supabase
       .from("service_orders")
-      .insert(clientId ? { client_id: clientId } : {})
-      .select("id, ordem_servico_ssgen, client_id")
+      .insert(payload)
+      .select("id, ordem_servico_ssgen")
       .single();
 
     setLoading(false);
@@ -35,7 +36,7 @@ export default function NewOrderPage() {
     setResult({ 
       id: data.id, 
       os: Number(data.ordem_servico_ssgen), 
-      client_id: data.client_id ?? null 
+      client_id: clientId 
     });
   };
 

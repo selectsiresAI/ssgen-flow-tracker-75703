@@ -20,7 +20,14 @@ export default function ClientCreateForm({
 
     const { data, error } = await supabase
       .from("clients")
-      .insert({ nome: nome.trim() })
+      .insert({
+        nome: nome.trim(),
+        cpf_cnpj: 0,
+        coordenador: '',
+        representante: '',
+        data: new Date().toISOString().split('T')[0],
+        ordem_servico_ssgen: 0,
+      })
       .select("id, nome")
       .single();
 

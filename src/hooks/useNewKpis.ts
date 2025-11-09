@@ -124,7 +124,7 @@ export function useOrdersAging() {
         
         return {
           id: o.id,
-          ordem_servico_ssgen: o.OS_SSGEN,
+          ordem_servico_ssgen: Number(o.OS_SSGEN) || 0,
           etapa_atual,
           sla_days: 15,
           received_at: o.DT_SSGEN_OS,

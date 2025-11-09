@@ -28,9 +28,10 @@ export default function ClientSelect({
     (async () => {
       setLoading(true);
       const { data, error } = await supabase
-        .from("v_clients_with_last_os")
-        .select("client_id, client_name, os_count, last_os_ssgen")
-        .order("client_name", { ascending: true });
+        .from("clients")
+        .select("id, nome")
+        .is("deleted_at", null)
+        .order("nome", { ascending: true });
 
       setLoading(false);
       if (error) {
@@ -42,7 +43,13 @@ export default function ClientSelect({
         return;
       }
       if (!mounted) return;
-      setRows(data ?? []);
+      const mapped = (data ?? []).map(c => ({
+        client_id: c.id,
+        client_name: c.nome,
+        os_count: null,
+        last_os_ssgen: null,
+      }));
+      setRows(mapped);
     })();
     return () => {
       mounted = false;
@@ -64,7 +71,14 @@ export default function ClientSelect({
     setCreating(true);
     const { data, error } = await supabase
       .from("clients")
-      .insert({ nome: name })
+      .insert({
+        nome: name,
+        cpf_cnpj: 0,
+        coordenador: '',
+        representante: '',
+        data: new Date().toISOString().split('T')[0],
+        ordem_servico_ssgen: 0,
+      })
       .select("id, nome")
       .single();
     
@@ -77,10 +91,10 @@ export default function ClientSelect({
     
     toast.success("Cliente criado com sucesso!");
     setRows((prev) => [
-      { client_id: data!.id, client_name: data!.nome, os_count: 0, last_os_ssgen: null }, 
+      { client_id: data.id, client_name: data.nome, os_count: 0, last_os_ssgen: null }, 
       ...prev
     ]);
-    onChange(data!.id);
+    onChange(data.id);
   };
 
   return (
