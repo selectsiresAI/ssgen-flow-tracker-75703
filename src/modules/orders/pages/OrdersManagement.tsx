@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trash2, Upload } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -21,7 +21,13 @@ import ImportDialog from '@/components/ssgen/import/ImportDialog';
 import { HeaderBar } from '@/components/ssgen/shared/HeaderBar';
 import { deleteServiceOrder } from '@/lib/trackerApi';
 import { logOrderChange } from '@/lib/orderAuditApi';
-import { fetchOrders as fetchUnifiedOrderRows, getProfile, POWER_ROW_TO_SERVICE_ORDER_FIELD } from '@/lib/ssgenClient';
+import InlineClientEditor from '@/components/orders/InlineClientEditor';
+import {
+  fetchOrders as fetchUnifiedOrderRows,
+  getProfile,
+  POWER_ROW_TO_SERVICE_ORDER_FIELD,
+} from '@/lib/ssgenClient';
+import { fetchManagementOrders, type ManagementOrderRow } from '@/lib/fetchOrders';
 import type { Database } from '@/integrations/supabase/types';
 import type { PowerRow } from '@/types/ssgen';
 
@@ -30,6 +36,11 @@ type ServiceOrderColumn = keyof Database['public']['Tables']['service_orders']['
 type StageConfig = {
   view: keyof PowerRow;
   column?: ServiceOrderColumn;
+};
+
+type OrdersManagementRow = PowerRow & {
+  client_id: string | null;
+  client_name: string | null;
 };
 
 const fieldMap: Record<string, StageConfig> = {
@@ -99,9 +110,9 @@ async function updateOrderByCode(
 }
 
 interface EtapasRowProps {
-  row: PowerRow;
-  onChange: (row: PowerRow) => void;
-  onDelete: (row: PowerRow) => Promise<void>;
+  row: OrdersManagementRow;
+  onChange: (row: OrdersManagementRow) => void;
+  onDelete: (row: OrdersManagementRow) => Promise<void>;
   isAdmin: boolean;
 }
 
@@ -123,7 +134,7 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin 
     }
 
     const oldValue = row[view] as string | null;
-    const updated = { ...row, [view]: value } as PowerRow;
+    const updated = { ...row, [view]: value } as OrdersManagementRow;
     onChange(updated);
     setSaving(label);
     setErrorStage(null);
@@ -226,6 +237,29 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin 
   return (
     <tr className="border-t align-top">
       <td className="p-3 font-medium whitespace-nowrap">{row.OS_SSGEN}</td>
+      <td className="p-3 whitespace-nowrap">
+        {row.id ? (
+          <InlineClientEditor
+            orderId={row.id}
+            initialName={
+              row.client_name ??
+              (typeof row.CLIENTE === 'string' && row.CLIENTE.trim().length > 0
+                ? row.CLIENTE
+                : null)
+            }
+            onCommitted={(payload) =>
+              onChange({
+                ...row,
+                CLIENTE: payload.client_name ?? '',
+                client_name: payload.client_name ?? null,
+                client_id: payload.client_id ?? null,
+              })
+            }
+          />
+        ) : (
+          row.CLIENTE || '—'
+        )}
+      </td>
       <td className="p-3 whitespace-nowrap">{row.PROD_SSG || 'SSGEN'}</td>
       <td className="p-3 whitespace-nowrap">{currentStage}</td>
       {stageOrder.map((label) => renderField(label))}
@@ -272,24 +306,59 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin 
 };
 
 const OrdersManagement: React.FC = () => {
-  const [rows, setRows] = useState<PowerRow[]>([]);
+  const [rows, setRows] = useState<OrdersManagementRow[]>([]);
   const [importOpen, setImportOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
-      const data = await fetchUnifiedOrderRows();
-      setRows(data);
+  const load = useCallback(async () => {
+    try {
+      const [powerRows, managementRows] = await Promise.all([
+        fetchUnifiedOrderRows(),
+        fetchManagementOrders(),
+      ]);
 
-      // Check if user is ADM
+      const viewById = new Map<string, ManagementOrderRow>();
+      managementRows.forEach((row) => {
+        if (row.id) {
+          viewById.set(row.id, row);
+        }
+      });
+
+      const merged: OrdersManagementRow[] = powerRows.map((row) => {
+        const view = row.id ? viewById.get(row.id) : undefined;
+        const fallbackName =
+          typeof row.CLIENTE === 'string' && row.CLIENTE.trim().length > 0
+            ? row.CLIENTE
+            : null;
+        const resolvedClientName = view?.client_name ?? fallbackName ?? null;
+
+        return {
+          ...row,
+          CLIENTE: resolvedClientName ?? '',
+          client_name: resolvedClientName,
+          client_id: view?.client_id ?? null,
+        } satisfies OrdersManagementRow;
+      });
+
+      setRows(merged);
+    } catch (error: unknown) {
+      console.error('Erro ao carregar ordens', error);
+      const message = error instanceof Error ? error.message : 'Erro ao carregar ordens';
+      toast.error(message);
+    }
+  }, []);
+
+  useEffect(() => {
+    const init = async () => {
+      await load();
       const profile = await getProfile();
       setIsAdmin(profile?.role === 'ADM');
     };
-    load();
-  }, []);
+    void init();
+  }, [load]);
 
-  const updateRow = (updated: PowerRow) => {
+  const updateRow = (updated: OrdersManagementRow) => {
     setRows((prev) =>
       prev.map((row) =>
         row.id === updated.id || row.OS_SSGEN === updated.OS_SSGEN ? updated : row,
@@ -306,7 +375,7 @@ const OrdersManagement: React.FC = () => {
     });
   }, [query, rows]);
 
-  const handleDeleteRow = async (row: PowerRow) => {
+  const handleDeleteRow = async (row: OrdersManagementRow) => {
     if (!isAdmin) {
       toast.error('Apenas administradores podem apagar ordens.');
       return;
@@ -345,6 +414,7 @@ const OrdersManagement: React.FC = () => {
           <thead className="bg-muted/40 sticky top-0">
             <tr className="text-left">
               <th className="p-3">OS SSGEN</th>
+              <th className="p-3">Nome do cliente</th>
               <th className="p-3">Produto</th>
               <th className="p-3">Etapa</th>
               <th className="p-3">CRA</th>
