@@ -15,7 +15,10 @@ export async function fetchManagementOrders(): Promise<ManagementOrderRow[]> {
     .select('id, ordem_servico_ssgen, client_id, client_name, created_at, deleted_at')
     .order('created_at', { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    console.error('Supabase error (v_map_orders):', error?.message);
+    throw error;
+  }
 
   return (data ?? []).filter((row) => row.deleted_at == null) as ManagementOrderRow[];
 }
