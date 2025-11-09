@@ -15,11 +15,11 @@ export async function fetchUnifiedOrders(): Promise<UnifiedOrder[]> {
   return data as any as UnifiedOrder[];
 }
 
-export async function createServiceOrder(order: Omit<ServiceOrder, 'id' | 'created_at' | 'updated_at'>) {
+export async function createServiceOrder(order: Omit<ServiceOrder, 'id' | 'created_at' | 'updated_at' | 'deleted_at' | 'ordem_servico_ssgen'>) {
   await requireAdmin();
   const { data, error } = await supabase
     .from('service_orders')
-    .insert([order])
+    .insert([order as any])
     .select()
     .single();
   

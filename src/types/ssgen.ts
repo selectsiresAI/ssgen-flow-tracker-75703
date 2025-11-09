@@ -75,6 +75,7 @@ export const slaBadge = (row: PowerRow) => {
 
 // Novos tipos para Clientes e Ordens de Serviço
 export type Client = {
+  id: string;
   ordem_servico_ssgen: number;
   data: string;
   ordem_servico_neogen?: number | null;
@@ -88,11 +89,13 @@ export type Client = {
   id_conta_ssgen?: number | null;
   created_at?: string;
   updated_at?: string;
+  deleted_at?: string | null;
 };
 
 export type ServiceOrder = {
   id?: string;
-  ordem_servico_ssgen: number;
+  ordem_servico_ssgen?: number | null;
+  client_id?: string | null;
   ordem_servico_neogen?: number | null;
   numero_nf_neogen?: number | null;
   nome_produto?: string | null;

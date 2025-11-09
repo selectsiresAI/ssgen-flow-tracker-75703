@@ -15,7 +15,7 @@ export async function fetchClients(): Promise<Client[]> {
   return data as Client[];
 }
 
-export async function createClient(client: Omit<Client, 'created_at' | 'updated_at'>) {
+export async function createClient(client: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>) {
   const { data, error } = await supabase
     .from('clients')
     .insert([client])
@@ -26,7 +26,7 @@ export async function createClient(client: Omit<Client, 'created_at' | 'updated_
   return data;
 }
 
-export async function updateClient(ordem_servico_ssgen: number, updates: Partial<Client>) {
+export async function updateClient(ordem_servico_ssgen: number, updates: Partial<Omit<Client, 'id' | 'created_at' | 'updated_at'>>) {
   const { data, error } = await supabase
     .from('clients')
     .update(updates)

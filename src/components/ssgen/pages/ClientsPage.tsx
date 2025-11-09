@@ -25,7 +25,6 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
-    ordem_servico_ssgen: '',
     data: '',
     ordem_servico_neogen: '',
     nome: '',
@@ -75,7 +74,6 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
 
   const resetForm = () => {
     setFormData({
-      ordem_servico_ssgen: '',
       data: '',
       ordem_servico_neogen: '',
       nome: '',
@@ -95,7 +93,7 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
     e.preventDefault();
     try {
       const clientData = {
-        ordem_servico_ssgen: Number(formData.ordem_servico_ssgen),
+        ordem_servico_ssgen: editingClient ? editingClient.ordem_servico_ssgen : 0,
         data: formData.data,
         ordem_servico_neogen: formData.ordem_servico_neogen ? Number(formData.ordem_servico_neogen) : null,
         nome: formData.nome,
@@ -130,7 +128,6 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
   const handleEdit = (client: Client) => {
     setEditingClient(client);
     setFormData({
-      ordem_servico_ssgen: String(client.ordem_servico_ssgen),
       data: client.data,
       ordem_servico_neogen: client.ordem_servico_neogen ? String(client.ordem_servico_neogen) : '',
       nome: client.nome,
@@ -166,18 +163,7 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="ordem_servico_ssgen">Ordem de Serviço SSGen *</Label>
-                  <Input
-                    id="ordem_servico_ssgen"
-                    type="number"
-                    required
-                    disabled={!!editingClient}
-                    value={formData.ordem_servico_ssgen}
-                    onChange={(e) => setFormData({ ...formData, ordem_servico_ssgen: e.target.value })}
-                  />
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="data">Data *</Label>
                   <Input
@@ -308,7 +294,6 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
                   variant="outline" 
                   onClick={() => {
                     setFormData({
-                      ordem_servico_ssgen: '',
                       data: '',
                       ordem_servico_neogen: '',
                       nome: '',
@@ -342,7 +327,6 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>OS SSGen</TableHead>
                   <TableHead>Data</TableHead>
                   <TableHead>Nome</TableHead>
                   <TableHead>CPF/CNPJ</TableHead>
@@ -355,14 +339,13 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
               <TableBody>
                 {clients.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center text-muted-foreground">
                       Nenhum cliente cadastrado
                     </TableCell>
                   </TableRow>
                 ) : (
                   clients.map((client) => (
                     <TableRow key={client.ordem_servico_ssgen}>
-                      <TableCell>{client.ordem_servico_ssgen}</TableCell>
                       <TableCell>{new Date(client.data).toLocaleDateString('pt-BR')}</TableCell>
                       <TableCell>{client.nome}</TableCell>
                       <TableCell>{client.cpf_cnpj}</TableCell>

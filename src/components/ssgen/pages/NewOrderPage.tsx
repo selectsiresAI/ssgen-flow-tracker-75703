@@ -78,19 +78,11 @@ const NewOrderPage: React.FC = () => {
       });
       return;
     }
-    if (!selectedClient) {
-      toast({
-        title: 'Erro',
-        description: 'Selecione um cliente',
-        variant: 'destructive' 
-      });
-      return;
-    }
 
     try {
-      const orderData = {
-        ordem_servico_ssgen: selectedClient.ordem_servico_ssgen,
-        ordem_servico_neogen: selectedClient.ordem_servico_neogen || null,
+      const orderData: any = {
+        client_id: selectedClient?.id || null,
+        ordem_servico_neogen: selectedClient?.ordem_servico_neogen || null,
         numero_nf_neogen: formData.numero_nf_neogen ? Number(formData.numero_nf_neogen) : null,
         nome_produto: formData.nome_produto || null,
         numero_amostras: formData.numero_amostras ? Number(formData.numero_amostras) : null,
@@ -172,44 +164,43 @@ const NewOrderPage: React.FC = () => {
     <div className="space-y-4">
       <HeaderBar title="Nova Ordem de Serviço" query="" setQuery={() => {}} />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Selecionar Cliente</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <Label>Cliente *</Label>
-            <Select
-              value={selectedClient ? String(selectedClient.ordem_servico_ssgen) : ''}
-              onValueChange={(value) => {
-                const client = clients.find(c => String(c.ordem_servico_ssgen) === value);
-                setSelectedClient(client || null);
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione um cliente" />
-              </SelectTrigger>
-              <SelectContent>
-                {clients.map((client) => (
-                  <SelectItem key={client.ordem_servico_ssgen} value={String(client.ordem_servico_ssgen)}>
-                    {client.ordem_servico_ssgen} - {client.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {selectedClient && (
-              <div className="mt-2 p-3 bg-muted rounded-md text-sm">
-                <p><strong>Nome:</strong> {selectedClient.nome}</p>
-                <p><strong>Representante:</strong> {selectedClient.representante}</p>
-                <p><strong>Coordenador:</strong> {selectedClient.coordenador}</p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {selectedClient && (
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Selecionar Cliente (Opcional)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Label>Cliente</Label>
+              <Select
+                value={selectedClient ? selectedClient.id : ''}
+                onValueChange={(value) => {
+                  const client = clients.find(c => c.id === value);
+                  setSelectedClient(client || null);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um cliente ou deixe em branco" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Sem cliente</SelectItem>
+                  {clients.map((client) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedClient && (
+                <div className="mt-2 p-3 bg-muted rounded-md text-sm">
+                  <p><strong>Nome:</strong> {selectedClient.nome}</p>
+                  <p><strong>Representante:</strong> {selectedClient.representante}</p>
+                  <p><strong>Coordenador:</strong> {selectedClient.coordenador}</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
           <Card>
             <CardHeader>
               <CardTitle>Dados Básicos</CardTitle>
@@ -436,12 +427,11 @@ const NewOrderPage: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Button type="submit" className="gap-2">
-            <Save className="w-4 h-4" />
-            Salvar Ordem
-          </Button>
-        </form>
-      )}
+        <Button type="submit" className="gap-2">
+          <Save className="w-4 h-4" />
+          Salvar Ordem
+        </Button>
+      </form>
     </div>
   );
 };
