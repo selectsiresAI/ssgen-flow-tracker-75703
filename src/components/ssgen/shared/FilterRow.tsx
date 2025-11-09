@@ -28,58 +28,66 @@ interface FilterRowProps {
 export const FilterRow: React.FC<FilterRowProps> = (p) => (
   <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
     {p.showCoord && (
-      <Select value={p.coord} onValueChange={(v) => p.setCoord(v)}>
+      <Select value={p.coord ?? undefined} onValueChange={(v) => p.setCoord(v || undefined)}>
         <SelectTrigger>
           <SelectValue placeholder="COORD (Gerente)" />
         </SelectTrigger>
         <SelectContent>
-          {p.coords.map((c) => (
-            <SelectItem key={c} value={c}>
-              {c}
-            </SelectItem>
-          ))}
+          {p.coords
+            .filter((c) => c && c.trim() !== '')
+            .map((c) => (
+              <SelectItem key={c} value={String(c)}>
+                {c}
+              </SelectItem>
+            ))}
         </SelectContent>
       </Select>
     )}
     {p.showRep && (
-      <Select value={p.rep} onValueChange={(v) => p.setRep(v)}>
+      <Select value={p.rep ?? undefined} onValueChange={(v) => p.setRep(v || undefined)}>
         <SelectTrigger>
           <SelectValue placeholder="REP (Representante)" />
         </SelectTrigger>
         <SelectContent>
-          {p.reps.map((c) => (
-            <SelectItem key={c} value={c}>
-              {c}
-            </SelectItem>
-          ))}
+          {p.reps
+            .filter((c) => c && c.trim() !== '')
+            .map((c) => (
+              <SelectItem key={c} value={String(c)}>
+                {c}
+              </SelectItem>
+            ))}
         </SelectContent>
       </Select>
     )}
     {p.showCliente && (
-      <Select value={p.cliente} onValueChange={(v) => p.setCliente(v)}>
+      <Select value={p.cliente ?? undefined} onValueChange={(v) => p.setCliente(v || undefined)}>
         <SelectTrigger>
           <SelectValue placeholder="CLIENTE" />
         </SelectTrigger>
         <SelectContent>
-          {p.clientes.map((c) => (
-            <SelectItem key={c} value={c}>
-              {c}
-            </SelectItem>
-          ))}
+          {p.clientes
+            .filter((c) => c && c.trim() !== '')
+            .map((c) => (
+              <SelectItem key={c} value={String(c)}>
+                {c}
+              </SelectItem>
+            ))}
         </SelectContent>
       </Select>
     )}
     {p.showProduto && (
-      <Select value={p.produto} onValueChange={(v) => p.setProduto(v)}>
+      <Select value={p.produto ?? undefined} onValueChange={(v) => p.setProduto(v || undefined)}>
         <SelectTrigger>
           <SelectValue placeholder="Produto (PROD_SSG/PROD_NEOGEN)" />
         </SelectTrigger>
         <SelectContent>
-          {p.produtos.map((c) => (
-            <SelectItem key={c} value={c}>
-              {c}
-            </SelectItem>
-          ))}
+          {p.produtos
+            .filter((c) => c && c.trim() !== '')
+            .map((c) => (
+              <SelectItem key={c} value={String(c)}>
+                {c}
+              </SelectItem>
+            ))}
         </SelectContent>
       </Select>
     )}

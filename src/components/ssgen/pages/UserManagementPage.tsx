@@ -33,8 +33,8 @@ export default function UserManagementPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<AppRole>('REPRESENTANTE');
-  const [selectedCoord, setSelectedCoord] = useState<string>('');
-  const [selectedRep, setSelectedRep] = useState<string>('');
+  const [selectedCoord, setSelectedCoord] = useState<string | undefined>(undefined);
+  const [selectedRep, setSelectedRep] = useState<string | undefined>(undefined);
 
   // Buscar usuários com papéis
   const { data: users = [] } = useQuery({
@@ -97,8 +97,8 @@ export default function UserManagementPage() {
   const handleEdit = (userId: string, role?: AppRole, coord?: string, rep?: string) => {
     setSelectedUser(userId);
     setSelectedRole(role || 'REPRESENTANTE');
-    setSelectedCoord(coord || '');
-    setSelectedRep(rep || '');
+    setSelectedCoord(coord ?? undefined);
+    setSelectedRep(rep ?? undefined);
     setDialogOpen(true);
   };
 
@@ -115,8 +115,8 @@ export default function UserManagementPage() {
     assignMutation.mutate({
       userId: selectedUser,
       role: selectedRole,
-      coord: selectedRole === 'GERENTE' ? selectedCoord : undefined,
-      rep: selectedRole === 'REPRESENTANTE' ? selectedRep : undefined,
+      coord: selectedRole === 'GERENTE' ? selectedCoord || undefined : undefined,
+      rep: selectedRole === 'REPRESENTANTE' ? selectedRep || undefined : undefined,
     });
   };
 
@@ -124,8 +124,8 @@ export default function UserManagementPage() {
     setDialogOpen(false);
     setSelectedUser(null);
     setSelectedRole('REPRESENTANTE');
-    setSelectedCoord('');
-    setSelectedRep('');
+    setSelectedCoord(undefined);
+    setSelectedRep(undefined);
   };
 
   const filtered = users.filter(user =>
@@ -216,16 +216,18 @@ export default function UserManagementPage() {
             {selectedRole === 'GERENTE' && (
               <div className="space-y-2">
                 <Label htmlFor="coord">Coordenador</Label>
-                <Select value={selectedCoord} onValueChange={setSelectedCoord}>
+                <Select value={selectedCoord ?? undefined} onValueChange={(value) => setSelectedCoord(value || undefined)}>
                   <SelectTrigger id="coord">
                     <SelectValue placeholder="Selecione o coordenador" />
                   </SelectTrigger>
                   <SelectContent>
-                    {coordenadores.map(coord => (
-                      <SelectItem key={coord.id} value={coord.nome}>
-                        {coord.nome}
-                      </SelectItem>
-                    ))}
+                    {coordenadores
+                      .filter((coord) => coord.nome && coord.nome.trim() !== '')
+                      .map(coord => (
+                        <SelectItem key={coord.id ?? coord.nome} value={String(coord.nome)}>
+                          {coord.nome}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -234,16 +236,18 @@ export default function UserManagementPage() {
             {selectedRole === 'REPRESENTANTE' && (
               <div className="space-y-2">
                 <Label htmlFor="rep">Representante</Label>
-                <Select value={selectedRep} onValueChange={setSelectedRep}>
+                <Select value={selectedRep ?? undefined} onValueChange={(value) => setSelectedRep(value || undefined)}>
                   <SelectTrigger id="rep">
                     <SelectValue placeholder="Selecione o representante" />
                   </SelectTrigger>
                   <SelectContent>
-                    {representantes.map(rep => (
-                      <SelectItem key={rep.id} value={rep.nome}>
-                        {rep.nome}
-                      </SelectItem>
-                    ))}
+                    {representantes
+                      .filter((rep) => rep.nome && rep.nome.trim() !== '')
+                      .map(rep => (
+                        <SelectItem key={rep.id ?? rep.nome} value={String(rep.nome)}>
+                          {rep.nome}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>

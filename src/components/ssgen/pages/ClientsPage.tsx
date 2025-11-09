@@ -18,13 +18,26 @@ interface ClientsPageProps {
   profile: { rep?: string | null; coord?: string | null };
 }
 
+type ClientFormData = {
+  data: string;
+  ordem_servico_neogen: string;
+  nome: string;
+  cpf_cnpj: string;
+  ie_rg: string;
+  codigo: string;
+  status: string;
+  representante?: string;
+  coordenador?: string;
+  id_conta_ssgen: string;
+};
+
 const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
   const [clients, setClients] = useState<Client[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const { toast } = useToast();
 
-  const [formData, setFormData] = useState({
+  const createInitialFormData = (): ClientFormData => ({
     data: '',
     ordem_servico_neogen: '',
     nome: '',
@@ -32,10 +45,12 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
     ie_rg: '',
     codigo: '',
     status: '',
-    representante: profile.rep || '',
-    coordenador: profile.coord || '',
+    representante: profile.rep ?? undefined,
+    coordenador: profile.coord ?? undefined,
     id_conta_ssgen: '',
   });
+
+  const [formData, setFormData] = useState<ClientFormData>(() => createInitialFormData());
 
   const { data: coordenadores = [] } = useQuery({
     queryKey: ['coordenadores'],
@@ -73,18 +88,7 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
   };
 
   const resetForm = () => {
-    setFormData({
-      data: '',
-      ordem_servico_neogen: '',
-      nome: '',
-      cpf_cnpj: '',
-      ie_rg: '',
-      codigo: '',
-      status: '',
-      representante: profile.rep || '',
-      coordenador: profile.coord || '',
-      id_conta_ssgen: '',
-    });
+    setFormData(createInitialFormData());
     setEditingClient(null);
     setShowForm(false);
   };
@@ -92,6 +96,15 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      if (!formData.representante || !formData.coordenador) {
+        toast({
+          title: 'Selecione representante e coordenador',
+          description: 'Escolha um representante e um coordenador válidos antes de salvar.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const clientData = {
         ordem_servico_ssgen: editingClient ? editingClient.ordem_servico_ssgen : 0,
         data: formData.data,
@@ -135,8 +148,8 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
       ie_rg: client.ie_rg ? String(client.ie_rg) : '',
       codigo: client.codigo ? String(client.codigo) : '',
       status: client.status || '',
-      representante: client.representante,
-      coordenador: client.coordenador,
+      representante: client.representante || undefined,
+      coordenador: client.coordenador || undefined,
       id_conta_ssgen: client.id_conta_ssgen ? String(client.id_conta_ssgen) : '',
     });
     setShowForm(true);
@@ -240,36 +253,40 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
                 <div>
                   <Label htmlFor="representante">Representante *</Label>
                   <Select
-                    value={formData.representante}
-                    onValueChange={(value) => setFormData({ ...formData, representante: value })}
+                    value={formData.representante ?? undefined}
+                    onValueChange={(value) => setFormData({ ...formData, representante: value || undefined })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione um representante" />
                     </SelectTrigger>
                     <SelectContent>
-                      {representantes.map((rep) => (
-                        <SelectItem key={rep.nome} value={rep.nome}>
-                          {rep.nome}
-                        </SelectItem>
-                      ))}
+                      {representantes
+                        .filter((rep) => rep.nome && rep.nome.trim() !== '')
+                        .map((rep) => (
+                          <SelectItem key={rep.nome} value={String(rep.nome)}>
+                            {rep.nome}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
                   <Label htmlFor="coordenador">Coordenador *</Label>
                   <Select
-                    value={formData.coordenador}
-                    onValueChange={(value) => setFormData({ ...formData, coordenador: value })}
+                    value={formData.coordenador ?? undefined}
+                    onValueChange={(value) => setFormData({ ...formData, coordenador: value || undefined })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione um coordenador" />
                     </SelectTrigger>
                     <SelectContent>
-                      {coordenadores.map((coord) => (
-                        <SelectItem key={coord.nome} value={coord.nome}>
-                          {coord.nome}
-                        </SelectItem>
-                      ))}
+                      {coordenadores
+                        .filter((coord) => coord.nome && coord.nome.trim() !== '')
+                        .map((coord) => (
+                          <SelectItem key={coord.nome} value={String(coord.nome)}>
+                            {coord.nome}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -293,18 +310,7 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
                   type="button" 
                   variant="outline" 
                   onClick={() => {
-                    setFormData({
-                      data: '',
-                      ordem_servico_neogen: '',
-                      nome: '',
-                      cpf_cnpj: '',
-                      ie_rg: '',
-                      codigo: '',
-                      status: '',
-                      representante: profile.rep || '',
-                      coordenador: profile.coord || '',
-                      id_conta_ssgen: '',
-                    });
+                    setFormData(createInitialFormData());
                   }}
                 >
                   Limpar
