@@ -173,8 +173,13 @@ const NewOrderPage: React.FC = () => {
             <div className="space-y-2">
               <Label>Cliente</Label>
               <Select
-                value={selectedClient ? selectedClient.id : ''}
+                value={selectedClient ? selectedClient.id : 'no-client'}
                 onValueChange={(value) => {
+                  if (value === 'no-client') {
+                    setSelectedClient(null);
+                    return;
+                  }
+
                   const client = clients.find(c => c.id === value);
                   setSelectedClient(client || null);
                 }}
@@ -183,7 +188,7 @@ const NewOrderPage: React.FC = () => {
                   <SelectValue placeholder="Selecione um cliente ou deixe em branco" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Sem cliente</SelectItem>
+                  <SelectItem value="no-client">Sem cliente</SelectItem>
                   {clients.map((client) => (
                     <SelectItem key={client.id} value={client.id}>
                       {client.nome}
