@@ -146,7 +146,7 @@ export async function requireAdmin(): Promise<Profile> {
 async function fetchServiceOrders(): Promise<PowerRow[]> {
   const { data, error } = await supabase
     .from('service_orders')
-    .select('*, clients:clients ( nome, coordenador, representante, deleted_at )')
+    .select('*, clients!service_orders_client_id_fkey ( nome, coordenador, representante, deleted_at )')
     .is('deleted_at', null)
     .order('created_at', { ascending: false });
 

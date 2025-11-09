@@ -14,6 +14,21 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_config: {
+        Row: {
+          key: string
+          value: string | null
+        }
+        Insert: {
+          key: string
+          value?: string | null
+        }
+        Update: {
+          key?: string
+          value?: string | null
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           codigo: number | null
@@ -22,6 +37,7 @@ export type Database = {
           created_at: string
           data: string
           deleted_at: string | null
+          id: string | null
           id_conta_ssgen: number | null
           ie_rg: number | null
           nome: string
@@ -38,6 +54,7 @@ export type Database = {
           created_at?: string
           data: string
           deleted_at?: string | null
+          id?: string | null
           id_conta_ssgen?: number | null
           ie_rg?: number | null
           nome: string
@@ -54,6 +71,7 @@ export type Database = {
           created_at?: string
           data?: string
           deleted_at?: string | null
+          id?: string | null
           id_conta_ssgen?: number | null
           ie_rg?: number | null
           nome?: string
@@ -610,6 +628,7 @@ export type Database = {
       }
       service_orders: {
         Row: {
+          client_id: string | null
           cliente_lat: number | null
           cliente_lon: number | null
           completed_at: string | null
@@ -652,6 +671,7 @@ export type Database = {
           vri_status_sla: string | null
         }
         Insert: {
+          client_id?: string | null
           cliente_lat?: number | null
           cliente_lon?: number | null
           completed_at?: string | null
@@ -694,6 +714,7 @@ export type Database = {
           vri_status_sla?: string | null
         }
         Update: {
+          client_id?: string | null
           cliente_lat?: number | null
           cliente_lon?: number | null
           completed_at?: string | null
@@ -737,11 +758,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "service_orders_ordem_servico_ssgen_fkey"
-            columns: ["ordem_servico_ssgen"]
+            foreignKeyName: "service_orders_client_id_fkey"
+            columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
-            referencedColumns: ["ordem_servico_ssgen"]
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -918,15 +939,7 @@ export type Database = {
           updated_at: string | null
           vri_status_sla: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "service_orders_ordem_servico_ssgen_fkey"
-            columns: ["ordem_servico_ssgen"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["ordem_servico_ssgen"]
-          },
-        ]
+        Relationships: []
       }
       v_monthly_billing: {
         Row: {
@@ -949,15 +962,7 @@ export type Database = {
           received_at: string | null
           sla_days: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "service_orders_ordem_servico_ssgen_fkey"
-            columns: ["ordem_servico_ssgen"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["ordem_servico_ssgen"]
-          },
-        ]
+        Relationships: []
       }
       v_ready_to_invoice: {
         Row: {
@@ -976,15 +981,7 @@ export type Database = {
           updated_at: string | null
           valor_estimado: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "service_orders_ordem_servico_ssgen_fkey"
-            columns: ["ordem_servico_ssgen"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["ordem_servico_ssgen"]
-          },
-        ]
+        Relationships: []
       }
       v_tracker_kpi_topline: {
         Row: {
@@ -1035,197 +1032,247 @@ export type Database = {
           ordem_servico_ssgen: number | null
           prioridade: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "service_orders_ordem_servico_ssgen_fkey"
-            columns: ["ordem_servico_ssgen"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["ordem_servico_ssgen"]
-          },
-        ]
+        Relationships: []
       }
       vw_orders_powerbi: {
         Row: {
-          id: string | null
-          OS_SSGEN: string | null
           CLIENTE: string | null
+          COD_SSB: string | null
           COORD: string | null
-          REP: string | null
-          PROD_SSG: string | null
-          N_AMOSTRAS_SSG: number | null
-          DT_SSGEN_OS: string | null
-          DT_PREV_RESULT_SSG: string | null
-          RESULT_SSG: string | null
-          DT_RESULT_SSG: string | null
-          FATUR_TIPO: string | null
-          FATUR_SSG: number | null
-          DT_FATUR_SSG: string | null
-          OS_NEOGEN: string | null
-          PLAN_NEOGEN: string | null
+          created_at: string | null
           DT_CRA: string | null
-          DT_PLAN_NEOGEN: string | null
-          DT_VRI: string | null
+          DT_FATUR_SSG: string | null
           DT_LPR: string | null
           DT_LR: string | null
-          N_VRI: number | null
+          DT_PLAN_NEOGEN: string | null
+          DT_PLAN_SSG: string | null
+          DT_PREV_RESULT_SSG: string | null
+          DT_RESULT_SSG: string | null
+          DT_SSGEN_OS: string | null
+          DT_VRI: string | null
+          FATUR_SSG: number | null
+          FATUR_TIPO: string | null
+          id: string | null
+          LIB_CAD_CLIENTE: string | null
+          LR_RASTREIO: string | null
+          N_AMOSTRAS_NEOGEN: number | null
+          N_AMOSTRAS_SSG: number | null
           N_LPR: number | null
           N_LR: number | null
-          LR_RASTREIO: string | null
+          N_VRI: number | null
+          NF_NA_NEOGEN: string | null
+          NF_NEOGEM: string | null
+          Ord: string | null
+          OS_NEOGEN: string | null
+          OS_SSGEN: string | null
+          PLAN_NEOGEN: string | null
+          PLAN_SSG: string | null
+          PROD_NEOGEN: string | null
+          PROD_SSG: string | null
+          REP: string | null
+          RESULT_SSG: string | null
+          updated_at: string | null
         }
         Insert: {
-          id?: string | null
-          OS_SSGEN?: string | null
           CLIENTE?: string | null
+          COD_SSB?: string | null
           COORD?: string | null
-          REP?: string | null
-          PROD_SSG?: string | null
-          N_AMOSTRAS_SSG?: number | null
-          DT_SSGEN_OS?: string | null
-          DT_PREV_RESULT_SSG?: string | null
-          RESULT_SSG?: string | null
-          DT_RESULT_SSG?: string | null
-          FATUR_TIPO?: string | null
-          FATUR_SSG?: number | null
-          DT_FATUR_SSG?: string | null
-          OS_NEOGEN?: string | null
-          PLAN_NEOGEN?: string | null
+          created_at?: string | null
           DT_CRA?: string | null
-          DT_PLAN_NEOGEN?: string | null
-          DT_VRI?: string | null
+          DT_FATUR_SSG?: string | null
           DT_LPR?: string | null
           DT_LR?: string | null
-          N_VRI?: number | null
+          DT_PLAN_NEOGEN?: string | null
+          DT_PLAN_SSG?: string | null
+          DT_PREV_RESULT_SSG?: string | null
+          DT_RESULT_SSG?: string | null
+          DT_SSGEN_OS?: string | null
+          DT_VRI?: string | null
+          FATUR_SSG?: number | null
+          FATUR_TIPO?: string | null
+          id?: never
+          LIB_CAD_CLIENTE?: string | null
+          LR_RASTREIO?: string | null
+          N_AMOSTRAS_NEOGEN?: number | null
+          N_AMOSTRAS_SSG?: number | null
           N_LPR?: number | null
           N_LR?: number | null
-          LR_RASTREIO?: string | null
+          N_VRI?: number | null
+          NF_NA_NEOGEN?: string | null
+          NF_NEOGEM?: string | null
+          Ord?: string | null
+          OS_NEOGEN?: string | null
+          OS_SSGEN?: string | null
+          PLAN_NEOGEN?: string | null
+          PLAN_SSG?: string | null
+          PROD_NEOGEN?: string | null
+          PROD_SSG?: string | null
+          REP?: string | null
+          RESULT_SSG?: string | null
+          updated_at?: string | null
         }
         Update: {
-          id?: string | null
-          OS_SSGEN?: string | null
           CLIENTE?: string | null
+          COD_SSB?: string | null
           COORD?: string | null
-          REP?: string | null
-          PROD_SSG?: string | null
-          N_AMOSTRAS_SSG?: number | null
-          DT_SSGEN_OS?: string | null
-          DT_PREV_RESULT_SSG?: string | null
-          RESULT_SSG?: string | null
-          DT_RESULT_SSG?: string | null
-          FATUR_TIPO?: string | null
-          FATUR_SSG?: number | null
-          DT_FATUR_SSG?: string | null
-          OS_NEOGEN?: string | null
-          PLAN_NEOGEN?: string | null
+          created_at?: string | null
           DT_CRA?: string | null
-          DT_PLAN_NEOGEN?: string | null
-          DT_VRI?: string | null
+          DT_FATUR_SSG?: string | null
           DT_LPR?: string | null
           DT_LR?: string | null
-          N_VRI?: number | null
+          DT_PLAN_NEOGEN?: string | null
+          DT_PLAN_SSG?: string | null
+          DT_PREV_RESULT_SSG?: string | null
+          DT_RESULT_SSG?: string | null
+          DT_SSGEN_OS?: string | null
+          DT_VRI?: string | null
+          FATUR_SSG?: number | null
+          FATUR_TIPO?: string | null
+          id?: never
+          LIB_CAD_CLIENTE?: string | null
+          LR_RASTREIO?: string | null
+          N_AMOSTRAS_NEOGEN?: number | null
+          N_AMOSTRAS_SSG?: number | null
           N_LPR?: number | null
           N_LR?: number | null
-          LR_RASTREIO?: string | null
+          N_VRI?: number | null
+          NF_NA_NEOGEN?: string | null
+          NF_NEOGEM?: string | null
+          Ord?: string | null
+          OS_NEOGEN?: string | null
+          OS_SSGEN?: string | null
+          PLAN_NEOGEN?: string | null
+          PLAN_SSG?: string | null
+          PROD_NEOGEN?: string | null
+          PROD_SSG?: string | null
+          REP?: string | null
+          RESULT_SSG?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
       vw_orders_unified: {
         Row: {
-          id: string | null
-          ordem_servico_ssgen: number | null
-          cliente_nome: string | null
-          coordenador: string | null
-          representante: string | null
-          nome_produto: string | null
-          numero_amostras: number | null
+          CLIENTE: string | null
+          COD_SSB: string | null
+          COORD: string | null
           created_at: string | null
-          dt_cra: string | null
-          dt_planilha_neogen: string | null
-          dt_vri: string | null
-          dt_lpr: string | null
-          dt_lr: string | null
-          dt_resultado: string | null
-          dt_prev_resultado: string | null
-          resultado: string | null
-          dt_faturamento: string | null
-          faturamento_tipo: string | null
-          valor_faturamento: number | null
-          os_neogen: string | null
-          plano_neogen: string | null
-          n_vri: number | null
-          n_lpr: number | null
-          n_lr: number | null
-          lr_rastreio: string | null
-          prioridade: string | null
-          flag_reagendamento: boolean | null
-          issue_text: string | null
-          source_table: string | null
+          DT_CRA: string | null
+          DT_FATUR_SSG: string | null
+          DT_LPR: string | null
+          DT_LR: string | null
+          DT_PLAN_NEOGEN: string | null
+          DT_PLAN_SSG: string | null
+          DT_PREV_RESULT_SSG: string | null
+          DT_RESULT_SSG: string | null
+          DT_SSGEN_OS: string | null
+          DT_VRI: string | null
+          FATUR_SSG: number | null
+          FATUR_TIPO: string | null
+          id: string | null
+          LIB_CAD_CLIENTE: string | null
+          LR_RASTREIO: string | null
+          N_AMOSTRAS_NEOGEN: number | null
+          N_AMOSTRAS_SSG: number | null
+          N_LPR: number | null
+          N_LR: number | null
+          N_VRI: number | null
+          NF_NA_NEOGEN: string | null
+          NF_NEOGEM: string | null
+          Ord: string | null
+          OS_NEOGEN: string | null
+          OS_SSGEN: string | null
+          PLAN_NEOGEN: string | null
+          PLAN_SSG: string | null
+          PROD_NEOGEN: string | null
+          PROD_SSG: string | null
+          REP: string | null
+          RESULT_SSG: string | null
+          updated_at: string | null
         }
         Insert: {
-          id?: string | null
-          ordem_servico_ssgen?: number | null
-          cliente_nome?: string | null
-          coordenador?: string | null
-          representante?: string | null
-          nome_produto?: string | null
-          numero_amostras?: number | null
+          CLIENTE?: string | null
+          COD_SSB?: string | null
+          COORD?: string | null
           created_at?: string | null
-          dt_cra?: string | null
-          dt_planilha_neogen?: string | null
-          dt_vri?: string | null
-          dt_lpr?: string | null
-          dt_lr?: string | null
-          dt_resultado?: string | null
-          dt_prev_resultado?: string | null
-          resultado?: string | null
-          dt_faturamento?: string | null
-          faturamento_tipo?: string | null
-          valor_faturamento?: number | null
-          os_neogen?: string | null
-          plano_neogen?: string | null
-          n_vri?: number | null
-          n_lpr?: number | null
-          n_lr?: number | null
-          lr_rastreio?: string | null
-          prioridade?: string | null
-          flag_reagendamento?: boolean | null
-          issue_text?: string | null
-          source_table?: string | null
+          DT_CRA?: string | null
+          DT_FATUR_SSG?: string | null
+          DT_LPR?: string | null
+          DT_LR?: string | null
+          DT_PLAN_NEOGEN?: string | null
+          DT_PLAN_SSG?: string | null
+          DT_PREV_RESULT_SSG?: string | null
+          DT_RESULT_SSG?: string | null
+          DT_SSGEN_OS?: string | null
+          DT_VRI?: string | null
+          FATUR_SSG?: number | null
+          FATUR_TIPO?: string | null
+          id?: string | null
+          LIB_CAD_CLIENTE?: string | null
+          LR_RASTREIO?: string | null
+          N_AMOSTRAS_NEOGEN?: number | null
+          N_AMOSTRAS_SSG?: number | null
+          N_LPR?: number | null
+          N_LR?: number | null
+          N_VRI?: number | null
+          NF_NA_NEOGEN?: string | null
+          NF_NEOGEM?: string | null
+          Ord?: string | null
+          OS_NEOGEN?: string | null
+          OS_SSGEN?: string | null
+          PLAN_NEOGEN?: string | null
+          PLAN_SSG?: string | null
+          PROD_NEOGEN?: string | null
+          PROD_SSG?: string | null
+          REP?: string | null
+          RESULT_SSG?: string | null
+          updated_at?: string | null
         }
         Update: {
-          id?: string | null
-          ordem_servico_ssgen?: number | null
-          cliente_nome?: string | null
-          coordenador?: string | null
-          representante?: string | null
-          nome_produto?: string | null
-          numero_amostras?: number | null
+          CLIENTE?: string | null
+          COD_SSB?: string | null
+          COORD?: string | null
           created_at?: string | null
-          dt_cra?: string | null
-          dt_planilha_neogen?: string | null
-          dt_vri?: string | null
-          dt_lpr?: string | null
-          dt_lr?: string | null
-          dt_resultado?: string | null
-          dt_prev_resultado?: string | null
-          resultado?: string | null
-          dt_faturamento?: string | null
-          faturamento_tipo?: string | null
-          valor_faturamento?: number | null
-          os_neogen?: string | null
-          plano_neogen?: string | null
-          n_vri?: number | null
-          n_lpr?: number | null
-          n_lr?: number | null
-          lr_rastreio?: string | null
-          prioridade?: string | null
-          flag_reagendamento?: boolean | null
-          issue_text?: string | null
-          source_table?: string | null
+          DT_CRA?: string | null
+          DT_FATUR_SSG?: string | null
+          DT_LPR?: string | null
+          DT_LR?: string | null
+          DT_PLAN_NEOGEN?: string | null
+          DT_PLAN_SSG?: string | null
+          DT_PREV_RESULT_SSG?: string | null
+          DT_RESULT_SSG?: string | null
+          DT_SSGEN_OS?: string | null
+          DT_VRI?: string | null
+          FATUR_SSG?: number | null
+          FATUR_TIPO?: string | null
+          id?: string | null
+          LIB_CAD_CLIENTE?: string | null
+          LR_RASTREIO?: string | null
+          N_AMOSTRAS_NEOGEN?: number | null
+          N_AMOSTRAS_SSG?: number | null
+          N_LPR?: number | null
+          N_LR?: number | null
+          N_VRI?: number | null
+          NF_NA_NEOGEN?: string | null
+          NF_NEOGEM?: string | null
+          Ord?: string | null
+          OS_NEOGEN?: string | null
+          OS_SSGEN?: string | null
+          PLAN_NEOGEN?: string | null
+          PLAN_SSG?: string | null
+          PROD_NEOGEN?: string | null
+          PROD_SSG?: string | null
+          REP?: string | null
+          RESULT_SSG?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
+    }
     Functions: {
+      _ssgen_only_digits: { Args: { txt: string }; Returns: string }
+      _ssgen_os_pad_width: { Args: never; Returns: number }
+      _ssgen_to_bigint_safe: { Args: { txt: string }; Returns: number }
       calcular_status_sla: {
         Args: { data_fim: string; data_inicio: string; dias_alvo: number }
         Returns: string
@@ -1269,11 +1316,11 @@ export type Database = {
       [_ in never]: never
     }
   }
-};
+}
 
-export type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">];
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
