@@ -3,7 +3,7 @@ import { Trash2, Upload } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,7 +28,7 @@ import {
   POWER_ROW_TO_SERVICE_ORDER_FIELD,
 } from '@/lib/ssgenClient';
 import { fetchManagementOrders, type ManagementOrderRow } from '@/lib/fetchOrders';
-import type { Database } from '@/integrations/supabase/types';
+import type { Database } from '@/lib/supabaseClient';
 import type { PowerRow } from '@/types/ssgen';
 
 type ServiceOrderColumn = keyof Database['public']['Tables']['service_orders']['Row'];
@@ -310,16 +310,20 @@ const OrdersManagement: React.FC = () => {
   const [importOpen, setImportOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
+      setErrorMsg(null);
       const [powerRows, managementRows] = await Promise.all([
         fetchUnifiedOrderRows(),
         fetchManagementOrders(),
       ]);
 
+      const activeManagementRows = managementRows.filter((row) => row.deleted_at == null);
+
       const viewById = new Map<string, ManagementOrderRow>();
-      managementRows.forEach((row) => {
+      activeManagementRows.forEach((row) => {
         if (row.id) {
           viewById.set(row.id, row);
         }
@@ -345,6 +349,7 @@ const OrdersManagement: React.FC = () => {
     } catch (error: unknown) {
       console.error('Erro ao carregar ordens', error);
       const message = error instanceof Error ? error.message : 'Erro ao carregar ordens';
+      setErrorMsg(message);
       toast.error(message);
     }
   }, []);
@@ -356,6 +361,23 @@ const OrdersManagement: React.FC = () => {
       setIsAdmin(profile?.role === 'ADM');
     };
     void init();
+  }, [load]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('orders-management-rt')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'service_orders' },
+        () => {
+          void load();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [load]);
 
   const updateRow = (updated: OrdersManagementRow) => {
@@ -408,6 +430,12 @@ const OrdersManagement: React.FC = () => {
           </Button>
         )}
       </HeaderBar>
+
+      {errorMsg && (
+        <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+          {errorMsg}
+        </div>
+      )}
 
       <div className="overflow-x-auto rounded-xl border">
         <table className="min-w-[1400px] text-sm">

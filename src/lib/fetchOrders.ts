@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 
 export type ManagementOrderRow = {
   id: string;
@@ -16,9 +16,9 @@ export async function fetchManagementOrders(): Promise<ManagementOrderRow[]> {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Supabase error (v_map_orders):', error?.message);
-    throw error;
+    console.error('Supabase error (v_map_orders):', error);
+    throw new Error(error.message);
   }
 
-  return (data ?? []).filter((row) => row.deleted_at == null) as ManagementOrderRow[];
+  return (data ?? []) as ManagementOrderRow[];
 }

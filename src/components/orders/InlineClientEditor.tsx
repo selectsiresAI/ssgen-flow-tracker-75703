@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabaseClient";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -36,7 +36,7 @@ export default function InlineClientEditor({
     if (error) {
       console.error(error);
       const msg = /permission/i.test(error.message)
-        ? "Permissão negada ao alterar cliente da OS."
+        ? "Permissão negada ao alterar cliente da OS. Verifique login/policies."
         : `Erro ao alterar cliente da OS: ${error.message}`;
       alert(msg);
       return;
