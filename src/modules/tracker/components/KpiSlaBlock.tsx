@@ -10,7 +10,7 @@ export function KpiSlaBlock({ k }: KpiSlaBlockProps) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="rounded-2xl p-4 bg-zenith-card border border-zenith-navy/30 animate-pulse">
+          <div key={i} className="rounded-2xl p-4 bg-white border border-gray-200 animate-pulse">
             <div className="h-40" />
           </div>
         ))}

@@ -38,19 +38,19 @@ export default function TrackerDashboard() {
   }, [rows, query]);
 
   return (
-    <div className="p-6 space-y-6 bg-zenith-black min-h-screen">
+    <div className="p-6 space-y-6 bg-white min-h-screen">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-4">
-          <div className="text-3xl font-bold text-white">SSGEN Tracker</div>
+          <div className="text-3xl font-bold text-black">SSGEN Tracker</div>
           {(criticalCount > 0 || warningCount > 0) && (
             <div className="flex gap-2">
               {criticalCount > 0 && (
-                <div className="px-3 py-1 rounded-full bg-white/90 text-black text-xs font-semibold ring-1 ring-destructive/60">
+                <div className="px-3 py-1 rounded-full bg-gray-100 text-black text-xs font-semibold ring-1 ring-destructive/60">
                   {criticalCount} Crítico{criticalCount !== 1 ? 's' : ''}
                 </div>
               )}
               {warningCount > 0 && (
-                <div className="px-3 py-1 rounded-full bg-white/90 text-black text-xs font-semibold ring-1 ring-warning/60">
+                <div className="px-3 py-1 rounded-full bg-gray-100 text-black text-xs font-semibold ring-1 ring-warning/60">
                   {warningCount} Aviso{warningCount !== 1 ? 's' : ''}
                 </div>
               )}
@@ -58,31 +58,31 @@ export default function TrackerDashboard() {
           )}
         </div>
         <div className="flex gap-3 items-center">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zenith-card border border-zenith-navy/30">
-            {alarmsEnabled ? <Bell className="w-4 h-4 text-zenith-gold" /> : <BellOff className="w-4 h-4 text-zenith-gray" />}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 border border-gray-200">
+            {alarmsEnabled ? <Bell className="w-4 h-4 text-black" /> : <BellOff className="w-4 h-4 text-black" />}
             <Switch checked={alarmsEnabled} onCheckedChange={setAlarmsEnabled} />
-            <Label className="text-xs text-white cursor-pointer" onClick={() => setAlarmsEnabled(!alarmsEnabled)}>
+            <Label className="text-xs text-black cursor-pointer" onClick={() => setAlarmsEnabled(!alarmsEnabled)}>
               Alarmes
             </Label>
           </div>
           {alarmsEnabled && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zenith-card border border-zenith-navy/30">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 border border-gray-200">
               <Switch checked={soundEnabled} onCheckedChange={setSoundEnabled} />
-              <Label className="text-xs text-white cursor-pointer" onClick={() => setSoundEnabled(!soundEnabled)}>
+              <Label className="text-xs text-black cursor-pointer" onClick={() => setSoundEnabled(!soundEnabled)}>
                 Som
               </Label>
             </div>
           )}
           <Input
             placeholder="Buscar por OS ou cliente..."
-            className="w-80 bg-zenith-bg text-white border-zenith-navy"
+            className="w-80 bg-white text-black border-gray-300"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
           <Button
             onClick={() => setMode(m => m === 'table' ? 'cards' : 'table')}
             variant="outline"
-            className="bg-zenith-navy text-white border-zenith-navy hover:bg-zenith-navy/80"
+            className="bg-white text-black border-gray-300 hover:bg-gray-100"
           >
             {mode === 'table' ? 'Cards' : 'Tabela'}
           </Button>
@@ -90,21 +90,21 @@ export default function TrackerDashboard() {
       </div>
 
       {loadingKpis ? (
-        <div className="text-center text-zenith-gray py-8">Carregando KPIs...</div>
+        <div className="text-center text-black py-8">Carregando KPIs...</div>
       ) : (
         <>
           <KpiCards k={kpis} />
-          
+
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
             <KpiSlaBlock k={kpis} />
             <div className="grid grid-cols-1 gap-4">
               <AlertCenter rows={rows} />
-              <div className="bg-zenith-card rounded-2xl p-4 border border-zenith-navy/30">
-                <div className="text-zenith-gold font-semibold mb-2">Resumo Executivo</div>
-                <div className="text-sm text-zenith-gray space-y-2">
+              <div className="bg-white rounded-2xl p-4 border border-gray-200">
+                <div className="text-black font-semibold mb-2">Resumo Executivo</div>
+                <div className="text-sm text-black space-y-2">
                   <p>
                     Operação com{' '}
-                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-white/90 text-black">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-black">
                       {kpis?.em_processamento ?? 0}
                     </span>{' '}
                     OS ativas.
