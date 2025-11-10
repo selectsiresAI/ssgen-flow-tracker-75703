@@ -112,10 +112,31 @@ export default function UserManagementPage() {
     e.preventDefault();
     if (!selectedUser) return;
 
+    if ((selectedRole === 'COORDENADOR' || selectedRole === 'REPRESENTANTE') && !selectedCoord) {
+      toast({
+        title: 'Selecione um coordenador',
+        description: 'Escolha o coordenador vinculado antes de salvar.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (selectedRole === 'REPRESENTANTE' && !selectedRep) {
+      toast({
+        title: 'Selecione um representante',
+        description: 'Escolha o representante que será vinculado ao usuário.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     assignMutation.mutate({
       userId: selectedUser,
       role: selectedRole,
-      coord: selectedRole === 'COORDENADOR' ? selectedCoord || undefined : undefined,
+      coord:
+        selectedRole === 'COORDENADOR' || selectedRole === 'REPRESENTANTE'
+          ? selectedCoord || undefined
+          : undefined,
       rep: selectedRole === 'REPRESENTANTE' ? selectedRep || undefined : undefined,
     });
   };
@@ -213,9 +234,11 @@ export default function UserManagementPage() {
               </Select>
             </div>
 
-            {selectedRole === 'COORDENADOR' && (
+            {(selectedRole === 'COORDENADOR' || selectedRole === 'REPRESENTANTE') && (
               <div className="space-y-2">
-                <Label htmlFor="coord">Coordenador</Label>
+                <Label htmlFor="coord">
+                  {selectedRole === 'COORDENADOR' ? 'Coordenador' : 'Coordenador responsável'}
+                </Label>
                 <Select value={selectedCoord ?? undefined} onValueChange={(value) => setSelectedCoord(value || undefined)}>
                   <SelectTrigger id="coord">
                     <SelectValue placeholder="Selecione o coordenador" />

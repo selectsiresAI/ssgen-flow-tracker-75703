@@ -3,14 +3,15 @@ import { supabase } from '@/integrations/supabase/client';
 export interface Representante {
   id: string;
   nome: string;
-  email?: string;
+  email?: string | null;
   ativo: boolean;
+  coordenador_nome?: string | null;
 }
 
 export async function fetchRepresentantes(): Promise<Representante[]> {
   const { data, error } = await supabase
     .from('representantes')
-    .select('*')
+    .select('id, nome, email, ativo, coordenador_nome, created_at, updated_at, deleted_at')
     .eq('ativo', true)
     .is('deleted_at', null)
     .order('nome', { ascending: true });

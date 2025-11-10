@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { HeaderBar } from '../shared/HeaderBar';
 import { fetchRepresentantes, createRepresentante, updateRepresentante, deleteRepresentante, Representante } from '@/lib/representantesApi';
+import { fetchCoordenadores } from '@/lib/coordenadoresApi';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -14,7 +15,7 @@ const RepresentantesPage: React.FC = () => {
   const [query, setQuery] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRep, setEditingRep] = useState<Representante | null>(null);
-  const [formData, setFormData] = useState({ nome: '', email: '' });
+  const [formData, setFormData] = useState({ nome: '', email: '', coordenador_nome: '' });
 
   const queryClient = useQueryClient();
 
@@ -23,8 +24,10 @@ const RepresentantesPage: React.FC = () => {
     queryFn: fetchRepresentantes,
   });
 
-  // Debug log
-  console.log('Representantes carregados:', representantes);
+  const { data: coordenadores = [] } = useQuery({
+    queryKey: ['coordenadores'],
+    queryFn: fetchCoordenadores,
+  });
 
   const createMutation = useMutation({
     mutationFn: createRepresentante,
@@ -32,7 +35,7 @@ const RepresentantesPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['representantes'] });
       toast.success('Representante criado com sucesso!');
       setIsDialogOpen(false);
-      setFormData({ nome: '', email: '' });
+      setFormData({ nome: '', email: '', coordenador_nome: '' });
     },
     onError: () => toast.error('Erro ao criar representante'),
   });
@@ -45,7 +48,7 @@ const RepresentantesPage: React.FC = () => {
       toast.success('Representante atualizado com sucesso!');
       setIsDialogOpen(false);
       setEditingRep(null);
-      setFormData({ nome: '', email: '' });
+      setFormData({ nome: '', email: '', coordenador_nome: '' });
     },
     onError: () => toast.error('Erro ao atualizar representante'),
   });
@@ -61,6 +64,10 @@ const RepresentantesPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.coordenador_nome) {
+      toast.error('Selecione um coordenador');
+      return;
+    }
     if (editingRep) {
       updateMutation.mutate({ id: editingRep.id, data: formData });
     } else {
@@ -70,7 +77,7 @@ const RepresentantesPage: React.FC = () => {
 
   const handleEdit = (rep: Representante) => {
     setEditingRep(rep);
-    setFormData({ nome: rep.nome, email: rep.email || '' });
+    setFormData({ nome: rep.nome, email: rep.email || '', coordenador_nome: rep.coordenador_nome || '' });
     setIsDialogOpen(true);
   };
 
@@ -92,7 +99,7 @@ const RepresentantesPage: React.FC = () => {
         setIsDialogOpen(open);
         if (!open) {
           setEditingRep(null);
-          setFormData({ nome: '', email: '' });
+          setFormData({ nome: '', email: '', coordenador_nome: '' });
         }
       }}>
         <DialogTrigger asChild>
@@ -124,6 +131,25 @@ const RepresentantesPage: React.FC = () => {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
             </div>
+            <div>
+              <Label htmlFor="coordenador_nome">Coordenador *</Label>
+              <select
+                id="coordenador_nome"
+                className="w-full border rounded-md px-3 py-2 text-sm"
+                value={formData.coordenador_nome}
+                onChange={(e) => setFormData({ ...formData, coordenador_nome: e.target.value })}
+                required
+              >
+                <option value="">Selecione um coordenador</option>
+                {coordenadores
+                  .filter((coord) => coord.nome && coord.nome.trim() !== '')
+                  .map((coord) => (
+                    <option key={coord.id ?? coord.nome} value={String(coord.nome)}>
+                      {coord.nome}
+                    </option>
+                  ))}
+              </select>
+            </div>
             <Button type="submit" className="w-full">
               {editingRep ? 'Atualizar' : 'Criar'}
             </Button>
@@ -152,6 +178,11 @@ const RepresentantesPage: React.FC = () => {
                 >
                   <div className="flex-1">
                     <div className="font-medium text-base">{rep.nome}</div>
+                    {rep.coordenador_nome && (
+                      <div className="text-sm text-muted-foreground mt-1">
+                        Coordenador: {rep.coordenador_nome}
+                      </div>
+                    )}
                     {rep.email && (
                       <div className="text-sm text-muted-foreground mt-1">{rep.email}</div>
                     )}

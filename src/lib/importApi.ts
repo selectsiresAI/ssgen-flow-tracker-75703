@@ -232,7 +232,8 @@ export async function importRepresentantes(representantes: any[]): Promise<Impor
   for (let i = 0; i < representantes.length; i++) {
     try {
       const rep = representantes[i];
-      
+      const coordenadorNome = rep.coordenador_nome || rep.coordenador || null;
+
       // Verificar se já existe
       const { data: existing } = await supabase
         .from('representantes')
@@ -244,7 +245,7 @@ export async function importRepresentantes(representantes: any[]): Promise<Impor
         // Atualizar se já existe
         const { error } = await supabase
           .from('representantes')
-          .update({ email: rep.email, ativo: true })
+          .update({ email: rep.email, ativo: true, coordenador_nome: coordenadorNome })
           .eq('nome', rep.nome);
 
         if (error) throw error;
@@ -252,7 +253,7 @@ export async function importRepresentantes(representantes: any[]): Promise<Impor
         // Inserir novo
         const { error } = await supabase
           .from('representantes')
-          .insert([{ nome: rep.nome, email: rep.email, ativo: true }]);
+          .insert([{ nome: rep.nome, email: rep.email, ativo: true, coordenador_nome: coordenadorNome }]);
 
         if (error) throw error;
       }

@@ -61,6 +61,9 @@ const RepresentantesListPage: React.FC = () => {
                   {rep.email}
                 </div>
               )}
+              {rep.coordenador_nome && (
+                <div className="text-sm text-muted-foreground">Coordenador: {rep.coordenador_nome}</div>
+              )}
               {rep.ativo && (
                 <div className="mt-3">
                   <span className="inline-flex items-center rounded-full bg-success/10 px-3 py-1 text-xs font-medium text-success border border-success/20">

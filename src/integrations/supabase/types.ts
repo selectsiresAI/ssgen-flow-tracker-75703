@@ -473,6 +473,7 @@ export type Database = {
       representantes: {
         Row: {
           ativo: boolean
+          coordenador_nome: string | null
           created_at: string
           deleted_at: string | null
           email: string | null
@@ -482,6 +483,7 @@ export type Database = {
         }
         Insert: {
           ativo?: boolean
+          coordenador_nome?: string | null
           created_at?: string
           deleted_at?: string | null
           email?: string | null
@@ -491,6 +493,7 @@ export type Database = {
         }
         Update: {
           ativo?: boolean
+          coordenador_nome?: string | null
           created_at?: string
           deleted_at?: string | null
           email?: string | null
@@ -498,7 +501,15 @@ export type Database = {
           nome?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "representantes_coordenador_nome_fkey"
+            columns: ["coordenador_nome"]
+            isOneToOne: false
+            referencedRelation: "coordenadores"
+            referencedColumns: ["nome"]
+          }
+        ]
       }
       service_order_samples: {
         Row: {
