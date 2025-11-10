@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Check, Loader2 } from "lucide-react";
 
 import { supabase } from "@/lib/supabaseClient";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { useClients } from "@/hooks/useClientData";
 
 type ClientOption = {
   id: string;
@@ -33,55 +34,46 @@ export default function InlineClientEditor({
 }) {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [clients, setClients] = useState<ClientOption[]>([]);
-  const [loadingClients, setLoadingClients] = useState(false);
-  const [clientsError, setClientsError] = useState<string | null>(null);
   const [currentClient, setCurrentClient] = useState<{ id: string | null; nome: string | null }>({
     id: initialId ?? null,
     nome: initialName ?? null,
   });
+  const {
+    data: clientsData,
+    isLoading: initialClientsLoading,
+    isFetching: isFetchingClients,
+    refetch: refetchClients,
+  } = useClients();
+
+  const clients = useMemo<ClientOption[]>(
+    () =>
+      (clientsData ?? [])
+        .filter((client) => !client.deleted_at)
+        .map((client) => ({ id: client.id, nome: client.nome }))
+        .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR")),
+    [clientsData],
+  );
+
+  const loadingClients = initialClientsLoading || isFetchingClients;
+
+  useEffect(() => {
+    if (open) {
+      void refetchClients();
+    }
+  }, [open, refetchClients]);
 
   useEffect(() => {
     setCurrentClient({ id: initialId ?? null, nome: initialName ?? null });
   }, [initialId, initialName]);
 
   useEffect(() => {
-    if (!open || clients.length > 0 || loadingClients) {
-      return;
+    if (currentClient.id && !currentClient.nome) {
+      const match = clients.find((client) => client.id === currentClient.id);
+      if (match) {
+        setCurrentClient({ id: match.id, nome: match.nome });
+      }
     }
-
-    let active = true;
-    const loadClients = async () => {
-      setLoadingClients(true);
-      setClientsError(null);
-
-      const { data, error } = await supabase
-        .from("clients")
-        .select("id, nome")
-        .is("deleted_at", null)
-        .order("nome", { ascending: true });
-
-      if (!active) {
-        return;
-      }
-
-      if (error) {
-        console.error(error);
-        setClientsError("Erro ao carregar clientes.");
-        setClients([]);
-      } else {
-        setClients(data ?? []);
-      }
-
-      setLoadingClients(false);
-    };
-
-    void loadClients();
-
-    return () => {
-      active = false;
-    };
-  }, [open, clients.length, loadingClients]);
+  }, [clients, currentClient.id, currentClient.nome]);
 
   const save = async (client: ClientOption | null) => {
     if (saving) return;
@@ -142,13 +134,15 @@ export default function InlineClientEditor({
         </PopoverTrigger>
         <PopoverContent className="w-72 p-0" align="start">
           <Command>
-            <CommandInput placeholder="Buscar cliente..." disabled={loadingClients || !!clientsError} />
+            <CommandInput placeholder="Buscar cliente..." disabled={loadingClients} />
             <CommandList>
-              <CommandEmpty>Nenhum cliente encontrado.</CommandEmpty>
+              {!loadingClients && <CommandEmpty>Nenhum cliente encontrado.</CommandEmpty>}
               {loadingClients ? (
                 <div className="p-4 text-sm text-muted-foreground">Carregando clientes…</div>
-              ) : clientsError ? (
-                <div className="p-4 text-sm text-destructive">{clientsError}</div>
+              ) : clients.length === 0 ? (
+                <div className="p-4 text-sm text-muted-foreground">
+                  Nenhum cliente ativo disponível.
+                </div>
               ) : (
                 <>
                   <CommandGroup heading="Clientes ativos">
