@@ -7,6 +7,7 @@ import { Mail, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { Profile } from '@/types/ssgen';
+import { fetchCoordenadorNomeByEmail } from '@/lib/coordenadoresApi';
 
 interface RepresentantesListPageProps {
   profile: Profile | null;
@@ -16,14 +17,38 @@ const RepresentantesListPage: React.FC<RepresentantesListPageProps> = ({ profile
   const [query, setQuery] = useState('');
   const { toast } = useToast();
 
-  const { data: representantes = [], refetch } = useQuery({
-    queryKey: ['representantes', profile?.role, profile?.coord, profile?.rep],
+  const shouldResolveCoord = profile?.role === 'COORDENADOR' && !profile?.coord && !!profile?.email;
+  const {
+    data: resolvedCoord,
+    isLoading: isLoadingCoord,
+  } = useQuery({
+    queryKey: ['coordenador-self', profile?.id],
+    queryFn: async () => {
+      if (!profile?.email) {
+        return null;
+      }
+      return fetchCoordenadorNomeByEmail(profile.email);
+    },
+    enabled: shouldResolveCoord,
+  });
+
+  const effectiveCoord = profile?.role === 'COORDENADOR'
+    ? profile?.coord ?? resolvedCoord ?? null
+    : null;
+
+  const {
+    data: representantes = [],
+    refetch,
+    isLoading,
+  } = useQuery({
+    queryKey: ['representantes', profile?.role, effectiveCoord, profile?.rep],
+    enabled: profile?.role !== 'COORDENADOR' || !isLoadingCoord,
     queryFn: async () => {
       if (profile?.role === 'COORDENADOR') {
-        if (!profile.coord) {
+        if (!effectiveCoord) {
           return [];
         }
-        return fetchRepresentantes({ coord: profile.coord });
+        return fetchRepresentantes({ coord: effectiveCoord });
       }
       if (profile?.role === 'REPRESENTANTE') {
         if (!profile.rep) {
@@ -59,12 +84,19 @@ const RepresentantesListPage: React.FC<RepresentantesListPageProps> = ({ profile
     [representantes, query]
   );
 
+  const isFetching = isLoading || isLoadingCoord;
+
   return (
     <div className="space-y-4">
       <HeaderBar title="Representantes" query={query} setQuery={setQuery} />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((rep) => (
+        {isFetching && (
+          <div className="col-span-full text-center text-muted-foreground py-8">
+            Carregando representantes...
+          </div>
+        )}
+        {!isFetching && filtered.map((rep) => (
           <Card key={rep.id} className="hover:shadow-lg transition-all hover:border-primary/50">
             <CardHeader className="pb-3 flex flex-row items-center justify-between">
               <CardTitle className="text-lg font-semibold">{rep.nome}</CardTitle>
@@ -99,7 +131,7 @@ const RepresentantesListPage: React.FC<RepresentantesListPageProps> = ({ profile
             </CardContent>
           </Card>
         ))}
-        {filtered.length === 0 && (
+        {!isFetching && filtered.length === 0 && (
           <div className="col-span-full text-center text-muted-foreground py-8">
             Nenhum representante encontrado
           </div>

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { HeaderBar } from '../shared/HeaderBar';
 import { fetchRepresentantes, createRepresentante, updateRepresentante, deleteRepresentante, Representante } from '@/lib/representantesApi';
-import { fetchCoordenadores } from '@/lib/coordenadoresApi';
+import { fetchCoordenadores, fetchCoordenadorNomeByEmail } from '@/lib/coordenadoresApi';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -20,20 +20,39 @@ const RepresentantesPage: React.FC<RepresentantesPageProps> = ({ profile }) => {
   const [query, setQuery] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRep, setEditingRep] = useState<Representante | null>(null);
-  const [formData, setFormData] = useState({ nome: '', email: '', coordenador_nome: profile?.coord ?? '' });
 
   const isCoordenador = profile?.role === 'COORDENADOR';
+
+  const shouldResolveCoord = isCoordenador && !profile?.coord && !!profile?.email;
+  const {
+    data: resolvedCoord,
+    isLoading: isLoadingCoord,
+  } = useQuery({
+    queryKey: ['coordenador-self', profile?.id],
+    queryFn: async () => {
+      if (!profile?.email) {
+        return null;
+      }
+      return fetchCoordenadorNomeByEmail(profile.email);
+    },
+    enabled: shouldResolveCoord,
+  });
+
+  const effectiveCoord = isCoordenador ? profile?.coord ?? resolvedCoord ?? null : null;
+
+  const [formData, setFormData] = useState({ nome: '', email: '', coordenador_nome: effectiveCoord ?? '' });
 
   const queryClient = useQueryClient();
 
   const { data: representantes = [], isLoading } = useQuery({
-    queryKey: ['representantes', profile?.role, profile?.coord, profile?.rep],
+    queryKey: ['representantes', profile?.role, effectiveCoord, profile?.rep],
+    enabled: !isCoordenador || !isLoadingCoord,
     queryFn: async () => {
       if (profile?.role === 'COORDENADOR') {
-        if (!profile.coord) {
+        if (!effectiveCoord) {
           return [];
         }
-        return fetchRepresentantes({ coord: profile.coord });
+        return fetchRepresentantes({ coord: effectiveCoord });
       }
       if (profile?.role === 'REPRESENTANTE') {
         if (!profile.rep) {
@@ -52,11 +71,27 @@ const RepresentantesPage: React.FC<RepresentantesPageProps> = ({ profile }) => {
 
   const availableCoordenadores = useMemo(
     () =>
-      isCoordenador && profile?.coord
-        ? coordenadores.filter((coord) => coord.nome === profile.coord)
+      isCoordenador && effectiveCoord
+        ? coordenadores.filter((coord) => coord.nome === effectiveCoord)
         : coordenadores,
-    [coordenadores, isCoordenador, profile?.coord]
+    [coordenadores, isCoordenador, effectiveCoord]
   );
+
+  useEffect(() => {
+    if (!isCoordenador) {
+      return;
+    }
+    setFormData((prev) => {
+      if (editingRep) {
+        return prev;
+      }
+      const nextCoord = effectiveCoord ?? '';
+      if (prev.coordenador_nome === nextCoord) {
+        return prev;
+      }
+      return { ...prev, coordenador_nome: nextCoord };
+    });
+  }, [effectiveCoord, isCoordenador, editingRep]);
 
   const createMutation = useMutation({
     mutationFn: createRepresentante,
@@ -64,7 +99,7 @@ const RepresentantesPage: React.FC<RepresentantesPageProps> = ({ profile }) => {
       queryClient.invalidateQueries({ queryKey: ['representantes'] });
       toast.success('Representante criado com sucesso!');
       setIsDialogOpen(false);
-      setFormData({ nome: '', email: '', coordenador_nome: profile?.coord ?? '' });
+      setFormData({ nome: '', email: '', coordenador_nome: effectiveCoord ?? '' });
     },
     onError: () => toast.error('Erro ao criar representante'),
   });
@@ -77,7 +112,7 @@ const RepresentantesPage: React.FC<RepresentantesPageProps> = ({ profile }) => {
       toast.success('Representante atualizado com sucesso!');
       setIsDialogOpen(false);
       setEditingRep(null);
-      setFormData({ nome: '', email: '', coordenador_nome: profile?.coord ?? '' });
+      setFormData({ nome: '', email: '', coordenador_nome: effectiveCoord ?? '' });
     },
     onError: () => toast.error('Erro ao atualizar representante'),
   });
@@ -128,7 +163,7 @@ const RepresentantesPage: React.FC<RepresentantesPageProps> = ({ profile }) => {
         setIsDialogOpen(open);
         if (!open) {
           setEditingRep(null);
-          setFormData({ nome: '', email: '', coordenador_nome: profile?.coord ?? '' });
+          setFormData({ nome: '', email: '', coordenador_nome: effectiveCoord ?? '' });
         }
       }}>
         <DialogTrigger asChild>
@@ -136,7 +171,7 @@ const RepresentantesPage: React.FC<RepresentantesPageProps> = ({ profile }) => {
             className="gap-2"
             onClick={() => {
               setEditingRep(null);
-              setFormData({ nome: '', email: '', coordenador_nome: profile?.coord ?? '' });
+              setFormData({ nome: '', email: '', coordenador_nome: effectiveCoord ?? '' });
             }}
           >
             <Plus className="w-4 h-4" />
@@ -200,7 +235,7 @@ const RepresentantesPage: React.FC<RepresentantesPageProps> = ({ profile }) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
+          {isLoading || isLoadingCoord ? (
             <div className="text-center py-8 text-muted-foreground">
               Carregando representantes...
             </div>

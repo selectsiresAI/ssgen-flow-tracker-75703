@@ -14,9 +14,21 @@ export async function fetchCoordenadores(): Promise<Coordenador[]> {
     .eq('ativo', true)
     .is('deleted_at', null)
     .order('nome', { ascending: true });
-  
+
   if (error) throw error;
   return data || [];
+}
+
+export async function fetchCoordenadorNomeByEmail(email: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('coordenadores')
+    .select('nome')
+    .eq('email', email)
+    .is('deleted_at', null)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data?.nome ?? null;
 }
 
 export async function createCoordenador(coord: Omit<Coordenador, 'id'>): Promise<Coordenador> {
@@ -25,7 +37,7 @@ export async function createCoordenador(coord: Omit<Coordenador, 'id'>): Promise
     .insert(coord)
     .select()
     .single();
-  
+
   if (error) throw error;
   return data;
 }
@@ -37,7 +49,7 @@ export async function updateCoordenador(id: string, coord: Partial<Coordenador>)
     .eq('id', id)
     .select()
     .single();
-  
+
   if (error) throw error;
   return data;
 }
@@ -47,6 +59,6 @@ export async function deleteCoordenador(id: string): Promise<void> {
     .from('coordenadores')
     .update({ deleted_at: new Date().toISOString() })
     .eq('id', id);
-  
+
   if (error) throw error;
 }
