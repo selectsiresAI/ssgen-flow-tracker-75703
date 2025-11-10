@@ -39,7 +39,11 @@ export function GaugeSLA({ value = 0, label }: { value: number; label: string })
           <RadialBar dataKey="value" fill="#C6A053" />
         </RadialBarChart>
       </div>
-      <div className="text-center -mt-6 text-xl font-semibold text-white">{pct.toFixed(1)}%</div>
+      <div className="flex justify-center -mt-6">
+        <span className="inline-flex items-center justify-center px-3 py-1 rounded-lg bg-white/90 text-xl font-semibold text-black">
+          {pct.toFixed(1)}%
+        </span>
+      </div>
     </div>
   );
 }

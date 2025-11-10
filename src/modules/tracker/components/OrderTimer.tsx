@@ -47,20 +47,32 @@ export function OrderTimer({ startDate, targetDays, status, className }: OrderTi
     return <span className="text-xs text-muted-foreground">—</span>;
   }
 
-  const colorClass = timeInfo.isOverdue 
-    ? 'text-destructive' 
-    : timeInfo.days === 0 
-    ? 'text-warning' 
+  const statusAccent = timeInfo.isOverdue
+    ? 'ring-destructive/60'
+    : timeInfo.days === 0
+    ? 'ring-warning/60'
+    : 'ring-success/60';
+
+  const iconColor = timeInfo.isOverdue
+    ? 'text-destructive'
+    : timeInfo.days === 0
+    ? 'text-warning'
     : 'text-success';
 
   return (
-    <div className={cn('flex items-center gap-1.5 text-xs font-medium', colorClass, className)}>
+    <div className={cn('flex items-center gap-1.5 text-xs font-medium', className)}>
       {timeInfo.isOverdue ? (
-        <AlertCircle className="w-3.5 h-3.5" />
+        <AlertCircle className={cn('w-3.5 h-3.5', iconColor)} />
       ) : (
-        <Clock className="w-3.5 h-3.5" />
+        <Clock className={cn('w-3.5 h-3.5', iconColor)} />
       )}
-      <span>
+      <span
+        className={cn(
+          'inline-flex items-center rounded-md px-2 py-0.5 bg-white/90 text-black',
+          statusAccent,
+          'ring-1'
+        )}
+      >
         {timeInfo.isOverdue ? '+' : '-'}
         {timeInfo.days}d {timeInfo.hours}h {timeInfo.minutes}m
       </span>

@@ -84,7 +84,11 @@ export function OrdersTable({ rows }: { rows: TrackerTimeline[] }) {
             <tbody className="divide-y divide-zenith-navy/20">
               {rows.map((r) => (
                 <tr key={r.id} className="hover:bg-zenith-navy/10 transition-colors">
-                  <td className="px-4 py-3 font-mono text-sm text-white">{r.ordem_servico_ssgen}</td>
+                  <td className="px-4 py-3 font-mono text-sm">
+                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-white/90 text-black">
+                      {r.ordem_servico_ssgen}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 text-sm text-white">{r.cliente}</td>
                   <td className="px-4 py-3">
                     <span className={`text-xs px-2 py-1 rounded ${
@@ -106,13 +110,15 @@ export function OrdersTable({ rows }: { rows: TrackerTimeline[] }) {
                     />
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-sm font-semibold ${
-                      (r.aging_dias_total ?? 0) >= 5
-                        ? 'text-red-400'
-                        : (r.aging_dias_total ?? 0) >= 3
-                        ? 'text-yellow-400'
-                        : 'text-green-400'
-                    }`}>
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-md bg-white/90 text-sm font-semibold text-black ring-1 ${
+                        (r.aging_dias_total ?? 0) >= 5
+                          ? 'ring-red-400/60'
+                          : (r.aging_dias_total ?? 0) >= 3
+                          ? 'ring-yellow-400/60'
+                          : 'ring-green-400/60'
+                      }`}
+                    >
                       {r.aging_dias_total ?? 0}
                     </span>
                   </td>
