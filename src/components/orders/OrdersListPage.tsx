@@ -29,6 +29,7 @@ export default function OrdersListPage() {
           ordem_servico_ssgen,
           created_at,
           deleted_at,
+          client_id,
           clients:client_id (nome)
         `)
         .is("deleted_at", null)
@@ -52,7 +53,7 @@ export default function OrdersListPage() {
         client_name: r.clients?.nome ?? null,
         created_at: r.created_at,
         deleted_at: r.deleted_at,
-        client_id: r.client_id
+        client_id: r.client_id,
       }));
       setRows(mapped);
       setLoading(false);
@@ -79,7 +80,11 @@ export default function OrdersListPage() {
     payload: { client_name: string | null; client_id: string | null },
   ) => {
     setRows((prev) =>
-      prev.map((r) => (r.id === orderId ? { ...r, client_name: payload.client_name } : r)),
+      prev.map((r) =>
+        r.id === orderId
+          ? { ...r, client_name: payload.client_name, client_id: payload.client_id }
+          : r,
+      ),
     );
   };
 
@@ -110,6 +115,7 @@ export default function OrdersListPage() {
                     <InlineClientEditor
                       orderId={r.id}
                       initialName={r.client_name}
+                      initialId={r.client_id ?? null}
                       onCommitted={(payload) => handleCommitted(r.id, payload)}
                     />
                   </td>

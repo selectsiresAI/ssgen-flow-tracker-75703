@@ -247,11 +247,13 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin 
                 ? row.CLIENTE
                 : null)
             }
+            initialId={row.client_id ?? null}
             onCommitted={(payload) =>
               onChange({
                 ...row,
                 CLIENTE: payload.client_name ?? '',
                 client_name: payload.client_name ?? null,
+                client_id: payload.client_id ?? null,
               })
             }
           />

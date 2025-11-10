@@ -1,81 +1,104 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Check, Loader2 } from "lucide-react";
+
 import { supabase } from "@/lib/supabaseClient";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+
+type ClientOption = {
+  id: string;
+  nome: string;
+};
 
 export default function InlineClientEditor({
   orderId,
   initialName,
+  initialId,
   onCommitted,
 }: {
   orderId: string;
   initialName: string | null;
+  initialId?: string | null;
   onCommitted: (payload: { client_name: string | null; client_id: string | null }) => void;
 }) {
-  const [editing, setEditing] = useState(false);
-  const [name, setName] = useState(initialName ?? "");
+  const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [clients, setClients] = useState<ClientOption[]>([]);
+  const [loadingClients, setLoadingClients] = useState(false);
+  const [clientsError, setClientsError] = useState<string | null>(null);
+  const [currentClient, setCurrentClient] = useState<{ id: string | null; nome: string | null }>({
+    id: initialId ?? null,
+    nome: initialName ?? null,
+  });
 
-  const start = () => {
-    setName(initialName ?? "");
-    setEditing(true);
-  };
-  const cancel = () => {
-    setName(initialName ?? "");
-    setEditing(false);
-  };
+  useEffect(() => {
+    setCurrentClient({ id: initialId ?? null, nome: initialName ?? null });
+  }, [initialId, initialName]);
 
-  const save = async () => {
-    setSaving(true);
-    
-    // Buscar ou criar cliente e vincular à ordem
-    let clientId: string | null = null;
-    let clientName: string | null = null;
-
-    if (name.trim()) {
-      // Buscar cliente existente
-      const { data: existingClient } = await supabase
-        .from("clients")
-        .select("id, nome")
-        .ilike("nome", name.trim())
-        .is("deleted_at", null)
-        .limit(1)
-        .maybeSingle();
-
-      if (existingClient) {
-        clientId = existingClient.id;
-        clientName = existingClient.nome;
-      } else {
-        // Criar novo cliente
-        const { data: newClient, error: createError } = await supabase
-          .from("clients")
-          .insert({
-            nome: name.trim(),
-            coordenador: "Não definido",
-            representante: "Não definido",
-            cpf_cnpj: 0,
-            data: new Date().toISOString().split('T')[0],
-            ordem_servico_ssgen: 0
-          })
-          .select("id, nome")
-          .single();
-
-        if (createError) {
-          console.error(createError);
-          alert(`Erro ao criar cliente: ${createError.message}`);
-          setSaving(false);
-          return;
-        }
-
-        clientId = newClient.id;
-        clientName = newClient.nome;
-      }
+  useEffect(() => {
+    if (!open || clients.length > 0 || loadingClients) {
+      return;
     }
 
-    // Atualizar ordem
+    let active = true;
+    const loadClients = async () => {
+      setLoadingClients(true);
+      setClientsError(null);
+
+      const { data, error } = await supabase
+        .from("clients")
+        .select("id, nome")
+        .is("deleted_at", null)
+        .order("nome", { ascending: true });
+
+      if (!active) {
+        return;
+      }
+
+      if (error) {
+        console.error(error);
+        setClientsError("Erro ao carregar clientes.");
+        setClients([]);
+      } else {
+        setClients(data ?? []);
+      }
+
+      setLoadingClients(false);
+    };
+
+    void loadClients();
+
+    return () => {
+      active = false;
+    };
+  }, [open, clients.length, loadingClients]);
+
+  const save = async (client: ClientOption | null) => {
+    if (saving) return;
+
+    const nextId = client?.id ?? null;
+    const nextName = client?.nome ?? null;
+
+    if (nextId === currentClient.id) {
+      setOpen(false);
+      return;
+    }
+
+    setSaving(true);
+
     const { error: updateError } = await supabase
       .from("service_orders")
-      .update({ client_id: clientId })
+      .update({ client_id: nextId })
       .eq("id", orderId);
 
     setSaving(false);
@@ -89,35 +112,89 @@ export default function InlineClientEditor({
       return;
     }
 
-    onCommitted({ client_name: clientName, client_id: clientId });
-    setEditing(false);
+    setCurrentClient({ id: nextId, nome: nextName });
+    onCommitted({ client_name: nextName, client_id: nextId });
+    setOpen(false);
   };
-
-  if (!editing) {
-    return (
-      <div className="flex items-center gap-2">
-        <span>{initialName ?? "—"}</span>
-        <Button size="sm" variant="outline" onClick={start}>
-          Editar
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <div className="flex items-center gap-2">
-      <Input
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Nome do cliente (vazio = desvincular)"
-        className="h-8"
-      />
-      <Button size="sm" onClick={save} disabled={saving}>
-        {saving ? "Salvando…" : "Salvar"}
-      </Button>
-      <Button size="sm" variant="ghost" onClick={cancel} disabled={saving}>
-        Cancelar
-      </Button>
+      <span>{currentClient.nome ?? "—"}</span>
+      <Popover
+        open={open}
+        onOpenChange={(nextOpen) => {
+          if (!saving) {
+            setOpen(nextOpen);
+          }
+        }}
+      >
+        <PopoverTrigger asChild>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-2"
+            disabled={saving}
+            onClick={() => setOpen(true)}
+          >
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+            Editar
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-72 p-0" align="start">
+          <Command>
+            <CommandInput placeholder="Buscar cliente..." disabled={loadingClients || !!clientsError} />
+            <CommandList>
+              <CommandEmpty>Nenhum cliente encontrado.</CommandEmpty>
+              {loadingClients ? (
+                <div className="p-4 text-sm text-muted-foreground">Carregando clientes…</div>
+              ) : clientsError ? (
+                <div className="p-4 text-sm text-destructive">{clientsError}</div>
+              ) : (
+                <>
+                  <CommandGroup heading="Clientes ativos">
+                    {clients.map((client) => (
+                      <CommandItem
+                        key={client.id}
+                        value={client.nome}
+                        disabled={saving}
+                        onSelect={() => {
+                          void save(client);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            client.id === currentClient.id ? "opacity-100" : "opacity-0",
+                          )}
+                        />
+                        {client.nome}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                  <CommandSeparator />
+                  <CommandGroup>
+                    <CommandItem
+                      value="desvincular"
+                      disabled={saving}
+                      onSelect={() => {
+                        void save(null);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          currentClient.id === null ? "opacity-100" : "opacity-0",
+                        )}
+                      />
+                      Desvincular cliente
+                    </CommandItem>
+                  </CommandGroup>
+                </>
+              )}
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
