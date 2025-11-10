@@ -177,6 +177,13 @@ export type Database = {
             referencedRelation: "v_tracker_timeline"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "invoices_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "vw_orders_unified"
+            referencedColumns: ["id"]
+          },
         ]
       }
       order_audit_log: {
@@ -222,13 +229,6 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_audit_log_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "vw_orders_unified"
             referencedColumns: ["id"]
           },
         ]
@@ -558,6 +558,13 @@ export type Database = {
             referencedRelation: "v_tracker_timeline"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "service_order_samples_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "vw_orders_unified"
+            referencedColumns: ["id"]
+          },
         ]
       }
       service_order_stage_history: {
@@ -622,6 +629,13 @@ export type Database = {
             columns: ["service_order_id"]
             isOneToOne: false
             referencedRelation: "v_tracker_timeline"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_order_stage_history_service_order_id_fkey"
+            columns: ["service_order_id"]
+            isOneToOne: false
+            referencedRelation: "vw_orders_unified"
             referencedColumns: ["id"]
           },
         ]
@@ -922,9 +936,12 @@ export type Database = {
       }
       v_map_orders: {
         Row: {
+          client_id: string | null
+          client_name: string | null
           cliente: string | null
           coordenador: string | null
           created_at: string | null
+          deleted_at: string | null
           envio_planilha_status_sla: string | null
           envio_resultados_status_sla: string | null
           flag_reagendamento: boolean | null
@@ -939,7 +956,15 @@ export type Database = {
           updated_at: string | null
           vri_status_sla: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "service_orders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       v_monthly_billing: {
         Row: {
@@ -1153,120 +1178,56 @@ export type Database = {
       }
       vw_orders_unified: {
         Row: {
-          CLIENTE: string | null
-          COD_SSB: string | null
-          COORD: string | null
+          client_id: string | null
+          client_name: string | null
+          cliente: string | null
+          cod_ssb: string | null
+          coord: string | null
           created_at: string | null
-          DT_CRA: string | null
-          DT_FATUR_SSG: string | null
-          DT_LPR: string | null
-          DT_LR: string | null
-          DT_PLAN_NEOGEN: string | null
-          DT_PLAN_SSG: string | null
-          DT_PREV_RESULT_SSG: string | null
-          DT_RESULT_SSG: string | null
-          DT_SSGEN_OS: string | null
-          DT_VRI: string | null
-          FATUR_SSG: number | null
-          FATUR_TIPO: string | null
+          deleted_at: string | null
+          dt_cra: string | null
+          dt_fatur_ssg: string | null
+          dt_lpr: string | null
+          dt_lr: string | null
+          dt_plan_neogen: string | null
+          dt_plan_ssg: string | null
+          dt_prev_result_ssg: string | null
+          dt_result_ssg: string | null
+          dt_ssgen_os: string | null
+          dt_vri: string | null
+          fatur_ssg: number | null
+          fatur_tipo: string | null
           id: string | null
-          LIB_CAD_CLIENTE: string | null
-          LR_RASTREIO: string | null
-          N_AMOSTRAS_NEOGEN: number | null
-          N_AMOSTRAS_SSG: number | null
-          N_LPR: number | null
-          N_LR: number | null
-          N_VRI: number | null
-          NF_NA_NEOGEN: string | null
-          NF_NEOGEM: string | null
-          Ord: string | null
-          OS_NEOGEN: string | null
-          OS_SSGEN: string | null
-          PLAN_NEOGEN: string | null
-          PLAN_SSG: string | null
-          PROD_NEOGEN: string | null
-          PROD_SSG: string | null
-          REP: string | null
-          RESULT_SSG: string | null
+          lib_cad_cliente: string | null
+          lr_rastreio: string | null
+          n_amostras_neogen: number | null
+          n_amostras_ssg: number | null
+          n_lpr: number | null
+          n_lr: number | null
+          n_vri: number | null
+          nf_na_neogen: string | null
+          nf_neogem: string | null
+          ord: string | null
+          ordem_servico_ssgen: number | null
+          os_neogen: string | null
+          os_ssgen: string | null
+          plan_neogen: string | null
+          plan_ssg: string | null
+          prod_neogen: string | null
+          prod_ssg: string | null
+          rep: string | null
+          result_ssg: string | null
           updated_at: string | null
         }
-        Insert: {
-          CLIENTE?: string | null
-          COD_SSB?: string | null
-          COORD?: string | null
-          created_at?: string | null
-          DT_CRA?: string | null
-          DT_FATUR_SSG?: string | null
-          DT_LPR?: string | null
-          DT_LR?: string | null
-          DT_PLAN_NEOGEN?: string | null
-          DT_PLAN_SSG?: string | null
-          DT_PREV_RESULT_SSG?: string | null
-          DT_RESULT_SSG?: string | null
-          DT_SSGEN_OS?: string | null
-          DT_VRI?: string | null
-          FATUR_SSG?: number | null
-          FATUR_TIPO?: string | null
-          id?: string | null
-          LIB_CAD_CLIENTE?: string | null
-          LR_RASTREIO?: string | null
-          N_AMOSTRAS_NEOGEN?: number | null
-          N_AMOSTRAS_SSG?: number | null
-          N_LPR?: number | null
-          N_LR?: number | null
-          N_VRI?: number | null
-          NF_NA_NEOGEN?: string | null
-          NF_NEOGEM?: string | null
-          Ord?: string | null
-          OS_NEOGEN?: string | null
-          OS_SSGEN?: string | null
-          PLAN_NEOGEN?: string | null
-          PLAN_SSG?: string | null
-          PROD_NEOGEN?: string | null
-          PROD_SSG?: string | null
-          REP?: string | null
-          RESULT_SSG?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          CLIENTE?: string | null
-          COD_SSB?: string | null
-          COORD?: string | null
-          created_at?: string | null
-          DT_CRA?: string | null
-          DT_FATUR_SSG?: string | null
-          DT_LPR?: string | null
-          DT_LR?: string | null
-          DT_PLAN_NEOGEN?: string | null
-          DT_PLAN_SSG?: string | null
-          DT_PREV_RESULT_SSG?: string | null
-          DT_RESULT_SSG?: string | null
-          DT_SSGEN_OS?: string | null
-          DT_VRI?: string | null
-          FATUR_SSG?: number | null
-          FATUR_TIPO?: string | null
-          id?: string | null
-          LIB_CAD_CLIENTE?: string | null
-          LR_RASTREIO?: string | null
-          N_AMOSTRAS_NEOGEN?: number | null
-          N_AMOSTRAS_SSG?: number | null
-          N_LPR?: number | null
-          N_LR?: number | null
-          N_VRI?: number | null
-          NF_NA_NEOGEN?: string | null
-          NF_NEOGEM?: string | null
-          Ord?: string | null
-          OS_NEOGEN?: string | null
-          OS_SSGEN?: string | null
-          PLAN_NEOGEN?: string | null
-          PLAN_SSG?: string | null
-          PROD_NEOGEN?: string | null
-          PROD_SSG?: string | null
-          REP?: string | null
-          RESULT_SSG?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "service_orders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
@@ -1283,6 +1244,13 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      link_order_to_client: {
+        Args: { p_client_name: string; p_order_id: string }
+        Returns: {
+          client_id: string
+          client_name: string
+        }[]
       }
       my_profile: {
         Args: never

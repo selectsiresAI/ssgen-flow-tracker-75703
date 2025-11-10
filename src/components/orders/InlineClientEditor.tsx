@@ -27,23 +27,69 @@ export default function InlineClientEditor({
 
   const save = async () => {
     setSaving(true);
-    const { data, error } = await supabase.rpc("link_order_to_client", {
-      p_order_id: orderId,
-      p_client_name: name, // vazio => desvincular
-    });
+    
+    // Buscar ou criar cliente e vincular à ordem
+    let clientId: string | null = null;
+    let clientName: string | null = null;
+
+    if (name.trim()) {
+      // Buscar cliente existente
+      const { data: existingClient } = await supabase
+        .from("clients")
+        .select("id, nome")
+        .ilike("nome", name.trim())
+        .is("deleted_at", null)
+        .limit(1)
+        .maybeSingle();
+
+      if (existingClient) {
+        clientId = existingClient.id;
+        clientName = existingClient.nome;
+      } else {
+        // Criar novo cliente
+        const { data: newClient, error: createError } = await supabase
+          .from("clients")
+          .insert({
+            nome: name.trim(),
+            coordenador: "Não definido",
+            representante: "Não definido",
+            cpf_cnpj: 0,
+            data: new Date().toISOString().split('T')[0],
+            ordem_servico_ssgen: 0
+          })
+          .select("id, nome")
+          .single();
+
+        if (createError) {
+          console.error(createError);
+          alert(`Erro ao criar cliente: ${createError.message}`);
+          setSaving(false);
+          return;
+        }
+
+        clientId = newClient.id;
+        clientName = newClient.nome;
+      }
+    }
+
+    // Atualizar ordem
+    const { error: updateError } = await supabase
+      .from("service_orders")
+      .update({ client_id: clientId })
+      .eq("id", orderId);
+
     setSaving(false);
 
-    if (error) {
-      console.error(error);
-      const msg = /permission/i.test(error.message)
+    if (updateError) {
+      console.error(updateError);
+      const msg = /permission/i.test(updateError.message)
         ? "Permissão negada ao alterar cliente da OS. Verifique login/policies."
-        : `Erro ao alterar cliente da OS: ${error.message}`;
+        : `Erro ao alterar cliente da OS: ${updateError.message}`;
       alert(msg);
       return;
     }
 
-    const row = Array.isArray(data) ? data[0] : data;
-    onCommitted({ client_name: row?.client_name ?? null, client_id: row?.client_id ?? null });
+    onCommitted({ client_name: clientName, client_id: clientId });
     setEditing(false);
   };
 

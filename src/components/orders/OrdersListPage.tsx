@@ -23,8 +23,15 @@ export default function OrdersListPage() {
       if (!active) return;
       setLoading(true);
       const { data, error } = await supabase
-        .from("v_map_orders")
-        .select("id, ordem_servico_ssgen, client_name, created_at, deleted_at")
+        .from("service_orders")
+        .select(`
+          id,
+          ordem_servico_ssgen,
+          created_at,
+          deleted_at,
+          clients:client_id (nome)
+        `)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       if (!active) return;
@@ -39,7 +46,15 @@ export default function OrdersListPage() {
         return;
       }
 
-      setRows((data ?? []).filter((r) => r.deleted_at == null));
+      const mapped = (data ?? []).map((r: any) => ({
+        id: r.id,
+        ordem_servico_ssgen: r.ordem_servico_ssgen,
+        client_name: r.clients?.nome ?? null,
+        created_at: r.created_at,
+        deleted_at: r.deleted_at,
+        client_id: r.client_id
+      }));
+      setRows(mapped);
       setLoading(false);
     };
 
