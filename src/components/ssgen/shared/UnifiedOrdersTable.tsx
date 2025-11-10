@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { UnifiedOrder } from '@/types/ssgen';
@@ -8,6 +8,7 @@ import { EditableCell } from './EditableCell';
 import { SLABadge } from './SLABadge';
 import { deleteServiceOrder, updateServiceOrder } from '@/lib/serviceOrdersApi';
 import { toast } from 'sonner';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,13 +29,49 @@ interface UnifiedOrdersTableProps {
   onUpdate?: () => void;
 }
 
-export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({ 
-  rows, 
-  onOpen, 
+export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
+  rows,
+  onOpen,
   userRole,
-  onUpdate 
+  onUpdate
 }) => {
   const isAdmin = userRole === 'ADM';
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  const sortedRows = useMemo(() => {
+    const parsedValue = (value: UnifiedOrder['ordem_servico_ssgen']) => {
+      if (!value) {
+        return { numeric: NaN, original: '' };
+      }
+
+      const asString = String(value);
+      const numeric = parseInt(asString.replace(/\D/g, ''), 10);
+
+      return {
+        numeric,
+        original: asString
+      };
+    };
+
+    return [...rows].sort((a, b) => {
+      const valueA = parsedValue(a.ordem_servico_ssgen);
+      const valueB = parsedValue(b.ordem_servico_ssgen);
+
+      if (!Number.isNaN(valueA.numeric) && !Number.isNaN(valueB.numeric)) {
+        return sortDirection === 'asc'
+          ? valueA.numeric - valueB.numeric
+          : valueB.numeric - valueA.numeric;
+      }
+
+      return sortDirection === 'asc'
+        ? valueA.original.localeCompare(valueB.original)
+        : valueB.original.localeCompare(valueA.original);
+    });
+  }, [rows, sortDirection]);
+
+  const toggleSortDirection = () => {
+    setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+  };
 
   const handleCellUpdate = async (orderId: string | undefined, field: string, value: any) => {
     if (!orderId) {
@@ -76,7 +113,20 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
         <table className="w-full text-sm">
           <thead className="bg-muted sticky top-0 z-10">
             <tr>
-              <th className="p-2 text-left border">OS SSGen</th>
+              <th className="p-2 text-left border">
+                <button
+                  type="button"
+                  onClick={toggleSortDirection}
+                  className="flex items-center gap-1 text-left"
+                >
+                  <span>OS SSGen</span>
+                  {sortDirection === 'asc' ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </button>
+              </th>
               <th className="p-2 text-left border">Data</th>
               <th className="p-2 text-left border">OS Neogen</th>
               <th className="p-2 text-left border">Nome</th>
@@ -111,14 +161,14 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
             </tr>
           </thead>
           <tbody>
-            {rows.length === 0 ? (
+            {sortedRows.length === 0 ? (
               <tr>
                 <td colSpan={32} className="p-4 text-center text-muted-foreground">
                   Nenhuma ordem encontrada
                 </td>
               </tr>
             ) : (
-              rows.map((row, idx) => (
+              sortedRows.map((row, idx) => (
                 <tr key={idx} className="hover:bg-muted/50">
                   <td className="p-2 border">
                     <button
