@@ -45,12 +45,12 @@ export default function TrackerDashboard() {
           {(criticalCount > 0 || warningCount > 0) && (
             <div className="flex gap-2">
               {criticalCount > 0 && (
-                <div className="px-3 py-1 rounded-full bg-destructive/20 text-destructive text-xs font-semibold border border-destructive">
+                <div className="px-3 py-1 rounded-full bg-white/90 text-black text-xs font-semibold ring-1 ring-destructive/60">
                   {criticalCount} Crítico{criticalCount !== 1 ? 's' : ''}
                 </div>
               )}
               {warningCount > 0 && (
-                <div className="px-3 py-1 rounded-full bg-warning/20 text-warning text-xs font-semibold border border-warning">
+                <div className="px-3 py-1 rounded-full bg-white/90 text-black text-xs font-semibold ring-1 ring-warning/60">
                   {warningCount} Aviso{warningCount !== 1 ? 's' : ''}
                 </div>
               )}
@@ -102,7 +102,13 @@ export default function TrackerDashboard() {
               <div className="bg-zenith-card rounded-2xl p-4 border border-zenith-navy/30">
                 <div className="text-zenith-gold font-semibold mb-2">Resumo Executivo</div>
                 <div className="text-sm text-zenith-gray space-y-2">
-                  <p>Operação com {kpis?.em_processamento ?? 0} OS ativas.</p>
+                  <p>
+                    Operação com{' '}
+                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-white/90 text-black">
+                      {kpis?.em_processamento ?? 0}
+                    </span>{' '}
+                    OS ativas.
+                  </p>
                   <p>Priorize etapas críticas para manter SLA.</p>
                 </div>
               </div>

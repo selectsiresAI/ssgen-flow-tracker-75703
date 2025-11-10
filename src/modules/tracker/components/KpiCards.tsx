@@ -37,7 +37,9 @@ export function KpiCards({ k }: KpiCardsProps) {
         >
           <div className="text-3xl mb-1">{c.icon}</div>
           <div className="text-zenith-gold text-sm">{c.label}</div>
-          <div className="text-2xl font-semibold text-white">{c.value ?? '-'}</div>
+          <div className="inline-flex items-center justify-center px-3 py-1 mt-1 rounded-lg bg-white/90 text-2xl font-semibold text-black">
+            {c.value ?? '-'}
+          </div>
         </div>
       ))}
     </div>

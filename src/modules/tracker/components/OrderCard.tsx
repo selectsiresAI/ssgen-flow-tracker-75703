@@ -26,13 +26,22 @@ export function OrderCard({
   return (
     <div className="rounded-2xl border border-zenith-navy/30 bg-zenith-card p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <div className="font-semibold text-white">OS {row.ordem_servico_ssgen}</div>
+        <div className="font-semibold text-white">
+          OS <span className="inline-flex items-center px-2 py-0.5 rounded bg-white/90 text-black">{row.ordem_servico_ssgen}</span>
+        </div>
         <div className="text-xs text-zenith-gray">{row.etapa_atual ?? '-'}</div>
       </div>
       <div className="text-sm text-zenith-gray">{row.cliente}</div>
       <TimelineNine steps={steps} />
       <div className="text-xs text-zenith-gray flex items-center justify-between">
-        <span>Aging: {aging === null ? '-' : `${aging}d`}</span>
+        <span>
+          Aging:{' '}
+          {aging === null ? (
+            '-'
+          ) : (
+            <span className="inline-flex items-center px-2 py-0.5 rounded bg-white/90 text-black">{aging}d</span>
+          )}
+        </span>
         <span className={`px-2 py-1 rounded ${row.prioridade === 'alta' ? 'bg-red-500/20 text-red-400' : 'bg-zenith-navy'}`}>
           {row.prioridade ?? 'média'}
         </span>
