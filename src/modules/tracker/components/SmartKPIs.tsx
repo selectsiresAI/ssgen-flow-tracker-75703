@@ -24,7 +24,7 @@ export function SmartKPIs({ kpis, trends }: SmartKPIsProps) {
         title="Total OS" 
         value={kpis.total_os} 
         trend={trends?.total_os_trend}
-        icon={<CheckCircle className="w-4 h-4" />}
+        icon={<CheckCircle className="w-4 h-4 text-black" />}
       />
       <KPICard 
         title="Em Processamento" 
@@ -40,7 +40,7 @@ export function SmartKPIs({ kpis, trends }: SmartKPIsProps) {
       <KPICard 
         title="Concluídas Hoje" 
         value={kpis.concluidas_hoje}
-        icon={<CheckCircle className="w-4 h-4 text-success" />}
+        icon={<CheckCircle className="w-4 h-4 text-black" />}
       />
       <KPICard 
         title="TMA (dias)" 
@@ -57,7 +57,7 @@ export function SmartKPIs({ kpis, trends }: SmartKPIsProps) {
       <KPICard 
         title="Alta Prioridade" 
         value={kpis.alta_prioridade || 0}
-        icon={<AlertTriangle className="w-4 h-4 text-warning" />}
+        icon={<AlertTriangle className="w-4 h-4 text-black" />}
       />
       <KPICard 
         title="Reagendamentos" 
@@ -89,27 +89,27 @@ interface KPICardProps {
 
 function KPICard({ title, value, subtitle, trend, icon, status }: KPICardProps) {
   const statusColors = {
-    success: 'border-l-success',
-    warning: 'border-l-warning',
-    error: 'border-l-destructive',
+    success: 'border-l-green-400',
+    warning: 'border-l-yellow-400',
+    error: 'border-l-red-400',
   };
 
   return (
-    <div className={`rounded-2xl p-4 bg-zenith-card border border-zenith-navy/30 border-l-4 ${status ? statusColors[status] : 'border-l-zenith-gold'}`}>
+    <div className={`rounded-2xl p-4 bg-white border border-gray-200 border-l-4 ${status ? statusColors[status] : 'border-l-gray-400'}`}>
       <div className="flex items-center justify-between mb-1">
-        <div className="text-zenith-gold text-xs uppercase tracking-wide">{title}</div>
-        {icon && <div className="text-zenith-gold">{icon}</div>}
+        <div className="text-black text-xs uppercase tracking-wide">{title}</div>
+        {icon && <div className="text-black">{icon}</div>}
       </div>
       <div className="flex items-baseline gap-2">
-        <div className="text-2xl font-bold text-white">{value}</div>
+        <div className="text-2xl font-bold text-black">{value}</div>
         {trend !== undefined && (
-          <div className={`flex items-center text-xs ${trend >= 0 ? 'text-success' : 'text-destructive'}`}>
-            {trend >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+          <div className="flex items-center text-xs text-black">
+            {trend >= 0 ? <TrendingUp className="w-3 h-3 text-black" /> : <TrendingDown className="w-3 h-3 text-black" />}
             <span>{Math.abs(trend).toFixed(1)}%</span>
           </div>
         )}
       </div>
-      {subtitle && <div className="text-xs text-zenith-gray mt-1">{subtitle}</div>}
+      {subtitle && <div className="text-xs text-black mt-1">{subtitle}</div>}
     </div>
   );
 }

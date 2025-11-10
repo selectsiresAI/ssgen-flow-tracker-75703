@@ -25,9 +25,9 @@ export function KpiChart({ data }: KpiChartProps) {
 
   if (!RC) {
     return (
-      <div className="bg-zenith-card rounded-2xl p-4 border border-zenith-navy/30">
-        <div className="text-zenith-gold mb-2">Evolução de Ordens e Amostras</div>
-        <div className="h-[250px] flex items-center justify-center text-zenith-gray">
+      <div className="bg-white rounded-2xl p-4 border border-gray-200">
+        <div className="text-black mb-2">Evolução de Ordens e Amostras</div>
+        <div className="h-[250px] flex items-center justify-center text-black">
           Carregando gráfico...
         </div>
       </div>
@@ -46,9 +46,9 @@ export function KpiChart({ data }: KpiChartProps) {
 
   if (!data || data.length === 0) {
     return (
-      <div className="bg-zenith-card rounded-2xl p-4 border border-zenith-navy/30">
-        <div className="text-zenith-gold mb-2">Evolução de Ordens e Amostras</div>
-        <div className="h-64 flex items-center justify-center text-zenith-gray">
+      <div className="bg-white rounded-2xl p-4 border border-gray-200">
+        <div className="text-black mb-2">Evolução de Ordens e Amostras</div>
+        <div className="h-64 flex items-center justify-center text-black">
           Sem dados disponíveis
         </div>
       </div>
@@ -56,8 +56,8 @@ export function KpiChart({ data }: KpiChartProps) {
   }
 
   return (
-    <div className="bg-zenith-card rounded-2xl p-4 border border-zenith-navy/30">
-      <div className="text-zenith-gold mb-2 font-semibold">Evolução de Ordens e Amostras</div>
+    <div className="bg-white rounded-2xl p-4 border border-gray-200">
+      <div className="text-black mb-2 font-semibold">Evolução de Ordens e Amostras</div>
       <ResponsiveContainer width="100%" height={250}>
         <AreaChart data={data}>
           <defs>
@@ -70,21 +70,22 @@ export function KpiChart({ data }: KpiChartProps) {
               <stop offset="90%" stopColor="#8DC63F" stopOpacity={0}/>
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1F2937" />
-          <XAxis dataKey="mes" stroke="#BBC3CF" style={{ fontSize: '12px' }} />
-          <YAxis stroke="#BBC3CF" style={{ fontSize: '12px' }} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+          <XAxis dataKey="mes" stroke="#4B5563" style={{ fontSize: '12px' }} tick={{ fill: '#000000' }} />
+          <YAxis stroke="#4B5563" style={{ fontSize: '12px' }} tick={{ fill: '#000000' }} />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#0F1419',
-              border: '1px solid #1F2937',
+              backgroundColor: '#ffffff',
+              border: '1px solid #D1D5DB',
               borderRadius: '8px',
-              color: '#fff',
+              color: '#000000',
             }}
+            itemStyle={{ color: '#000000' }}
           />
-          <Legend wrapperStyle={{ color: '#BBC3CF' }} />
-          <Area 
-            type="monotone" 
-            dataKey="ordens" 
+          <Legend wrapperStyle={{ color: '#000000' }} />
+          <Area
+            type="monotone"
+            dataKey="ordens"
             stroke="#C6A053" 
             strokeWidth={2}
             fillOpacity={1} 

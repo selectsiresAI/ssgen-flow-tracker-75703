@@ -67,10 +67,10 @@ export function OrdersTable({ rows }: { rows: TrackerTimeline[] }) {
 
   return (
     <>
-      <div className="rounded-2xl border border-zenith-navy/30 bg-zenith-card overflow-hidden">
+      <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-zenith-navy/50 text-zenith-gold text-xs uppercase tracking-wide">
+            <thead className="bg-gray-100 text-black text-xs uppercase tracking-wide">
               <tr>
                 <th className="px-4 py-3 text-left">OS</th>
                 <th className="px-4 py-3 text-left">Cliente</th>
@@ -81,27 +81,27 @@ export function OrdersTable({ rows }: { rows: TrackerTimeline[] }) {
                 <th className="px-4 py-3 text-center">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zenith-navy/20">
+            <tbody className="divide-y divide-gray-100">
               {rows.map((r) => (
-                <tr key={r.id} className="hover:bg-zenith-navy/10 transition-colors">
+                <tr key={r.id} className="hover:bg-gray-100 transition-colors">
                   <td className="px-4 py-3 font-mono text-sm">
-                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-white/90 text-black">
+                    <span className="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 text-black">
                       {r.ordem_servico_ssgen}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-sm text-white">{r.cliente}</td>
+                  <td className="px-4 py-3 text-sm text-black">{r.cliente}</td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-1 rounded ${
-                      r.prioridade === 'alta' 
-                        ? 'bg-red-500/20 text-red-400' 
+                    <span className={`text-xs px-2 py-1 rounded text-black ${
+                      r.prioridade === 'alta'
+                        ? 'bg-red-200'
                         : r.prioridade === 'media'
-                        ? 'bg-yellow-500/20 text-yellow-400'
-                        : 'bg-green-500/20 text-green-400'
+                        ? 'bg-yellow-200'
+                        : 'bg-green-200'
                     }`}>
                       {r.prioridade || 'baixa'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-sm text-zenith-gray">{r.etapa_atual || '—'}</td>
+                  <td className="px-4 py-3 text-sm text-black">{r.etapa_atual || '—'}</td>
                   <td className="px-4 py-3">
                     <OrderTimer 
                       startDate={r.etapa1_cra_data} 
@@ -111,7 +111,7 @@ export function OrdersTable({ rows }: { rows: TrackerTimeline[] }) {
                   </td>
                   <td className="px-4 py-3">
                     <span
-                      className={`inline-flex items-center px-2 py-1 rounded-md bg-white/90 text-sm font-semibold text-black ring-1 ${
+                      className={`inline-flex items-center px-2 py-1 rounded-md bg-gray-100 text-sm font-semibold text-black ring-1 ${
                         (r.aging_dias_total ?? 0) >= 5
                           ? 'ring-red-400/60'
                           : (r.aging_dias_total ?? 0) >= 3
@@ -124,7 +124,7 @@ export function OrdersTable({ rows }: { rows: TrackerTimeline[] }) {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-center gap-2">
-                      <button className="px-3 py-1 text-xs rounded bg-zenith-navy text-white hover:opacity-90 transition-opacity">
+                      <button className="px-3 py-1 text-xs rounded bg-gray-200 text-black hover:bg-gray-300 transition-colors">
                         Abrir
                       </button>
                       <Button
@@ -132,7 +132,7 @@ export function OrdersTable({ rows }: { rows: TrackerTimeline[] }) {
                         size="sm"
                         onClick={() => handleOpenDelete(r.id, r.source_table)}
                         disabled={!isAdmin}
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 disabled:opacity-50 disabled:hover:bg-transparent"
+                        className="h-8 w-8 p-0 text-black hover:text-black hover:bg-gray-100 disabled:opacity-50 disabled:hover:bg-transparent"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

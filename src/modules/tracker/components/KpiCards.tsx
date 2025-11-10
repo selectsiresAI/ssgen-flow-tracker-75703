@@ -9,7 +9,7 @@ export function KpiCards({ k }: KpiCardsProps) {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-          <div key={i} className="rounded-2xl p-4 bg-zenith-card border border-zenith-navy/30 animate-pulse">
+          <div key={i} className="rounded-2xl p-4 bg-white border border-gray-200 animate-pulse">
             <div className="h-24" />
           </div>
         ))}
@@ -33,11 +33,11 @@ export function KpiCards({ k }: KpiCardsProps) {
       {cards.map((c, i) => (
         <div
           key={i}
-          className="rounded-2xl p-4 bg-zenith-card border border-zenith-navy/30 text-center hover:border-zenith-gold/60 transition-all"
+          className="rounded-2xl p-4 bg-white border border-gray-200 text-center hover:border-gray-400 transition-all"
         >
           <div className="text-3xl mb-1">{c.icon}</div>
-          <div className="text-zenith-gold text-sm">{c.label}</div>
-          <div className="inline-flex items-center justify-center px-3 py-1 mt-1 rounded-lg bg-white/90 text-2xl font-semibold text-black">
+          <div className="text-black text-sm">{c.label}</div>
+          <div className="inline-flex items-center justify-center px-3 py-1 mt-1 rounded-lg bg-gray-100 text-2xl font-semibold text-black">
             {c.value ?? '-'}
           </div>
         </div>

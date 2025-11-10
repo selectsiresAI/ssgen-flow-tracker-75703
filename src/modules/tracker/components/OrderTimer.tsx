@@ -44,7 +44,7 @@ export function OrderTimer({ startDate, targetDays, status, className }: OrderTi
   }, [startDate, targetDays]);
 
   if (!startDate) {
-    return <span className="text-xs text-muted-foreground">—</span>;
+    return <span className="text-xs text-black">—</span>;
   }
 
   const statusAccent = timeInfo.isOverdue
@@ -53,11 +53,7 @@ export function OrderTimer({ startDate, targetDays, status, className }: OrderTi
     ? 'ring-warning/60'
     : 'ring-success/60';
 
-  const iconColor = timeInfo.isOverdue
-    ? 'text-destructive'
-    : timeInfo.days === 0
-    ? 'text-warning'
-    : 'text-success';
+  const iconColor = 'text-black';
 
   return (
     <div className={cn('flex items-center gap-1.5 text-xs font-medium', className)}>
@@ -68,7 +64,7 @@ export function OrderTimer({ startDate, targetDays, status, className }: OrderTi
       )}
       <span
         className={cn(
-          'inline-flex items-center rounded-md px-2 py-0.5 bg-white/90 text-black',
+          'inline-flex items-center rounded-md px-2 py-0.5 bg-gray-100 text-black',
           statusAccent,
           'ring-1'
         )}

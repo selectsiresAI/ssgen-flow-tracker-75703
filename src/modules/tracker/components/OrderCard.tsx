@@ -24,37 +24,37 @@ export function OrderCard({
   const aging = row.aging_dias_total ?? null;
 
   return (
-    <div className="rounded-2xl border border-zenith-navy/30 bg-zenith-card p-4 space-y-3">
+    <div className="rounded-2xl border border-gray-200 bg-white p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <div className="font-semibold text-white">
-          OS <span className="inline-flex items-center px-2 py-0.5 rounded bg-white/90 text-black">{row.ordem_servico_ssgen}</span>
+        <div className="font-semibold text-black">
+          OS <span className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-black">{row.ordem_servico_ssgen}</span>
         </div>
-        <div className="text-xs text-zenith-gray">{row.etapa_atual ?? '-'}</div>
+        <div className="text-xs text-black">{row.etapa_atual ?? '-'}</div>
       </div>
-      <div className="text-sm text-zenith-gray">{row.cliente}</div>
+      <div className="text-sm text-black">{row.cliente}</div>
       <TimelineNine steps={steps} />
-      <div className="text-xs text-zenith-gray flex items-center justify-between">
+      <div className="text-xs text-black flex items-center justify-between">
         <span>
           Aging:{' '}
           {aging === null ? (
             '-'
           ) : (
-            <span className="inline-flex items-center px-2 py-0.5 rounded bg-white/90 text-black">{aging}d</span>
+            <span className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-black">{aging}d</span>
           )}
         </span>
-        <span className={`px-2 py-1 rounded ${row.prioridade === 'alta' ? 'bg-red-500/20 text-red-400' : 'bg-zenith-navy'}`}>
+        <span className={`px-2 py-1 rounded text-black ${row.prioridade === 'alta' ? 'bg-red-200' : 'bg-gray-200'}`}>
           {row.prioridade ?? 'média'}
         </span>
       </div>
       <div className="flex gap-2">
-        <button 
-          className="px-3 py-1.5 rounded bg-zenith-navy text-white hover:opacity-90 text-sm"
+        <button
+          className="px-3 py-1.5 rounded bg-gray-200 text-black hover:bg-gray-300 text-sm"
           onClick={() => onOpen(row)}
         >
           Detalhes
         </button>
-        <button 
-          className="px-3 py-1.5 rounded bg-zenith-navy text-white hover:opacity-90 text-sm"
+        <button
+          className="px-3 py-1.5 rounded bg-gray-200 text-black hover:bg-gray-300 text-sm"
           onClick={() => onMap(row)}
         >
           Mapa

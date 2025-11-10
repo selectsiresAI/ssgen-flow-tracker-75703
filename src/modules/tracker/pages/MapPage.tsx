@@ -35,11 +35,11 @@ export default function MapPage() {
   }, [refetchOrders, refetchTeam]);
 
   return (
-    <div className="p-6 space-y-6 bg-zenith-black min-h-screen">
-      <div className="text-3xl font-bold text-white">Mapa Operacional</div>
-      <MapLayer 
-        orders={orders} 
-        team={team} 
+    <div className="p-6 space-y-6 bg-white min-h-screen">
+      <div className="text-3xl font-bold text-black">Mapa Operacional</div>
+      <MapLayer
+        orders={orders}
+        team={team}
         onOrderClick={(id) => navigate(`/ordem/${id}`)} 
       />
     </div>

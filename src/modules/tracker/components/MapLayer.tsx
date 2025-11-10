@@ -113,8 +113,8 @@ export function MapLayer({
   }, [team]);
 
   return (
-    <div className="bg-zenith-card rounded-2xl p-4 border border-zenith-navy/30">
-      <div className="text-zenith-gold mb-3 font-semibold">Mapa Operacional</div>
+    <div className="bg-white rounded-2xl p-4 border border-gray-200">
+      <div className="text-black mb-3 font-semibold">Mapa Operacional</div>
       <div
         ref={mapContainerRef}
         style={{ height: 500, width: '100%', borderRadius: '12px' }}
