@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Trash2, Upload } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +29,7 @@ import {
 } from '@/lib/ssgenClient';
 import { fetchManagementOrders, type ManagementOrderRow } from '@/lib/fetchOrders';
 import type { Database } from '@/lib/supabaseClient';
-import type { PowerRow } from '@/types/ssgen';
+import type { PowerRow, Profile } from '@/types/ssgen';
 
 type ServiceOrderColumn = keyof Database['public']['Tables']['service_orders']['Row'];
 
@@ -306,64 +306,101 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin 
   );
 };
 
+const shouldIncludeRowForProfile = (
+  row: OrdersManagementRow,
+  profile: Profile | null,
+): boolean => {
+  if (!profile) return true;
+  if (profile.role === 'ADM') return true;
+
+  if (profile.role === 'GERENTE') {
+    if (!profile.coord) return false;
+    return row.COORD === profile.coord;
+  }
+
+  if (profile.role === 'REPRESENTANTE') {
+    if (!profile.rep) return false;
+    return row.REP === profile.rep;
+  }
+
+  return false;
+};
+
 const OrdersManagement: React.FC = () => {
   const [rows, setRows] = useState<OrdersManagementRow[]>([]);
   const [importOpen, setImportOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const profileRef = useRef<Profile | null>(null);
 
-  const load = useCallback(async () => {
-    try {
-      setErrorMsg(null);
-      const [powerRows, managementRows] = await Promise.all([
-        fetchUnifiedOrderRows(),
-        fetchManagementOrders(),
-      ]);
+  const load = useCallback(
+    async (overrideProfile?: Profile | null) => {
+      const activeProfile = overrideProfile ?? profileRef.current ?? null;
 
-      const activeManagementRows = managementRows.filter((row) => row.deleted_at == null);
+      try {
+        setErrorMsg(null);
+        const [powerRows, managementRows] = await Promise.all([
+          fetchUnifiedOrderRows(),
+          fetchManagementOrders(),
+        ]);
 
-      const viewById = new Map<string, ManagementOrderRow>();
-      activeManagementRows.forEach((row) => {
-        if (row.id) {
-          viewById.set(row.id, row);
-        }
-      });
+        const activeManagementRows = managementRows.filter((row) => row.deleted_at == null);
 
-      const merged: OrdersManagementRow[] = powerRows.map((row) => {
-        const view = row.id ? viewById.get(row.id) : undefined;
-        const fallbackName =
-          typeof row.CLIENTE === 'string' && row.CLIENTE.trim().length > 0
-            ? row.CLIENTE
-            : null;
-        const resolvedClientName = view?.client_name ?? fallbackName ?? null;
+        const viewById = new Map<string, ManagementOrderRow>();
+        activeManagementRows.forEach((row) => {
+          if (row.id) {
+            viewById.set(row.id, row);
+          }
+        });
 
-        return {
-          ...row,
-          CLIENTE: resolvedClientName ?? '',
-          client_name: resolvedClientName,
-        } satisfies OrdersManagementRow;
-      });
+        const merged: OrdersManagementRow[] = powerRows.map((row) => {
+          const view = row.id ? viewById.get(row.id) : undefined;
+          const fallbackName =
+            typeof row.CLIENTE === 'string' && row.CLIENTE.trim().length > 0
+              ? row.CLIENTE
+              : null;
+          const resolvedClientName = view?.client_name ?? fallbackName ?? null;
 
-      setRows(merged);
-    } catch (error: unknown) {
-      console.error('Erro ao carregar ordens', error);
-      const message = error instanceof Error ? error.message : 'Erro ao carregar ordens';
-      setErrorMsg(message);
-      toast.error(message);
+          return {
+            ...row,
+            CLIENTE: resolvedClientName ?? '',
+            client_name: resolvedClientName,
+          } satisfies OrdersManagementRow;
+        });
+
+        const scopedRows = merged.filter((row) => shouldIncludeRowForProfile(row, activeProfile));
+
+        setRows(scopedRows);
+      } catch (error: unknown) {
+        console.error('Erro ao carregar ordens', error);
+        const message = error instanceof Error ? error.message : 'Erro ao carregar ordens';
+        setErrorMsg(message);
+        toast.error(message);
     }
-  }, []);
+    },
+    [],
+  );
 
   useEffect(() => {
     const init = async () => {
-      await load();
-      const profile = await getProfile();
-      setIsAdmin(profile?.role === 'ADM');
+      const fetchedProfile = await getProfile();
+      setProfile(fetchedProfile);
+      profileRef.current = fetchedProfile;
+      setIsAdmin(fetchedProfile?.role === 'ADM');
+      await load(fetchedProfile);
     };
     void init();
   }, [load]);
 
   useEffect(() => {
+    profileRef.current = profile;
+  }, [profile]);
+
+  useEffect(() => {
+    if (!profile) return;
+
     const channel = supabase
       .channel('orders-management-rt')
       .on(
@@ -375,10 +412,10 @@ const OrdersManagement: React.FC = () => {
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [load]);
+      return () => {
+        supabase.removeChannel(channel);
+      };
+  }, [load, profile]);
 
   const updateRow = (updated: OrdersManagementRow) => {
     setRows((prev) =>
