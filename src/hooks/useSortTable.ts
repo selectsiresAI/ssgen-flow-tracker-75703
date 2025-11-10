@@ -114,6 +114,10 @@ export function useSortTable<T, K extends keyof T = keyof T>(
       const nextColumn = direction ? column : null;
       const nextDirection = direction;
 
+      if (nextColumn === sortColumn && nextDirection === sortDirection) {
+        return;
+      }
+
       if (!isControlled) {
         setInternalSortColumn(nextColumn);
         setInternalSortDirection(nextDirection);
@@ -121,7 +125,7 @@ export function useSortTable<T, K extends keyof T = keyof T>(
 
       onSortChange?.(nextColumn, nextDirection);
     },
-    [isControlled, onSortChange],
+    [isControlled, onSortChange, sortColumn, sortDirection],
   );
 
   const handleSort = useCallback(
