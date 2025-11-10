@@ -51,7 +51,7 @@ export default function UserManagementPage() {
   // Buscar representantes
   const { data: representantes = [] } = useQuery({
     queryKey: ['representantes'],
-    queryFn: fetchRepresentantes,
+    queryFn: () => fetchRepresentantes(),
   });
 
   // Mutation para atribuir papel

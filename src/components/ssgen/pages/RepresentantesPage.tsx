@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,18 +10,39 @@ import { fetchCoordenadores } from '@/lib/coordenadoresApi';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import type { Profile } from '@/types/ssgen';
 
-const RepresentantesPage: React.FC = () => {
+interface RepresentantesPageProps {
+  profile: Profile | null;
+}
+
+const RepresentantesPage: React.FC<RepresentantesPageProps> = ({ profile }) => {
   const [query, setQuery] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRep, setEditingRep] = useState<Representante | null>(null);
-  const [formData, setFormData] = useState({ nome: '', email: '', coordenador_nome: '' });
+  const [formData, setFormData] = useState({ nome: '', email: '', coordenador_nome: profile?.coord ?? '' });
+
+  const isCoordenador = profile?.role === 'COORDENADOR';
 
   const queryClient = useQueryClient();
 
   const { data: representantes = [], isLoading } = useQuery({
-    queryKey: ['representantes'],
-    queryFn: fetchRepresentantes,
+    queryKey: ['representantes', profile?.role, profile?.coord, profile?.rep],
+    queryFn: async () => {
+      if (profile?.role === 'COORDENADOR') {
+        if (!profile.coord) {
+          return [];
+        }
+        return fetchRepresentantes({ coord: profile.coord });
+      }
+      if (profile?.role === 'REPRESENTANTE') {
+        if (!profile.rep) {
+          return [];
+        }
+        return fetchRepresentantes({ rep: profile.rep });
+      }
+      return fetchRepresentantes();
+    },
   });
 
   const { data: coordenadores = [] } = useQuery({
@@ -29,13 +50,21 @@ const RepresentantesPage: React.FC = () => {
     queryFn: fetchCoordenadores,
   });
 
+  const availableCoordenadores = useMemo(
+    () =>
+      isCoordenador && profile?.coord
+        ? coordenadores.filter((coord) => coord.nome === profile.coord)
+        : coordenadores,
+    [coordenadores, isCoordenador, profile?.coord]
+  );
+
   const createMutation = useMutation({
     mutationFn: createRepresentante,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['representantes'] });
       toast.success('Representante criado com sucesso!');
       setIsDialogOpen(false);
-      setFormData({ nome: '', email: '', coordenador_nome: '' });
+      setFormData({ nome: '', email: '', coordenador_nome: profile?.coord ?? '' });
     },
     onError: () => toast.error('Erro ao criar representante'),
   });
@@ -48,7 +77,7 @@ const RepresentantesPage: React.FC = () => {
       toast.success('Representante atualizado com sucesso!');
       setIsDialogOpen(false);
       setEditingRep(null);
-      setFormData({ nome: '', email: '', coordenador_nome: '' });
+      setFormData({ nome: '', email: '', coordenador_nome: profile?.coord ?? '' });
     },
     onError: () => toast.error('Erro ao atualizar representante'),
   });
@@ -94,16 +123,22 @@ const RepresentantesPage: React.FC = () => {
   return (
     <div className="space-y-4">
       <HeaderBar title="Representantes" query={query} setQuery={setQuery} />
-      
+
       <Dialog open={isDialogOpen} onOpenChange={(open) => {
         setIsDialogOpen(open);
         if (!open) {
           setEditingRep(null);
-          setFormData({ nome: '', email: '', coordenador_nome: '' });
+          setFormData({ nome: '', email: '', coordenador_nome: profile?.coord ?? '' });
         }
       }}>
         <DialogTrigger asChild>
-          <Button className="gap-2">
+          <Button
+            className="gap-2"
+            onClick={() => {
+              setEditingRep(null);
+              setFormData({ nome: '', email: '', coordenador_nome: profile?.coord ?? '' });
+            }}
+          >
             <Plus className="w-4 h-4" />
             Novo Representante
           </Button>
@@ -141,7 +176,7 @@ const RepresentantesPage: React.FC = () => {
                 required
               >
                 <option value="">Selecione um coordenador</option>
-                {coordenadores
+                {availableCoordenadores
                   .filter((coord) => coord.nome && coord.nome.trim() !== '')
                   .map((coord) => (
                     <option key={coord.id ?? coord.nome} value={String(coord.nome)}>
@@ -196,14 +231,16 @@ const RepresentantesPage: React.FC = () => {
                     >
                       <Pencil className="w-4 h-4" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(rep.id)}
-                      title="Remover representante"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    {profile?.role === 'ADM' && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(rep.id)}
+                        title="Remover representante"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}

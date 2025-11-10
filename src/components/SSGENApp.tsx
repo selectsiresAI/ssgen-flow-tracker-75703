@@ -172,7 +172,7 @@ export default function SSGENTrackApp() {
     if (current === 'representantes-gestao') {
       return (
         <React.Suspense fallback={<div>Carregando...</div>}>
-          <RepresentantesListPage />
+          <RepresentantesListPage profile={profile} />
         </React.Suspense>
       );
     }
@@ -186,7 +186,7 @@ export default function SSGENTrackApp() {
     if (current === 'config-representantes') {
       return (
         <React.Suspense fallback={<div>Carregando...</div>}>
-          <RepresentantesPage />
+          <RepresentantesPage profile={profile} />
         </React.Suspense>
       );
     }
