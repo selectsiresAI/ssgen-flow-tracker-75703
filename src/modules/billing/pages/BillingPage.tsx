@@ -40,9 +40,9 @@ export default function BillingPage() {
   }, [readyToInvoice, selectedRep, selectedCoord]);
 
   return (
-    <div className="p-6 space-y-6 bg-zenith-black min-h-screen">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-white">Faturamento</h1>
+        <h1 className="text-3xl font-bold text-foreground">Faturamento</h1>
       </div>
 
       <BillingFilters 
@@ -55,22 +55,22 @@ export default function BillingPage() {
       />
 
       {loadingSummary ? (
-        <div className="text-center text-zenith-gray py-8">Carregando resumo...</div>
+        <div className="text-center text-muted-foreground py-8">Carregando resumo...</div>
       ) : (
         <BillingKPIs summary={summary} />
       )}
 
       {loadingMonthly ? (
-        <div className="bg-zenith-card rounded-2xl p-6 border border-zenith-navy/30">
-          <div className="text-center text-zenith-gray py-8">Carregando gráfico...</div>
+        <div className="bg-card rounded-lg p-6 border">
+          <div className="text-center text-muted-foreground py-8">Carregando gráfico...</div>
         </div>
       ) : (
         <BillingChart data={monthly} />
       )}
 
       {loadingReady ? (
-        <div className="bg-zenith-card rounded-2xl p-6 border border-zenith-navy/30">
-          <div className="text-center text-zenith-gray py-8">Carregando ordens...</div>
+        <div className="bg-card rounded-lg p-6 border">
+          <div className="text-center text-muted-foreground py-8">Carregando ordens...</div>
         </div>
       ) : (
         <BillingOrdersTable orders={filteredOrders} />
