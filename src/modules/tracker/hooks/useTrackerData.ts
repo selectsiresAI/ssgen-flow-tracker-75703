@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  fetchAllTimelines, 
-  fetchTrackerKPIs, 
+import {
+  fetchAllTimelines,
+  fetchTrackerKPIs,
   fetchMapOrders,
   fetchTeamLocations,
   updateOrderPriority,
@@ -9,6 +9,7 @@ import {
   updateIssueText,
   deleteServiceOrder
 } from '@/lib/trackerApi';
+import type { TrackerKPI } from '@/types/ssgen';
 
 export function useTrackerTimelines() {
   return useQuery({
@@ -19,7 +20,7 @@ export function useTrackerTimelines() {
 }
 
 export function useTrackerKPIs() {
-  return useQuery({
+  return useQuery<TrackerKPI>({
     queryKey: ['tracker_kpis'],
     queryFn: fetchTrackerKPIs,
     refetchInterval: 30000,

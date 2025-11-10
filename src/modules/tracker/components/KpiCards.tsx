@@ -1,7 +1,7 @@
-import type { TrackerKPIs } from '../hooks/useTrackerKpis';
+import type { TrackerKPI } from '@/types/ssgen';
 
 interface KpiCardsProps {
-  k: TrackerKPIs | null;
+  k?: TrackerKPI | null;
 }
 
 export function KpiCards({ k }: KpiCardsProps) {
