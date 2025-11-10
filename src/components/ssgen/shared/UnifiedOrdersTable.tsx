@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import type { UnifiedOrder } from '@/types/ssgen';
 import { fmt } from '@/types/ssgen';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -9,6 +9,7 @@ import { SLABadge } from './SLABadge';
 import { deleteServiceOrder, updateServiceOrder } from '@/lib/serviceOrdersApi';
 import { toast } from 'sonner';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,27 +34,27 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
   rows,
   onOpen,
   userRole,
-  onUpdate
+  onUpdate,
 }) => {
   const isAdmin = userRole === 'ADM';
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const sortedRows = useMemo(() => {
     const parsedValue = (value: UnifiedOrder['ordem_servico_ssgen']) => {
-      if (!value) {
-        return { numeric: NaN, original: '' };
+      if (value === null || value === undefined) {
+        return { numeric: Number.NaN, original: '' };
       }
 
-      const asString = String(value);
-      const numeric = parseInt(asString.replace(/\D/g, ''), 10);
+      const asString = String(value).trim();
+      const numeric = Number.parseInt(asString.replace(/\D/g, ''), 10);
 
       return {
         numeric,
-        original: asString
+        original: asString,
       };
     };
 
-    return [...rows].sort((a, b) => {
+    const comparator = (a: UnifiedOrder, b: UnifiedOrder) => {
       const valueA = parsedValue(a.ordem_servico_ssgen);
       const valueB = parsedValue(b.ordem_servico_ssgen);
 
@@ -63,17 +64,41 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
           : valueB.numeric - valueA.numeric;
       }
 
+      if (!valueA.original && !valueB.original) {
+        return 0;
+      }
+
+      if (!valueA.original) {
+        return 1;
+      }
+
+      if (!valueB.original) {
+        return -1;
+      }
+
       return sortDirection === 'asc'
-        ? valueA.original.localeCompare(valueB.original)
-        : valueB.original.localeCompare(valueA.original);
-    });
+        ? valueA.original.localeCompare(valueB.original, 'pt-BR', {
+            numeric: true,
+          })
+        : valueB.original.localeCompare(valueA.original, 'pt-BR', {
+            numeric: true,
+          });
+    };
+
+    return [...rows].sort(comparator);
   }, [rows, sortDirection]);
 
   const toggleSortDirection = () => {
     setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
   };
 
-  const handleCellUpdate = async (orderId: string | undefined, field: string, value: any) => {
+  const sortLabel = sortDirection === 'desc' ? 'Mais recente' : 'Mais antiga';
+
+  const handleCellUpdate = async (
+    orderId: string | undefined,
+    field: string,
+    value: any,
+  ) => {
     if (!orderId) {
       toast.error('ID da ordem não encontrado');
       return;
@@ -113,18 +138,30 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
         <table className="w-full text-sm">
           <thead className="bg-muted sticky top-0 z-10">
             <tr>
-              <th className="p-2 text-left border">
+              <th
+                className="p-2 text-left border"
+                aria-sort={sortDirection === 'asc' ? 'ascending' : 'descending'}
+              >
                 <button
                   type="button"
                   onClick={toggleSortDirection}
-                  className="flex items-center gap-1 text-left"
-                >
-                  <span>OS SSGen</span>
-                  {sortDirection === 'asc' ? (
-                    <ChevronUp className="h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4" />
+                  className={cn(
+                    'flex items-center gap-2 text-left font-semibold transition-colors hover:text-primary',
+                    'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                   )}
+                >
+                  <span className="flex flex-col items-start leading-tight">
+                    <span>OS SSGen</span>
+                    <span className="text-xs font-normal text-muted-foreground">
+                      {sortLabel}
+                    </span>
+                  </span>
+                  {sortDirection === 'asc' ? (
+                    <ChevronUp className="h-4 w-4" aria-hidden="true" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                  )}
+                  <span className="sr-only">Alternar ordenação</span>
                 </button>
               </th>
               <th className="p-2 text-left border">Data</th>
@@ -163,13 +200,19 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
           <tbody>
             {sortedRows.length === 0 ? (
               <tr>
-                <td colSpan={32} className="p-4 text-center text-muted-foreground">
+                <td
+                  colSpan={32}
+                  className="p-4 text-center text-muted-foreground"
+                >
                   Nenhuma ordem encontrada
                 </td>
               </tr>
             ) : (
               sortedRows.map((row, idx) => (
-                <tr key={idx} className="hover:bg-muted/50">
+                <tr
+                  key={row.ordem_id ?? row.ordem_servico_ssgen ?? idx}
+                  className="hover:bg-muted/50"
+                >
                   <td className="p-2 border">
                     <button
                       onClick={() => onOpen(row)}
@@ -182,7 +225,13 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.ordem_servico_neogen}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'ordem_servico_neogen', v)}
+                      onSave={(v) =>
+                        handleCellUpdate(
+                          row.ordem_id,
+                          'ordem_servico_neogen',
+                          v,
+                        )
+                      }
                       isEditable={isAdmin}
                       type="number"
                     />
@@ -204,7 +253,9 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.numero_nf_neogen}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'numero_nf_neogen', v)}
+                      onSave={(v) =>
+                        handleCellUpdate(row.ordem_id, 'numero_nf_neogen', v)
+                      }
                       isEditable={isAdmin}
                       type="number"
                     />
@@ -212,14 +263,18 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.nome_produto}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'nome_produto', v)}
+                      onSave={(v) =>
+                        handleCellUpdate(row.ordem_id, 'nome_produto', v)
+                      }
                       isEditable={isAdmin}
                     />
                   </td>
                   <td className="p-2 border">
                     <EditableCell
                       value={row.numero_amostras}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'numero_amostras', v)}
+                      onSave={(v) =>
+                        handleCellUpdate(row.ordem_id, 'numero_amostras', v)
+                      }
                       isEditable={isAdmin}
                       type="number"
                     />
@@ -227,7 +282,9 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.cra_data}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'cra_data', v)}
+                      onSave={(v) =>
+                        handleCellUpdate(row.ordem_id, 'cra_data', v)
+                      }
                       isEditable={isAdmin}
                       type="date"
                     />
@@ -235,7 +292,9 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.cra_status}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'cra_status', v)}
+                      onSave={(v) =>
+                        handleCellUpdate(row.ordem_id, 'cra_status', v)
+                      }
                       isEditable={isAdmin}
                       type="badge"
                       badgeVariant="secondary"
@@ -244,7 +303,9 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.envio_planilha_data}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'envio_planilha_data', v)}
+                      onSave={(v) =>
+                        handleCellUpdate(row.ordem_id, 'envio_planilha_data', v)
+                      }
                       isEditable={isAdmin}
                       type="date"
                     />
@@ -252,7 +313,13 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.envio_planilha_status}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'envio_planilha_status', v)}
+                      onSave={(v) =>
+                        handleCellUpdate(
+                          row.ordem_id,
+                          'envio_planilha_status',
+                          v,
+                        )
+                      }
                       isEditable={isAdmin}
                       type="badge"
                       badgeVariant="secondary"
@@ -264,7 +331,9 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.vri_data}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'vri_data', v)}
+                      onSave={(v) =>
+                        handleCellUpdate(row.ordem_id, 'vri_data', v)
+                      }
                       isEditable={isAdmin}
                       type="date"
                     />
@@ -272,7 +341,9 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.vri_n_amostras}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'vri_n_amostras', v)}
+                      onSave={(v) =>
+                        handleCellUpdate(row.ordem_id, 'vri_n_amostras', v)
+                      }
                       isEditable={isAdmin}
                       type="number"
                     />
@@ -280,7 +351,9 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.vri_resolvido_data}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'vri_resolvido_data', v)}
+                      onSave={(v) =>
+                        handleCellUpdate(row.ordem_id, 'vri_resolvido_data', v)
+                      }
                       isEditable={isAdmin}
                       type="date"
                     />
@@ -291,7 +364,9 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.lpr_data}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'lpr_data', v)}
+                      onSave={(v) =>
+                        handleCellUpdate(row.ordem_id, 'lpr_data', v)
+                      }
                       isEditable={isAdmin}
                       type="date"
                     />
@@ -299,7 +374,9 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.lpr_n_amostras}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'lpr_n_amostras', v)}
+                      onSave={(v) =>
+                        handleCellUpdate(row.ordem_id, 'lpr_n_amostras', v)
+                      }
                       isEditable={isAdmin}
                       type="number"
                     />
@@ -310,7 +387,13 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.envio_resultados_data}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'envio_resultados_data', v)}
+                      onSave={(v) =>
+                        handleCellUpdate(
+                          row.ordem_id,
+                          'envio_resultados_data',
+                          v,
+                        )
+                      }
                       isEditable={isAdmin}
                       type="date"
                     />
@@ -318,7 +401,13 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.envio_resultados_status}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'envio_resultados_status', v)}
+                      onSave={(v) =>
+                        handleCellUpdate(
+                          row.ordem_id,
+                          'envio_resultados_status',
+                          v,
+                        )
+                      }
                       isEditable={isAdmin}
                       type="badge"
                       badgeVariant="secondary"
@@ -330,7 +419,9 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.dt_receb_resultados}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'dt_receb_resultados', v)}
+                      onSave={(v) =>
+                        handleCellUpdate(row.ordem_id, 'dt_receb_resultados', v)
+                      }
                       isEditable={isAdmin}
                       type="date"
                     />
@@ -338,7 +429,9 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.dt_faturamento}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'dt_faturamento', v)}
+                      onSave={(v) =>
+                        handleCellUpdate(row.ordem_id, 'dt_faturamento', v)
+                      }
                       isEditable={isAdmin}
                       type="date"
                     />
@@ -355,7 +448,11 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                       {isAdmin && (
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="destructive" size="sm" className="gap-1">
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="gap-1"
+                            >
                               <Trash2 className="h-4 w-4" />
                               Apagar
                             </Button>
@@ -364,13 +461,17 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                             <AlertDialogHeader>
                               <AlertDialogTitle>Apagar ordem</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Esta ação não pode ser desfeita. Tem certeza que deseja remover a ordem
-                                {` ${row.ordem_servico_ssgen ?? ''}`} do sistema?
+                                Esta ação não pode ser desfeita. Tem certeza que
+                                deseja remover a ordem
+                                {` ${row.ordem_servico_ssgen ?? ''}`} do
+                                sistema?
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteOrder(row.ordem_id)}>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteOrder(row.ordem_id)}
+                              >
                                 Confirmar
                               </AlertDialogAction>
                             </AlertDialogFooter>
