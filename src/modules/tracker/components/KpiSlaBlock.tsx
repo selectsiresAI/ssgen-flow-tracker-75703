@@ -1,8 +1,8 @@
 import { GaugeSLA } from './GaugeSLA';
-import type { TrackerKPIs } from '../hooks/useTrackerKpis';
+import type { TrackerKPI } from '@/types/ssgen';
 
 interface KpiSlaBlockProps {
-  k: TrackerKPIs | null;
+  k?: TrackerKPI | null;
 }
 
 export function KpiSlaBlock({ k }: KpiSlaBlockProps) {

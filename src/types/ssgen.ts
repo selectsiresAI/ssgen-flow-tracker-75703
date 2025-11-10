@@ -206,18 +206,25 @@ export type TrackerTimeline = {
 
 export type TrackerKPI = {
   total_os: number;
+  total_ordens: number;
+  total_amostras: number;
+  total_clientes: number;
   em_processamento: number;
   a_faturar: number;
   concluidas_hoje: number;
   reagendamentos: number;
   alta_prioridade: number;
-  pct_sla_envio_ok: number;
-  sla_envio_atrasado: number;
-  pct_sla_vri_ok: number;
-  sla_vri_atrasado: number;
-  pct_sla_lpr_ok: number;
-  sla_lpr_atrasado: number;
-  pct_sla_envio_res_ok: number;
-  sla_envio_res_atrasado: number;
   tma_dias: number;
+  sla_envio_ok: number;
+  sla_envio_atrasado: number;
+  pct_sla_envio_ok: number;
+  sla_vri_ok: number;
+  sla_vri_atrasado: number;
+  pct_sla_vri_ok: number;
+  sla_lpr_ok: number;
+  sla_lpr_atrasado: number;
+  pct_sla_lpr_ok: number;
+  sla_envio_res_ok: number;
+  sla_envio_res_atrasado: number;
+  pct_sla_envio_res_ok: number;
 };
