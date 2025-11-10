@@ -115,7 +115,7 @@ export default function UserManagementPage() {
     assignMutation.mutate({
       userId: selectedUser,
       role: selectedRole,
-      coord: selectedRole === 'GERENTE' ? selectedCoord || undefined : undefined,
+      coord: selectedRole === 'COORDENADOR' ? selectedCoord || undefined : undefined,
       rep: selectedRole === 'REPRESENTANTE' ? selectedRep || undefined : undefined,
     });
   };
@@ -207,13 +207,13 @@ export default function UserManagementPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ADM">ADM</SelectItem>
-                  <SelectItem value="GERENTE">GERENTE</SelectItem>
+                  <SelectItem value="COORDENADOR">COORDENADOR</SelectItem>
                   <SelectItem value="REPRESENTANTE">REPRESENTANTE</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {selectedRole === 'GERENTE' && (
+            {selectedRole === 'COORDENADOR' && (
               <div className="space-y-2">
                 <Label htmlFor="coord">Coordenador</Label>
                 <Select value={selectedCoord ?? undefined} onValueChange={(value) => setSelectedCoord(value || undefined)}>

@@ -96,13 +96,13 @@ CREATE POLICY "ADM can manage all clients"
   ON public.clients FOR ALL
   USING (public.has_role(auth.uid(), 'ADM'::app_role));
 
-CREATE POLICY "GERENTE can view their coord clients"
+CREATE POLICY "COORDENADOR can view their coord clients"
   ON public.clients FOR SELECT
   USING (
     EXISTS (
       SELECT 1 FROM public.user_roles
       WHERE user_id = auth.uid()
-        AND role = 'GERENTE'::app_role
+        AND role = 'COORDENADOR'::app_role
         AND coord = clients.coordenador
     )
   );
@@ -118,13 +118,13 @@ CREATE POLICY "REPRESENTANTE can view their clients"
     )
   );
 
-CREATE POLICY "GERENTE can insert clients"
+CREATE POLICY "COORDENADOR can insert clients"
   ON public.clients FOR INSERT
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM public.user_roles
       WHERE user_id = auth.uid()
-        AND role IN ('GERENTE'::app_role, 'ADM'::app_role)
+        AND role IN ('COORDENADOR'::app_role, 'ADM'::app_role)
     )
   );
 
@@ -139,13 +139,13 @@ CREATE POLICY "REPRESENTANTE can insert their clients"
     )
   );
 
-CREATE POLICY "GERENTE can update their coord clients"
+CREATE POLICY "COORDENADOR can update their coord clients"
   ON public.clients FOR UPDATE
   USING (
     EXISTS (
       SELECT 1 FROM public.user_roles
       WHERE user_id = auth.uid()
-        AND role = 'GERENTE'::app_role
+        AND role = 'COORDENADOR'::app_role
         AND coord = clients.coordenador
     )
   );
@@ -168,7 +168,7 @@ CREATE POLICY "ADM can manage all service_orders"
   ON public.service_orders FOR ALL
   USING (public.has_role(auth.uid(), 'ADM'::app_role));
 
-CREATE POLICY "GERENTE can view their coord orders"
+CREATE POLICY "COORDENADOR can view their coord orders"
   ON public.service_orders FOR SELECT
   USING (
     EXISTS (
@@ -176,7 +176,7 @@ CREATE POLICY "GERENTE can view their coord orders"
       JOIN public.user_roles ur ON ur.coord = c.coordenador
       WHERE c.ordem_servico_ssgen = service_orders.ordem_servico_ssgen
         AND ur.user_id = auth.uid()
-        AND ur.role = 'GERENTE'::app_role
+        AND ur.role = 'COORDENADOR'::app_role
     )
   );
 
@@ -192,10 +192,10 @@ CREATE POLICY "REPRESENTANTE can view their orders"
     )
   );
 
-CREATE POLICY "GERENTE can insert orders"
+CREATE POLICY "COORDENADOR can insert orders"
   ON public.service_orders FOR INSERT
   WITH CHECK (
-    public.has_role(auth.uid(), 'GERENTE'::app_role) OR
+    public.has_role(auth.uid(), 'COORDENADOR'::app_role) OR
     public.has_role(auth.uid(), 'ADM'::app_role)
   );
 
@@ -211,7 +211,7 @@ CREATE POLICY "REPRESENTANTE can insert their orders"
     )
   );
 
-CREATE POLICY "GERENTE can update their coord orders"
+CREATE POLICY "COORDENADOR can update their coord orders"
   ON public.service_orders FOR UPDATE
   USING (
     EXISTS (
@@ -219,7 +219,7 @@ CREATE POLICY "GERENTE can update their coord orders"
       JOIN public.user_roles ur ON ur.coord = c.coordenador
       WHERE c.ordem_servico_ssgen = service_orders.ordem_servico_ssgen
         AND ur.user_id = auth.uid()
-        AND ur.role = 'GERENTE'::app_role
+        AND ur.role = 'COORDENADOR'::app_role
     )
   );
 

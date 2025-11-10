@@ -1,7 +1,7 @@
 -- Fase 1 & 2: Estrutura do Banco + Segurança
 
 -- 1. Criar enum para papéis
-CREATE TYPE app_role AS ENUM ('ADM', 'GERENTE', 'REPRESENTANTE');
+CREATE TYPE app_role AS ENUM ('ADM', 'COORDENADOR', 'REPRESENTANTE');
 
 -- 2. Tabela de perfis (sincronizada com auth.users)
 CREATE TABLE public.profiles (
@@ -144,13 +144,13 @@ CREATE POLICY "Admins can view all orders"
   ON public.orders FOR SELECT
   USING (public.has_role(auth.uid(), 'ADM'));
 
-CREATE POLICY "Managers can view their coord orders"
+CREATE POLICY "Coordenadores can view their coord orders"
   ON public.orders FOR SELECT
   USING (
     EXISTS (
       SELECT 1 FROM public.user_roles
       WHERE user_id = auth.uid()
-        AND role = 'GERENTE'
+        AND role = 'COORDENADOR'
         AND coord = orders.coord
     )
   );

@@ -22,7 +22,7 @@ export const FEATURES: Record<Role, FeatureFlags> = {
     notes: { read: true, write: true },
     settings: { sla: true, users: true, import: true },
   },
-  GERENTE: {
+  COORDENADOR: {
     filters: { coord: false, rep: true, cliente: true, periodo: true, produto: true, status: true },
     kpis: { showAll: true },
     kanban: { editable: false },

@@ -30,7 +30,7 @@ export const FilterRow: React.FC<FilterRowProps> = (p) => (
     {p.showCoord && (
       <Select value={p.coord ?? undefined} onValueChange={(v) => p.setCoord(v || undefined)}>
         <SelectTrigger>
-          <SelectValue placeholder="COORD (Gerente)" />
+          <SelectValue placeholder="COORD (Coordenador)" />
         </SelectTrigger>
         <SelectContent>
           {p.coords

@@ -35,10 +35,10 @@ CREATE POLICY "ADM can manage SLA config"
   FOR ALL
   USING (has_role(auth.uid(), 'ADM'::app_role));
 
-CREATE POLICY "GERENTE can view SLA config"
+CREATE POLICY "COORDENADOR can view SLA config"
   ON public.sla_config
   FOR SELECT
-  USING (has_role(auth.uid(), 'GERENTE'::app_role));
+  USING (has_role(auth.uid(), 'COORDENADOR'::app_role));
 
 CREATE POLICY "REPRESENTANTE can view SLA config"
   ON public.sla_config

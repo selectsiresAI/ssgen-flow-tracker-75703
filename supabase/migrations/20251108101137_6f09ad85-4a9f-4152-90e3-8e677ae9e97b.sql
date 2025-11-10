@@ -20,13 +20,13 @@ CREATE INDEX idx_order_audit_log_changed_by ON public.order_audit_log(changed_by
 -- Habilitar RLS
 ALTER TABLE public.order_audit_log ENABLE ROW LEVEL SECURITY;
 
--- Políticas RLS: ADM pode ver tudo, GERENTE vê de suas coordenações, REP vê suas ordens
+-- Políticas RLS: ADM pode ver tudo, COORDENADOR vê de suas coordenações, REP vê suas ordens
 CREATE POLICY "ADM can view all audit logs"
   ON public.order_audit_log
   FOR SELECT
   USING (has_role(auth.uid(), 'ADM'::app_role));
 
-CREATE POLICY "GERENTE can view audit logs of their coord"
+CREATE POLICY "COORDENADOR can view audit logs of their coord"
   ON public.order_audit_log
   FOR SELECT
   USING (
@@ -35,7 +35,7 @@ CREATE POLICY "GERENTE can view audit logs of their coord"
       JOIN user_roles ur ON ur.coord = o.coord
       WHERE o.id = order_audit_log.order_id
         AND ur.user_id = auth.uid()
-        AND ur.role = 'GERENTE'::app_role
+        AND ur.role = 'COORDENADOR'::app_role
     )
   );
 

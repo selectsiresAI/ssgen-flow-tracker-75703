@@ -62,7 +62,7 @@ DROP POLICY IF EXISTS team_locations_update_policy ON public.team_locations;
 DROP POLICY IF EXISTS team_locations_delete_policy ON public.team_locations;
 
 CREATE POLICY team_locations_read_policy ON public.team_locations FOR SELECT 
-  USING (has_role(auth.uid(), 'ADM') OR has_role(auth.uid(), 'GERENTE') OR user_id = auth.uid());
+  USING (has_role(auth.uid(), 'ADM') OR has_role(auth.uid(), 'COORDENADOR') OR user_id = auth.uid());
 
 CREATE POLICY team_locations_insert_policy ON public.team_locations FOR INSERT 
   WITH CHECK (user_id = auth.uid() OR has_role(auth.uid(), 'ADM'));

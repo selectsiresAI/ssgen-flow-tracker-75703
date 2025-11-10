@@ -228,7 +228,7 @@ export default function AuthPage() {
                   )}
                 </Button>
                 <p className="text-xs text-muted-foreground text-center">
-                  Após o cadastro, um administrador precisa atribuir seu papel (ADM, GERENTE ou REPRESENTANTE).
+                  Após o cadastro, um administrador precisa atribuir seu papel (ADM, COORDENADOR ou REPRESENTANTE).
                 </p>
               </form>
             </TabsContent>

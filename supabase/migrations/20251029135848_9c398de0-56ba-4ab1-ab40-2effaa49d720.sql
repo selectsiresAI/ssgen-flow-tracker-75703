@@ -27,14 +27,14 @@ CREATE POLICY "ADM can manage all coordenadores"
   FOR ALL
   USING (has_role(auth.uid(), 'ADM'::app_role));
 
-CREATE POLICY "GERENTE can view coordenadores"
+CREATE POLICY "COORDENADOR can view coordenadores"
   ON public.coordenadores
   FOR SELECT
   USING (
     EXISTS (
       SELECT 1 FROM user_roles
       WHERE user_id = auth.uid()
-      AND role = 'GERENTE'::app_role
+      AND role = 'COORDENADOR'::app_role
     )
   );
 
@@ -55,14 +55,14 @@ CREATE POLICY "ADM can manage all representantes"
   FOR ALL
   USING (has_role(auth.uid(), 'ADM'::app_role));
 
-CREATE POLICY "GERENTE can view representantes"
+CREATE POLICY "COORDENADOR can view representantes"
   ON public.representantes
   FOR SELECT
   USING (
     EXISTS (
       SELECT 1 FROM user_roles
       WHERE user_id = auth.uid()
-      AND role = 'GERENTE'::app_role
+      AND role = 'COORDENADOR'::app_role
     )
   );
 

@@ -83,7 +83,7 @@ export default function SSGENTrackApp() {
   const rowsFiltered = useMemo(()=>{
     const q = (filters.q||'').toLowerCase();
     return rows.filter(r=>{
-      if (role==='GERENTE' && profile?.coord && r.COORD!==profile.coord) return false;
+      if (role==='COORDENADOR' && profile?.coord && r.COORD!==profile.coord) return false;
       if (role==='REPRESENTANTE' && profile?.rep && r.REP!==profile.rep) return false;
       if (filters.coord && r.COORD!==filters.coord) return false;
       if (filters.rep && r.REP!==filters.rep) return false;
@@ -141,10 +141,10 @@ export default function SSGENTrackApp() {
         </React.Suspense>
       );
     }
-    if (current === 'gerentes') {
+    if (current === 'coordenadores-catalogo') {
       return (
         <React.Suspense fallback={<div>Carregando...</div>}>
-          <CatalogPage title="Gerentes (COORD)" items={listCoords} />
+          <CatalogPage title="Coordenadores (COORD)" items={listCoords} />
         </React.Suspense>
       );
     }
@@ -289,7 +289,7 @@ export default function SSGENTrackApp() {
               Sua conta foi criada com sucesso, mas ainda não possui um papel atribuído.
             </p>
             <p className="text-sm text-muted-foreground">
-              Entre em contato com um administrador para receber acesso como <strong>ADM</strong>, <strong>GERENTE</strong> ou <strong>REPRESENTANTE</strong>.
+              Entre em contato com um administrador para receber acesso como <strong>ADM</strong>, <strong>COORDENADOR</strong> ou <strong>REPRESENTANTE</strong>.
             </p>
           </CardContent>
         </Card>
@@ -405,7 +405,7 @@ export default function SSGENTrackApp() {
                   <div className="text-sm text-muted-foreground">Uploads e histórico de versões (Storage do Supabase com links assinados).</div>
                 </TabsContent>
                 <TabsContent value="notas">
-                  <div className="text-sm text-muted-foreground">Notas internas (ADM/Gerente) com @menções (tabela separada).</div>
+                  <div className="text-sm text-muted-foreground">Notas internas (ADM/Coordenador) com @menções (tabela separada).</div>
                 </TabsContent>
               </Tabs>
             </div>

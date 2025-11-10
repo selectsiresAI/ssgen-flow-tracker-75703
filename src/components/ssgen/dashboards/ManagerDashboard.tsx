@@ -30,7 +30,7 @@ const ManagerDashboard: React.FC<ManagerDashboardProps> = ({ rows, filters, setF
 
   return (
     <div className="space-y-4">
-      <HeaderBar title="Dashboard • Gerente" query={filters.q} setQuery={(v: string) => setFilters((f: any) => ({ ...f, q: v }))} />
+      <HeaderBar title="Dashboard • Coordenador" query={filters.q} setQuery={(v: string) => setFilters((f: any) => ({ ...f, q: v }))} />
 
       <FilterRow
         showCoord={false}

@@ -18,7 +18,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ title, query, setQuery, ch
         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <Input
           className="pl-9 w-[260px] border-border focus:ring-primary"
-          placeholder="Buscar por OS_SSGEN, CLIENTE, REP, COORD"
+          placeholder="Buscar por OS_SSGEN, CLIENTE, REP, COORDENADOR"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />

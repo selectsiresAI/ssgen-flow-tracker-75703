@@ -313,7 +313,7 @@ const shouldIncludeRowForProfile = (
   if (!profile) return true;
   if (profile.role === 'ADM') return true;
 
-  if (profile.role === 'GERENTE') {
+  if (profile.role === 'COORDENADOR') {
     if (!profile.coord) return false;
     return row.COORD === profile.coord;
   }

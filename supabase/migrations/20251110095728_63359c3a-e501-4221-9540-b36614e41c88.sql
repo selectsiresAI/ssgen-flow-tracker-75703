@@ -175,8 +175,8 @@ TO authenticated
 USING (has_role(auth.uid(), 'ADM'::app_role))
 WITH CHECK (has_role(auth.uid(), 'ADM'::app_role));
 
--- GERENTE pode ver dados do seu coordenador
-CREATE POLICY "GERENTE can view their coord orders_ext"
+-- COORDENADOR pode ver dados do seu coordenador
+CREATE POLICY "COORDENADOR can view their coord orders_ext"
 ON public.orders_ext
 FOR SELECT
 TO authenticated
@@ -184,7 +184,7 @@ USING (
   EXISTS (
     SELECT 1 FROM user_roles
     WHERE user_id = auth.uid()
-      AND role = 'GERENTE'::app_role
+      AND role = 'COORDENADOR'::app_role
       AND coord = orders_ext.coord
   )
 );
@@ -215,6 +215,6 @@ FOR INSERT
 TO authenticated
 WITH CHECK (
   has_role(auth.uid(), 'ADM'::app_role) OR
-  has_role(auth.uid(), 'GERENTE'::app_role) OR
+  has_role(auth.uid(), 'COORDENADOR'::app_role) OR
   has_role(auth.uid(), 'REPRESENTANTE'::app_role)
 );

@@ -1,4 +1,4 @@
-export type Role = 'ADM' | 'GERENTE' | 'REPRESENTANTE';
+export type Role = 'ADM' | 'COORDENADOR' | 'REPRESENTANTE';
 
 export type Profile = {
   id: string;
