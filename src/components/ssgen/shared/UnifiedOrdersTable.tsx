@@ -19,7 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, Trash2 } from 'lucide-react';
 
 interface UnifiedOrdersTableProps {
   rows: UnifiedOrder[];
@@ -28,13 +28,53 @@ interface UnifiedOrdersTableProps {
   onUpdate?: () => void;
 }
 
-export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({ 
-  rows, 
-  onOpen, 
+export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
+  rows,
+  onOpen,
   userRole,
-  onUpdate 
+  onUpdate
 }) => {
   const isAdmin = userRole === 'ADM';
+  const [sortDirection, setSortDirection] = React.useState<'asc' | 'desc'>('asc');
+
+  const sortedRows = React.useMemo(() => {
+    const getTimestamp = (value?: string | null) => {
+      if (!value) {
+        return Number.NaN;
+      }
+
+      const timestamp = new Date(value).getTime();
+      return Number.isNaN(timestamp) ? Number.NaN : timestamp;
+    };
+
+    const sorted = [...rows];
+    sorted.sort((a, b) => {
+      const dateA = getTimestamp(a.data_cadastro);
+      const dateB = getTimestamp(b.data_cadastro);
+
+      if (Number.isNaN(dateA) && Number.isNaN(dateB)) {
+        return 0;
+      }
+
+      if (Number.isNaN(dateA)) {
+        return sortDirection === 'asc' ? 1 : -1;
+      }
+
+      if (Number.isNaN(dateB)) {
+        return sortDirection === 'asc' ? -1 : 1;
+      }
+
+      return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+    });
+
+    return sorted;
+  }, [rows, sortDirection]);
+
+  const SortIcon = sortDirection === 'asc' ? ArrowUp : ArrowDown;
+
+  const handleToggleSortDirection = () => {
+    setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+  };
 
   const handleCellUpdate = async (orderId: string | undefined, field: string, value: any) => {
     if (!orderId) {
@@ -77,7 +117,20 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
           <thead className="bg-muted sticky top-0 z-10">
             <tr>
               <th className="p-2 text-left border">OS SSGen</th>
-              <th className="p-2 text-left border">Data</th>
+              <th className="p-2 text-left border">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleToggleSortDirection}
+                  className="px-0 font-medium hover:bg-transparent"
+                >
+                  <span className="flex items-center gap-2">
+                    Data
+                    <SortIcon className="h-4 w-4" />
+                  </span>
+                </Button>
+              </th>
               <th className="p-2 text-left border">OS Neogen</th>
               <th className="p-2 text-left border">Nome</th>
               <th className="p-2 text-left border">CPF/CNPJ</th>
@@ -118,7 +171,7 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                 </td>
               </tr>
             ) : (
-              rows.map((row, idx) => (
+              sortedRows.map((row, idx) => (
                 <tr key={idx} className="hover:bg-muted/50">
                   <td className="p-2 border">
                     <button
