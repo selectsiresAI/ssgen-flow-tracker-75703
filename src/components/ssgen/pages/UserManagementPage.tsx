@@ -19,8 +19,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { HeaderBar } from '../shared/HeaderBar';
-import { UserPlus, Pencil, Trash2 } from 'lucide-react';
+import { UserPlus, Pencil, Trash2, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { fetchUsersWithRoles, assignUserRole, removeUserRole, type AppRole } from '@/lib/userRolesApi';
 import { fetchCoordenadores } from '@/lib/coordenadoresApi';
@@ -132,9 +133,25 @@ export default function UserManagementPage() {
     user.email.toLowerCase().includes(query.toLowerCase())
   );
 
+  const hasIncompleteAssignments = users.some(
+    user => 
+      (user.role === 'GERENTE' && !user.coord) ||
+      (user.role === 'REPRESENTANTE' && !user.rep)
+  );
+
   return (
     <div className="space-y-4">
       <HeaderBar title="Gerenciamento de Usuários" query={query} setQuery={setQuery} />
+
+      {hasIncompleteAssignments && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            Há usuários com GERENTE ou REPRESENTANTE sem coordenador/representante atribuído. 
+            Isso impede o acesso correto aos dados. Clique no ícone de edição para corrigir.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Card>
         <CardHeader>
@@ -154,12 +171,24 @@ export default function UserManagementPage() {
               >
                 <div className="flex-1">
                   <p className="font-medium">{user.email}</p>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
                     {user.role ? (
                       <>
                         <Badge variant="outline">{user.role}</Badge>
                         {user.coord && <Badge variant="secondary">Coord: {user.coord}</Badge>}
                         {user.rep && <Badge variant="secondary">Rep: {user.rep}</Badge>}
+                        {user.role === 'GERENTE' && !user.coord && (
+                          <Badge variant="destructive" className="flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" />
+                            Coordenador não atribuído
+                          </Badge>
+                        )}
+                        {user.role === 'REPRESENTANTE' && !user.rep && (
+                          <Badge variant="destructive" className="flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" />
+                            Representante não atribuído
+                          </Badge>
+                        )}
                       </>
                     ) : (
                       <Badge variant="destructive">Sem papel</Badge>
