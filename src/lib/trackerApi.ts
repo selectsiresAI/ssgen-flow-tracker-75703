@@ -108,7 +108,7 @@ const computeLegacyStage = (row: LegacyOrderRow): string | null => {
 
 const mapLegacyOrderToTimeline = (row: LegacyOrderRow): TrackerTimeline => ({
   id: row.id ?? `${row.os_ssgen ?? ''}`,
-  ordem_servico_ssgen: parseOrderNumber(row.ordem_servico_ssgen ?? row.os_ssgen),
+  ordem_servico_ssgen: parseOrderNumber(row.os_ssgen),
   cliente: row.cliente ?? '—',
   prioridade: 'media',
   flag_reagendamento: false,
@@ -177,7 +177,7 @@ async function loadTrackerSources(): Promise<TrackerSources> {
   );
 
   const legacyOrders = legacyOrdersRaw.filter((row) => {
-    const os = row.ordem_servico_ssgen ?? row.os_ssgen;
+    const os = row.os_ssgen;
     if (!os) return true;
     return !serviceOrderCodes.has(String(os));
   });
@@ -227,11 +227,11 @@ async function fetchLegacyOrderTimeline(orderId: string): Promise<TrackerTimelin
 const countWhere = <T,>(rows: T[], predicate: (row: T) => boolean) =>
   rows.reduce((acc, row) => (predicate(row) ? acc + 1 : acc), 0);
 
-const sumNumbers = (values: Array<number | string | null | undefined>) =>
+const sumNumbers = (values: Array<number | string | null | undefined>): number =>
   values.reduce((acc, value) => {
     const numeric = typeof value === 'string' ? Number(value) : value;
-    return typeof numeric === 'number' && Number.isFinite(numeric) ? acc + numeric : acc;
-  }, 0);
+    return typeof numeric === 'number' && Number.isFinite(numeric) ? (acc as number) + numeric : acc;
+  }, 0 as number);
 
 const roundOneDecimal = (value: number) => Math.round(value * 10) / 10;
 
