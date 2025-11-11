@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { EditableCell } from './EditableCell';
 import { SLABadge } from './SLABadge';
 import { deleteServiceOrder, updateServiceOrder } from '@/lib/serviceOrdersApi';
+import { updateClient } from '@/lib/clientsApi';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -36,10 +37,30 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
 }) => {
   const isAdmin = userRole === 'ADM';
 
-  const nullableFields = new Set(['ordem_servico_neogen']);
+  type EditableValue = string | number | null;
 
-  const handleCellUpdate = async (orderId: string | undefined, field: string, value: any) => {
-    if (!orderId) {
+  const nullableFields = new Set<string>(['ordem_servico_neogen']);
+  const clientScopedFields = new Set<string>(['ordem_servico_neogen']);
+
+  const handleCellUpdate = async ({
+    orderId,
+    clientId,
+    field,
+    value
+  }: {
+    orderId?: string;
+    clientId?: string;
+    field: string;
+    value: EditableValue | undefined;
+  }) => {
+    const targetsClient = clientScopedFields.has(field);
+
+    if (targetsClient && !clientId) {
+      toast.error('ID do cliente não encontrado');
+      return;
+    }
+
+    if (!targetsClient && !orderId) {
       toast.error('ID da ordem não encontrado');
       return;
     }
@@ -52,9 +73,29 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
         throw new Error('Campo obrigatório');
       }
 
-      const payloadValue = isNullish ? null : value;
+      const payloadValue: EditableValue = isNullish ? null : (value as EditableValue);
 
-      await updateServiceOrder(orderId, { [field]: payloadValue });
+      if (field === 'ordem_servico_neogen') {
+        const updates: Record<string, EditableValue> = { [field]: payloadValue };
+        const updatePromises: Promise<unknown>[] = [];
+
+        if (clientId) {
+          updatePromises.push(updateClient(clientId, updates));
+        }
+
+        if (orderId) {
+          updatePromises.push(updateServiceOrder(orderId, updates));
+        }
+
+        if (updatePromises.length === 0) {
+          toast.error('Nenhum registro encontrado para atualizar');
+          return;
+        }
+
+        await Promise.all(updatePromises);
+      } else if (orderId) {
+        await updateServiceOrder(orderId, { [field]: payloadValue });
+      }
       toast.success('Campo atualizado com sucesso');
       onUpdate?.();
     } catch (error) {
@@ -143,7 +184,7 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.ordem_servico_neogen}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'ordem_servico_neogen', v)}
+                      onSave={(v) => handleCellUpdate({ orderId: row.ordem_id, clientId: row.id, field: 'ordem_servico_neogen', value: v })}
                       isEditable={isAdmin}
                       type="number"
                     />
@@ -165,7 +206,7 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.numero_nf_neogen}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'numero_nf_neogen', v)}
+                      onSave={(v) => handleCellUpdate({ orderId: row.ordem_id, field: 'numero_nf_neogen', value: v })}
                       isEditable={isAdmin}
                       type="number"
                     />
@@ -173,14 +214,14 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.nome_produto}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'nome_produto', v)}
+                      onSave={(v) => handleCellUpdate({ orderId: row.ordem_id, field: 'nome_produto', value: v })}
                       isEditable={isAdmin}
                     />
                   </td>
                   <td className="p-2 border">
                     <EditableCell
                       value={row.numero_amostras}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'numero_amostras', v)}
+                      onSave={(v) => handleCellUpdate({ orderId: row.ordem_id, field: 'numero_amostras', value: v })}
                       isEditable={isAdmin}
                       type="number"
                     />
@@ -188,7 +229,7 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.cra_data}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'cra_data', v)}
+                      onSave={(v) => handleCellUpdate({ orderId: row.ordem_id, field: 'cra_data', value: v })}
                       isEditable={isAdmin}
                       type="date"
                     />
@@ -196,7 +237,7 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.cra_status}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'cra_status', v)}
+                      onSave={(v) => handleCellUpdate({ orderId: row.ordem_id, field: 'cra_status', value: v })}
                       isEditable={isAdmin}
                       type="badge"
                       badgeVariant="secondary"
@@ -205,7 +246,7 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.envio_planilha_data}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'envio_planilha_data', v)}
+                      onSave={(v) => handleCellUpdate({ orderId: row.ordem_id, field: 'envio_planilha_data', value: v })}
                       isEditable={isAdmin}
                       type="date"
                     />
@@ -213,7 +254,7 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.envio_planilha_status}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'envio_planilha_status', v)}
+                      onSave={(v) => handleCellUpdate({ orderId: row.ordem_id, field: 'envio_planilha_status', value: v })}
                       isEditable={isAdmin}
                       type="badge"
                       badgeVariant="secondary"
@@ -225,7 +266,7 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.vri_data}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'vri_data', v)}
+                      onSave={(v) => handleCellUpdate({ orderId: row.ordem_id, field: 'vri_data', value: v })}
                       isEditable={isAdmin}
                       type="date"
                     />
@@ -233,7 +274,7 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.vri_n_amostras}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'vri_n_amostras', v)}
+                      onSave={(v) => handleCellUpdate({ orderId: row.ordem_id, field: 'vri_n_amostras', value: v })}
                       isEditable={isAdmin}
                       type="number"
                     />
@@ -241,7 +282,7 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.vri_resolvido_data}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'vri_resolvido_data', v)}
+                      onSave={(v) => handleCellUpdate({ orderId: row.ordem_id, field: 'vri_resolvido_data', value: v })}
                       isEditable={isAdmin}
                       type="date"
                     />
@@ -252,7 +293,7 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.lpr_data}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'lpr_data', v)}
+                      onSave={(v) => handleCellUpdate({ orderId: row.ordem_id, field: 'lpr_data', value: v })}
                       isEditable={isAdmin}
                       type="date"
                     />
@@ -260,7 +301,7 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.lpr_n_amostras}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'lpr_n_amostras', v)}
+                      onSave={(v) => handleCellUpdate({ orderId: row.ordem_id, field: 'lpr_n_amostras', value: v })}
                       isEditable={isAdmin}
                       type="number"
                     />
@@ -271,7 +312,7 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.envio_resultados_data}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'envio_resultados_data', v)}
+                      onSave={(v) => handleCellUpdate({ orderId: row.ordem_id, field: 'envio_resultados_data', value: v })}
                       isEditable={isAdmin}
                       type="date"
                     />
@@ -279,7 +320,7 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.envio_resultados_status}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'envio_resultados_status', v)}
+                      onSave={(v) => handleCellUpdate({ orderId: row.ordem_id, field: 'envio_resultados_status', value: v })}
                       isEditable={isAdmin}
                       type="badge"
                       badgeVariant="secondary"
@@ -291,7 +332,7 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.dt_receb_resultados}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'dt_receb_resultados', v)}
+                      onSave={(v) => handleCellUpdate({ orderId: row.ordem_id, field: 'dt_receb_resultados', value: v })}
                       isEditable={isAdmin}
                       type="date"
                     />
@@ -299,7 +340,7 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                   <td className="p-2 border">
                     <EditableCell
                       value={row.dt_faturamento}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'dt_faturamento', v)}
+                      onSave={(v) => handleCellUpdate({ orderId: row.ordem_id, field: 'dt_faturamento', value: v })}
                       isEditable={isAdmin}
                       type="date"
                     />
