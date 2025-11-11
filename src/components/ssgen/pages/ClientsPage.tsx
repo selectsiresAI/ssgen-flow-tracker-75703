@@ -106,7 +106,6 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
       }
 
       const clientData = {
-        ordem_servico_ssgen: editingClient ? editingClient.ordem_servico_ssgen : 0,
         data: formData.data,
         ordem_servico_neogen: formData.ordem_servico_neogen ? Number(formData.ordem_servico_neogen) : null,
         nome: formData.nome,

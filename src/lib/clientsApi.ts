@@ -15,10 +15,21 @@ export async function fetchClients(): Promise<Client[]> {
   return data as Client[];
 }
 
-export async function createClient(client: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>) {
+type NewClientPayload = Omit<
+  Client,
+  'id' | 'created_at' | 'updated_at' | 'deleted_at' | 'ordem_servico_ssgen'
+> & {
+  ordem_servico_ssgen?: number;
+};
+
+export async function createClient(client: NewClientPayload) {
+  const { ordem_servico_ssgen, ...rest } = client;
+  const payload =
+    ordem_servico_ssgen !== undefined ? { ordem_servico_ssgen, ...rest } : rest;
+
   const { data, error } = await supabase
     .from('clients')
-    .insert([client])
+    .insert([payload])
     .select()
     .single();
   
