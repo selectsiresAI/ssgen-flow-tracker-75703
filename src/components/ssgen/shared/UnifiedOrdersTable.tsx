@@ -36,6 +36,8 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
 }) => {
   const isAdmin = userRole === 'ADM';
 
+  const nullableFields = new Set(['ordem_servico_neogen']);
+
   const handleCellUpdate = async (orderId: string | undefined, field: string, value: any) => {
     if (!orderId) {
       toast.error('ID da ordem não encontrado');
@@ -43,7 +45,16 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
     }
 
     try {
-      await updateServiceOrder(orderId, { [field]: value });
+      const isNullish = value === null || value === undefined || value === '';
+
+      if (isNullish && !nullableFields.has(field)) {
+        toast.error('Este campo não pode ficar em branco');
+        throw new Error('Campo obrigatório');
+      }
+
+      const payloadValue = isNullish ? null : value;
+
+      await updateServiceOrder(orderId, { [field]: payloadValue });
       toast.success('Campo atualizado com sucesso');
       onUpdate?.();
     } catch (error) {
