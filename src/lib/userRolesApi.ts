@@ -56,6 +56,15 @@ export async function assignUserRole(
   coord?: string,
   rep?: string
 ): Promise<void> {
+  // Validação client-side
+  if (role === 'GERENTE' && (!coord || coord.trim() === '')) {
+    throw new Error('GERENTE deve ter um coordenador atribuído');
+  }
+  
+  if (role === 'REPRESENTANTE' && (!rep || rep.trim() === '')) {
+    throw new Error('REPRESENTANTE deve ter um representante atribuído');
+  }
+
   // Verificar se já existe
   const { data: existing } = await supabase
     .from('user_roles')

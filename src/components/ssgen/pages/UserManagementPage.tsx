@@ -31,6 +31,9 @@ export default function UserManagementPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [query, setQuery] = useState('');
+  const [filterCoord, setFilterCoord] = useState<string>('all');
+  const [filterRep, setFilterRep] = useState<string>('all');
+  const [filterRole, setFilterRole] = useState<string>('all');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<AppRole>('REPRESENTANTE');
@@ -113,6 +116,25 @@ export default function UserManagementPage() {
     e.preventDefault();
     if (!selectedUser) return;
 
+    // Validação client-side
+    if (selectedRole === 'GERENTE' && (!selectedCoord || selectedCoord.trim() === '')) {
+      toast({
+        title: 'Validação',
+        description: 'GERENTE deve ter um coordenador atribuído',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (selectedRole === 'REPRESENTANTE' && (!selectedRep || selectedRep.trim() === '')) {
+      toast({
+        title: 'Validação',
+        description: 'REPRESENTANTE deve ter um representante atribuído',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     assignMutation.mutate({
       userId: selectedUser,
       role: selectedRole,
@@ -129,9 +151,14 @@ export default function UserManagementPage() {
     setSelectedRep(undefined);
   };
 
-  const filtered = users.filter(user =>
-    user.email.toLowerCase().includes(query.toLowerCase())
-  );
+  const filtered = users.filter(user => {
+    const matchesQuery = user.email.toLowerCase().includes(query.toLowerCase());
+    const matchesRole = filterRole === 'all' || user.role === filterRole;
+    const matchesCoord = filterCoord === 'all' || user.coord === filterCoord;
+    const matchesRep = filterRep === 'all' || user.rep === filterRep;
+    
+    return matchesQuery && matchesRole && matchesCoord && matchesRep;
+  });
 
   const hasIncompleteAssignments = users.some(
     user => 
@@ -158,6 +185,56 @@ export default function UserManagementPage() {
           <CardTitle>Usuários e Papéis</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="space-y-2">
+              <Label>Filtrar por Role</Label>
+              <Select value={filterRole} onValueChange={setFilterRole}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="ADM">ADM</SelectItem>
+                  <SelectItem value="GERENTE">GERENTE</SelectItem>
+                  <SelectItem value="REPRESENTANTE">REPRESENTANTE</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Filtrar por Coordenador</Label>
+              <Select value={filterCoord} onValueChange={setFilterCoord}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {coordenadores.map(coord => (
+                    <SelectItem key={coord.id} value={coord.nome}>
+                      {coord.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Filtrar por Representante</Label>
+              <Select value={filterRep} onValueChange={setFilterRep}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {representantes.map(rep => (
+                    <SelectItem key={rep.id} value={rep.nome}>
+                      {rep.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <div className="space-y-3">
             {filtered.length === 0 && (
               <p className="text-sm text-muted-foreground text-center py-8">
@@ -244,10 +321,12 @@ export default function UserManagementPage() {
 
             {selectedRole === 'GERENTE' && (
               <div className="space-y-2">
-                <Label htmlFor="coord">Coordenador</Label>
+                <Label htmlFor="coord" className="text-destructive">
+                  Coordenador <span className="text-destructive">*</span>
+                </Label>
                 <Select value={selectedCoord ?? undefined} onValueChange={(value) => setSelectedCoord(value || undefined)}>
-                  <SelectTrigger id="coord">
-                    <SelectValue placeholder="Selecione o coordenador" />
+                  <SelectTrigger id="coord" className={!selectedCoord ? 'border-destructive' : ''}>
+                    <SelectValue placeholder="Selecione o coordenador (obrigatório)" />
                   </SelectTrigger>
                   <SelectContent>
                     {coordenadores
@@ -264,10 +343,12 @@ export default function UserManagementPage() {
 
             {selectedRole === 'REPRESENTANTE' && (
               <div className="space-y-2">
-                <Label htmlFor="rep">Representante</Label>
+                <Label htmlFor="rep" className="text-destructive">
+                  Representante <span className="text-destructive">*</span>
+                </Label>
                 <Select value={selectedRep ?? undefined} onValueChange={(value) => setSelectedRep(value || undefined)}>
-                  <SelectTrigger id="rep">
-                    <SelectValue placeholder="Selecione o representante" />
+                  <SelectTrigger id="rep" className={!selectedRep ? 'border-destructive' : ''}>
+                    <SelectValue placeholder="Selecione o representante (obrigatório)" />
                   </SelectTrigger>
                   <SelectContent>
                     {representantes
