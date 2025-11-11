@@ -37,12 +37,12 @@ export type Database = {
           created_at: string
           data: string
           deleted_at: string | null
-          id: string | null
+          id: string
           id_conta_ssgen: number | null
           ie_rg: number | null
           nome: string
           ordem_servico_neogen: number | null
-          ordem_servico_ssgen: number
+          ordem_servico_ssgen: number | null
           representante: string
           status: string | null
           updated_at: string
@@ -54,12 +54,12 @@ export type Database = {
           created_at?: string
           data: string
           deleted_at?: string | null
-          id?: string | null
+          id?: string
           id_conta_ssgen?: number | null
           ie_rg?: number | null
           nome: string
           ordem_servico_neogen?: number | null
-          ordem_servico_ssgen: number
+          ordem_servico_ssgen?: number | null
           representante: string
           status?: string | null
           updated_at?: string
@@ -71,12 +71,12 @@ export type Database = {
           created_at?: string
           data?: string
           deleted_at?: string | null
-          id?: string | null
+          id?: string
           id_conta_ssgen?: number | null
           ie_rg?: number | null
           nome?: string
           ordem_servico_neogen?: number | null
-          ordem_servico_ssgen?: number
+          ordem_servico_ssgen?: number | null
           representante?: string
           status?: string | null
           updated_at?: string
