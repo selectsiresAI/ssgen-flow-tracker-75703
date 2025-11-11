@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 export interface Coordenador {
   id: string;
   nome: string;
-  email?: string;
+  email?: string | null;
   ativo: boolean;
 }
 
