@@ -228,10 +228,10 @@ const countWhere = <T,>(rows: T[], predicate: (row: T) => boolean) =>
   rows.reduce((acc, row) => (predicate(row) ? acc + 1 : acc), 0);
 
 const sumNumbers = (values: Array<number | string | null | undefined>): number =>
-  values.reduce((acc, value) => {
+  values.reduce<number>((acc, value) => {
     const numeric = typeof value === 'string' ? Number(value) : value;
-    return typeof numeric === 'number' && Number.isFinite(numeric) ? (acc as number) + numeric : acc;
-  }, 0 as number);
+    return typeof numeric === 'number' && Number.isFinite(numeric) ? acc + numeric : acc;
+  }, 0);
 
 const roundOneDecimal = (value: number) => Math.round(value * 10) / 10;
 
