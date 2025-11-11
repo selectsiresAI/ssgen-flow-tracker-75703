@@ -186,7 +186,7 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                       value={row.ordem_servico_neogen}
                       onSave={(v) => handleCellUpdate({ orderId: row.ordem_id, clientId: row.id, field: 'ordem_servico_neogen', value: v })}
                       isEditable={isAdmin}
-                      type="number"
+                      type="text"
                     />
                   </td>
                   <td className="p-2 border">{row.cliente_nome || '—'}</td>
