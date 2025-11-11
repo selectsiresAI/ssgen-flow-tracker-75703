@@ -17,15 +17,17 @@ export async function fetchClients(): Promise<Client[]> {
 
 type NewClientPayload = Omit<
   Client,
-  'id' | 'created_at' | 'updated_at' | 'deleted_at' | 'ordem_servico_ssgen'
+  'id' | 'created_at' | 'updated_at' | 'deleted_at'
 > & {
-  ordem_servico_ssgen?: number;
+  ordem_servico_ssgen?: number | null;
 };
 
 export async function createClient(client: NewClientPayload) {
   const { ordem_servico_ssgen, ...rest } = client;
   const payload =
-    ordem_servico_ssgen !== undefined ? { ordem_servico_ssgen, ...rest } : rest;
+    ordem_servico_ssgen === undefined || ordem_servico_ssgen === null
+      ? rest
+      : { ordem_servico_ssgen, ...rest };
 
   const { data, error } = await supabase
     .from('clients')
@@ -37,23 +39,25 @@ export async function createClient(client: NewClientPayload) {
   return data;
 }
 
-export async function updateClient(ordem_servico_ssgen: number, updates: Partial<Omit<Client, 'id' | 'created_at' | 'updated_at'>>) {
+type UpdateClientPayload = Partial<Omit<Client, 'id' | 'created_at' | 'updated_at' | 'deleted_at'>>;
+
+export async function updateClient(clientId: string, updates: UpdateClientPayload) {
   const { data, error } = await supabase
     .from('clients')
     .update(updates)
-    .eq('ordem_servico_ssgen', ordem_servico_ssgen)
+    .eq('id', clientId)
     .select()
     .single();
-  
+
   if (error) throw error;
   return data;
 }
 
-export async function deleteClient(ordem_servico_ssgen: number) {
+export async function deleteClient(clientId: string) {
   const { error } = await supabase
     .from('clients')
     .update({ deleted_at: new Date().toISOString() })
-    .eq('ordem_servico_ssgen', ordem_servico_ssgen);
+    .eq('id', clientId);
   
   if (error) throw error;
 }

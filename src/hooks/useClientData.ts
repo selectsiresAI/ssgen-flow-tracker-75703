@@ -22,8 +22,8 @@ export function useCreateClient() {
 export function useUpdateClient() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ ordem_servico_ssgen, updates }: { ordem_servico_ssgen: number; updates: any }) =>
-      updateClient(ordem_servico_ssgen, updates),
+    mutationFn: ({ clientId, updates }: { clientId: string; updates: any }) =>
+      updateClient(clientId, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
     },
@@ -33,7 +33,7 @@ export function useUpdateClient() {
 export function useDeleteClient() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (ordem_servico_ssgen: number) => deleteClient(ordem_servico_ssgen),
+    mutationFn: (clientId: string) => deleteClient(clientId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
     },

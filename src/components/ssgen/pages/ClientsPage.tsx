@@ -119,7 +119,7 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
       };
 
       if (editingClient) {
-        await updateClient(editingClient.ordem_servico_ssgen, clientData);
+        await updateClient(editingClient.id, clientData);
         toast({ title: 'Cliente atualizado com sucesso!' });
       } else {
         await createClient(clientData);
@@ -350,7 +350,7 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
                   </TableRow>
                 ) : (
                   clients.map((client) => (
-                    <TableRow key={client.ordem_servico_ssgen}>
+                    <TableRow key={client.id}>
                       <TableCell>{new Date(client.data).toLocaleDateString('pt-BR')}</TableCell>
                       <TableCell>{client.nome}</TableCell>
                       <TableCell>{client.cpf_cnpj}</TableCell>
@@ -372,12 +372,12 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
                             onClick={async () => {
                               if (confirm('Tem certeza que deseja excluir este cliente?')) {
                                 try {
-                                  await deleteClient(client.ordem_servico_ssgen);
+                                  await deleteClient(client.id);
                                   toast({ title: 'Cliente excluído com sucesso!' });
                                   loadClients();
                                 } catch (error: any) {
-                                  toast({ 
-                                    title: 'Erro ao excluir cliente', 
+                                  toast({
+                                    title: 'Erro ao excluir cliente',
                                     description: error.message,
                                     variant: 'destructive' 
                                   });
