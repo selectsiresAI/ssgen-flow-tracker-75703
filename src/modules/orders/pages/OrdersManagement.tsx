@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Trash2, Upload } from 'lucide-react';
+import { Trash2, Upload, Download, FileUp } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -41,6 +41,7 @@ type StageConfig = {
 type OrdersManagementRow = PowerRow & {
   client_name: string | null;
   client_id?: string | null;
+  result_file_path?: string | null;
 };
 
 const fieldMap: Record<string, StageConfig> = {
@@ -114,11 +115,45 @@ interface EtapasRowProps {
   onChange: (row: OrdersManagementRow) => void;
   onDelete: (row: OrdersManagementRow) => Promise<void>;
   isAdmin: boolean;
+  onFileUpload?: (row: OrdersManagementRow, file: File) => Promise<void>;
+  onFileDownload?: (row: OrdersManagementRow) => Promise<void>;
 }
 
-const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin }) => {
+const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin, onFileUpload, onFileDownload }) => {
   const [saving, setSaving] = useState<StageKey | null>(null);
   const [errorStage, setErrorStage] = useState<StageKey | null>(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !onFileUpload) return;
+
+    setUploadingFile(true);
+    try {
+      await onFileUpload(row, file);
+      toast.success('Arquivo enviado com sucesso');
+    } catch (error) {
+      console.error('Erro ao enviar arquivo', error);
+      toast.error('Erro ao enviar arquivo');
+    } finally {
+      setUploadingFile(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleDownloadClick = async () => {
+    if (!onFileDownload) return;
+    
+    try {
+      await onFileDownload(row);
+    } catch (error) {
+      console.error('Erro ao baixar arquivo', error);
+      toast.error('Erro ao baixar arquivo');
+    }
+  };
 
   const persistField = async (label: StageKey, value: string | null) => {
     if (!isAdmin) {
@@ -219,14 +254,6 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin 
             onChange={(event) => persistField(label, event.target.value || null)}
             disabled={!isAdmin}
           />
-          <Button
-            size="sm"
-            variant="ghost"
-            disabled={savingThisField || !isAdmin}
-            onClick={() => persistField(label, null)}
-          >
-            Limpar
-          </Button>
           {savingThisField && <Badge variant="secondary">Salvando…</Badge>}
           {hasError && <Badge variant="destructive">Erro</Badge>}
         </div>
@@ -235,7 +262,7 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin 
   };
 
   return (
-    <tr className="border-t align-top">
+    <tr className="align-top">
       <td className="p-3 font-medium whitespace-nowrap">{row.OS_SSGEN}</td>
       <td className="p-3 whitespace-nowrap">
         {row.id ? (
@@ -273,6 +300,45 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin 
           <Badge variant="secondary">Atualizando…</Badge>
         ) : (
           <Badge variant="success">OK</Badge>
+        )}
+      </td>
+      {/* File upload/download column */}
+      <td className="p-3">
+        {isAdmin ? (
+          <div className="flex items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls,.csv"
+              className="hidden"
+              onChange={handleFileSelect}
+              disabled={!row.id || uploadingFile}
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1"
+              disabled={!row.id || uploadingFile}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <FileUp className="h-4 w-4" />
+              <span className="hidden xl:inline">{uploadingFile ? 'Enviando...' : 'Upload'}</span>
+            </Button>
+          </div>
+        ) : (
+          row.result_file_path ? (
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1"
+              onClick={handleDownloadClick}
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden xl:inline">Download</span>
+            </Button>
+          ) : (
+            <span className="text-muted-foreground text-xs">—</span>
+          )
         )}
       </td>
       <td className="p-3">
@@ -434,6 +500,66 @@ const OrdersManagement: React.FC = () => {
     });
   }, [query, rows]);
 
+  const handleFileUpload = async (row: OrdersManagementRow, file: File) => {
+    if (!row.id) {
+      throw new Error('ID da ordem não encontrado');
+    }
+
+    // Upload file to storage
+    const filePath = `${row.id}/${file.name}`;
+    const { error: uploadError } = await supabase.storage
+      .from('order-results')
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    // Update order with file path
+    const { error: updateError } = await supabase
+      .from('service_orders')
+      .update({ result_file_path: filePath })
+      .eq('id', row.id);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    // Update local state
+    setRows((prev) =>
+      prev.map((item) =>
+        item.id === row.id ? { ...item, result_file_path: filePath } : item
+      )
+    );
+  };
+
+  const handleFileDownload = async (row: OrdersManagementRow) => {
+    if (!row.result_file_path) {
+      toast.error('Nenhum arquivo disponível para download');
+      return;
+    }
+
+    const { data, error } = await supabase.storage
+      .from('order-results')
+      .download(row.result_file_path);
+
+    if (error) {
+      throw error;
+    }
+
+    // Create download link
+    const url = URL.createObjectURL(data);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = row.result_file_path.split('/').pop() || 'resultado.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast.success('Download iniciado');
+  };
+
   const handleDeleteRow = async (row: OrdersManagementRow) => {
     if (!isAdmin) {
       toast.error('Apenas administradores podem apagar ordens.');
@@ -474,8 +600,8 @@ const OrdersManagement: React.FC = () => {
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-xl border">
-        <table className="min-w-[1400px] text-sm">
+      <div className="overflow-x-auto rounded-xl">
+        <table className="min-w-[1400px] text-sm border-separate border-spacing-0">
           <thead className="bg-muted/40 sticky top-0">
             <tr className="text-left">
               <th className="p-3">OS SSGEN</th>
@@ -492,12 +618,21 @@ const OrdersManagement: React.FC = () => {
               <th className="p-3">Prioridade</th>
               <th className="p-3">Aging</th>
               <th className="p-3">Status</th>
+              <th className="p-3">Arquivo</th>
               <th className="p-3">Ações</th>
             </tr>
           </thead>
           <tbody>
             {filteredRows.map((row) => (
-              <EtapasRow key={row.id ?? row.OS_SSGEN} row={row} onChange={updateRow} onDelete={handleDeleteRow} isAdmin={isAdmin} />
+              <EtapasRow 
+                key={row.id ?? row.OS_SSGEN} 
+                row={row} 
+                onChange={updateRow} 
+                onDelete={handleDeleteRow} 
+                isAdmin={isAdmin}
+                onFileUpload={handleFileUpload}
+                onFileDownload={handleFileDownload}
+              />
             ))}
           </tbody>
         </table>

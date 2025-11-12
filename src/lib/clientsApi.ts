@@ -24,10 +24,10 @@ type NewClientPayload = Omit<
 
 export async function createClient(client: NewClientPayload) {
   const { ordem_servico_ssgen, ...rest } = client;
-  const payload =
-    ordem_servico_ssgen === undefined || ordem_servico_ssgen === null
-      ? rest
-      : { ordem_servico_ssgen, ...rest };
+  const payload = {
+    ...rest,
+    ordem_servico_ssgen: ordem_servico_ssgen ?? 0,
+  };
 
   const { data, error } = await supabase
     .from('clients')

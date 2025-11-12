@@ -29,6 +29,21 @@ export type Database = {
         }
         Relationships: []
       }
+      app_config_backup_20251111_000000: {
+        Row: {
+          key: string | null
+          value: string | null
+        }
+        Insert: {
+          key?: string | null
+          value?: string | null
+        }
+        Update: {
+          key?: string | null
+          value?: string | null
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           codigo: number | null
@@ -37,12 +52,12 @@ export type Database = {
           created_at: string
           data: string
           deleted_at: string | null
-          id: string
+          id: string | null
           id_conta_ssgen: number | null
           ie_rg: number | null
           nome: string
           ordem_servico_neogen: number | null
-          ordem_servico_ssgen: number | null
+          ordem_servico_ssgen: number
           representante: string
           status: string | null
           updated_at: string
@@ -54,12 +69,12 @@ export type Database = {
           created_at?: string
           data: string
           deleted_at?: string | null
-          id?: string
+          id?: string | null
           id_conta_ssgen?: number | null
           ie_rg?: number | null
           nome: string
           ordem_servico_neogen?: number | null
-          ordem_servico_ssgen?: number | null
+          ordem_servico_ssgen: number
           representante: string
           status?: string | null
           updated_at?: string
@@ -71,15 +86,111 @@ export type Database = {
           created_at?: string
           data?: string
           deleted_at?: string | null
-          id?: string
+          id?: string | null
           id_conta_ssgen?: number | null
           ie_rg?: number | null
           nome?: string
           ordem_servico_neogen?: number | null
-          ordem_servico_ssgen?: number | null
+          ordem_servico_ssgen?: number
           representante?: string
           status?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      clients_backup_20251111_000000: {
+        Row: {
+          codigo: number | null
+          coordenador: string | null
+          cpf_cnpj: number | null
+          created_at: string | null
+          data: string | null
+          deleted_at: string | null
+          id: string | null
+          id_conta_ssgen: number | null
+          ie_rg: number | null
+          nome: string | null
+          ordem_servico_neogen: number | null
+          ordem_servico_ssgen: number | null
+          representante: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          codigo?: number | null
+          coordenador?: string | null
+          cpf_cnpj?: number | null
+          created_at?: string | null
+          data?: string | null
+          deleted_at?: string | null
+          id?: string | null
+          id_conta_ssgen?: number | null
+          ie_rg?: number | null
+          nome?: string | null
+          ordem_servico_neogen?: number | null
+          ordem_servico_ssgen?: number | null
+          representante?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          codigo?: number | null
+          coordenador?: string | null
+          cpf_cnpj?: number | null
+          created_at?: string | null
+          data?: string | null
+          deleted_at?: string | null
+          id?: string | null
+          id_conta_ssgen?: number | null
+          ie_rg?: number | null
+          nome?: string | null
+          ordem_servico_neogen?: number | null
+          ordem_servico_ssgen?: number | null
+          representante?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      coordenador_representante: {
+        Row: {
+          coordenador_id: string
+          created_at: string | null
+          id: string
+          representante_id: string
+        }
+        Insert: {
+          coordenador_id: string
+          created_at?: string | null
+          id?: string
+          representante_id: string
+        }
+        Update: {
+          coordenador_id?: string
+          created_at?: string | null
+          id?: string
+          representante_id?: string
+        }
+        Relationships: []
+      }
+      coordenador_representante_backup_20251111_000000: {
+        Row: {
+          coordenador_id: string | null
+          created_at: string | null
+          id: string | null
+          representante_id: string | null
+        }
+        Insert: {
+          coordenador_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          representante_id?: string | null
+        }
+        Update: {
+          coordenador_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          representante_id?: string | null
         }
         Relationships: []
       }
@@ -110,6 +221,36 @@ export type Database = {
           id?: string
           nome?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      coordenadores_backup_20251111_000000: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          deleted_at: string | null
+          email: string | null
+          id: string | null
+          nome: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          deleted_at?: string | null
+          email?: string | null
+          id?: string | null
+          nome?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          deleted_at?: string | null
+          email?: string | null
+          id?: string | null
+          nome?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -186,6 +327,36 @@ export type Database = {
           },
         ]
       }
+      invoices_backup_20251111_000000: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          deleted_at: string | null
+          id: string | null
+          issued_on: string | null
+          service_order_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string | null
+          issued_on?: string | null
+          service_order_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          deleted_at?: string | null
+          id?: string | null
+          issued_on?: string | null
+          service_order_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       order_audit_log: {
         Row: {
           changed_at: string
@@ -232,6 +403,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      order_audit_log_backup_20251111_000000: {
+        Row: {
+          changed_at: string | null
+          changed_by: string | null
+          field_name: string | null
+          id: string | null
+          new_value: string | null
+          old_value: string | null
+          ordem_servico_ssgen: string | null
+          order_id: string | null
+          user_email: string | null
+          user_role: string | null
+        }
+        Insert: {
+          changed_at?: string | null
+          changed_by?: string | null
+          field_name?: string | null
+          id?: string | null
+          new_value?: string | null
+          old_value?: string | null
+          ordem_servico_ssgen?: string | null
+          order_id?: string | null
+          user_email?: string | null
+          user_role?: string | null
+        }
+        Update: {
+          changed_at?: string | null
+          changed_by?: string | null
+          field_name?: string | null
+          id?: string | null
+          new_value?: string | null
+          old_value?: string | null
+          ordem_servico_ssgen?: string | null
+          order_id?: string | null
+          user_email?: string | null
+          user_role?: string | null
+        }
+        Relationships: []
       }
       orders: {
         Row: {
@@ -353,6 +563,126 @@ export type Database = {
         }
         Relationships: []
       }
+      orders_backup_20251111_000000: {
+        Row: {
+          cliente: string | null
+          cod_ssb: string | null
+          coord: string | null
+          created_at: string | null
+          deleted_at: string | null
+          dt_cra: string | null
+          dt_fatur_ssg: string | null
+          dt_lpr: string | null
+          dt_lr: string | null
+          dt_plan_neogen: string | null
+          dt_plan_ssg: string | null
+          dt_prev_result_ssg: string | null
+          dt_result_ssg: string | null
+          dt_ssgen_os: string | null
+          dt_vri: string | null
+          fatur_ssg: number | null
+          fatur_tipo: string | null
+          id: string | null
+          lib_cad_cliente: string | null
+          lr_rastreio: string | null
+          n_amostras_neogen: number | null
+          n_amostras_ssg: number | null
+          n_lpr: number | null
+          n_lr: number | null
+          n_vri: number | null
+          nf_na_neogen: string | null
+          nf_neogem: string | null
+          ord: string | null
+          os_neogen: string | null
+          os_ssgen: string | null
+          plan_neogen: string | null
+          plan_ssg: string | null
+          prod_neogen: string | null
+          prod_ssg: string | null
+          rep: string | null
+          result_ssg: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cliente?: string | null
+          cod_ssb?: string | null
+          coord?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          dt_cra?: string | null
+          dt_fatur_ssg?: string | null
+          dt_lpr?: string | null
+          dt_lr?: string | null
+          dt_plan_neogen?: string | null
+          dt_plan_ssg?: string | null
+          dt_prev_result_ssg?: string | null
+          dt_result_ssg?: string | null
+          dt_ssgen_os?: string | null
+          dt_vri?: string | null
+          fatur_ssg?: number | null
+          fatur_tipo?: string | null
+          id?: string | null
+          lib_cad_cliente?: string | null
+          lr_rastreio?: string | null
+          n_amostras_neogen?: number | null
+          n_amostras_ssg?: number | null
+          n_lpr?: number | null
+          n_lr?: number | null
+          n_vri?: number | null
+          nf_na_neogen?: string | null
+          nf_neogem?: string | null
+          ord?: string | null
+          os_neogen?: string | null
+          os_ssgen?: string | null
+          plan_neogen?: string | null
+          plan_ssg?: string | null
+          prod_neogen?: string | null
+          prod_ssg?: string | null
+          rep?: string | null
+          result_ssg?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cliente?: string | null
+          cod_ssb?: string | null
+          coord?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          dt_cra?: string | null
+          dt_fatur_ssg?: string | null
+          dt_lpr?: string | null
+          dt_lr?: string | null
+          dt_plan_neogen?: string | null
+          dt_plan_ssg?: string | null
+          dt_prev_result_ssg?: string | null
+          dt_result_ssg?: string | null
+          dt_ssgen_os?: string | null
+          dt_vri?: string | null
+          fatur_ssg?: number | null
+          fatur_tipo?: string | null
+          id?: string | null
+          lib_cad_cliente?: string | null
+          lr_rastreio?: string | null
+          n_amostras_neogen?: number | null
+          n_amostras_ssg?: number | null
+          n_lpr?: number | null
+          n_lr?: number | null
+          n_vri?: number | null
+          nf_na_neogen?: string | null
+          nf_neogem?: string | null
+          ord?: string | null
+          os_neogen?: string | null
+          os_ssgen?: string | null
+          plan_neogen?: string | null
+          plan_ssg?: string | null
+          prod_neogen?: string | null
+          prod_ssg?: string | null
+          rep?: string | null
+          result_ssg?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       orders_ext: {
         Row: {
           client_name: string | null
@@ -449,6 +779,102 @@ export type Database = {
         }
         Relationships: []
       }
+      orders_ext_backup_20251111_000000: {
+        Row: {
+          client_name: string | null
+          coord: string | null
+          created_at: string | null
+          dt_cra: string | null
+          dt_fatur_ssg: string | null
+          dt_lpr: string | null
+          dt_lr: string | null
+          dt_plan_neogen: string | null
+          dt_prev_result_ssg: string | null
+          dt_result_ssg: string | null
+          dt_ssgen_os: string | null
+          dt_vri: string | null
+          fatur_ssg: string | null
+          fatur_tipo: string | null
+          id: number | null
+          lr_rastreio: string | null
+          n_amostras_ssg: number | null
+          n_lpr: number | null
+          n_lr: number | null
+          n_vri: number | null
+          nf_neogen: string | null
+          order_id: string | null
+          os_neogen: string | null
+          os_ssgen: string | null
+          plan_neogen: string | null
+          prod_ssg: string | null
+          rep: string | null
+          result_ssg: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_name?: string | null
+          coord?: string | null
+          created_at?: string | null
+          dt_cra?: string | null
+          dt_fatur_ssg?: string | null
+          dt_lpr?: string | null
+          dt_lr?: string | null
+          dt_plan_neogen?: string | null
+          dt_prev_result_ssg?: string | null
+          dt_result_ssg?: string | null
+          dt_ssgen_os?: string | null
+          dt_vri?: string | null
+          fatur_ssg?: string | null
+          fatur_tipo?: string | null
+          id?: number | null
+          lr_rastreio?: string | null
+          n_amostras_ssg?: number | null
+          n_lpr?: number | null
+          n_lr?: number | null
+          n_vri?: number | null
+          nf_neogen?: string | null
+          order_id?: string | null
+          os_neogen?: string | null
+          os_ssgen?: string | null
+          plan_neogen?: string | null
+          prod_ssg?: string | null
+          rep?: string | null
+          result_ssg?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_name?: string | null
+          coord?: string | null
+          created_at?: string | null
+          dt_cra?: string | null
+          dt_fatur_ssg?: string | null
+          dt_lpr?: string | null
+          dt_lr?: string | null
+          dt_plan_neogen?: string | null
+          dt_prev_result_ssg?: string | null
+          dt_result_ssg?: string | null
+          dt_ssgen_os?: string | null
+          dt_vri?: string | null
+          fatur_ssg?: string | null
+          fatur_tipo?: string | null
+          id?: number | null
+          lr_rastreio?: string | null
+          n_amostras_ssg?: number | null
+          n_lpr?: number | null
+          n_lr?: number | null
+          n_vri?: number | null
+          nf_neogen?: string | null
+          order_id?: string | null
+          os_neogen?: string | null
+          os_ssgen?: string | null
+          plan_neogen?: string | null
+          prod_ssg?: string | null
+          rep?: string | null
+          result_ssg?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -470,9 +896,31 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles_backup_20251111_000000: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       representantes: {
         Row: {
           ativo: boolean
+          coordenador_id: string | null
           created_at: string
           deleted_at: string | null
           email: string | null
@@ -482,6 +930,7 @@ export type Database = {
         }
         Insert: {
           ativo?: boolean
+          coordenador_id?: string | null
           created_at?: string
           deleted_at?: string | null
           email?: string | null
@@ -491,12 +940,51 @@ export type Database = {
         }
         Update: {
           ativo?: boolean
+          coordenador_id?: string | null
           created_at?: string
           deleted_at?: string | null
           email?: string | null
           id?: string
           nome?: string
           updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_representantes_coordenador"
+            columns: ["coordenador_id"]
+            isOneToOne: false
+            referencedRelation: "coordenadores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      representantes_backup_20251111_000000: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          deleted_at: string | null
+          email: string | null
+          id: string | null
+          nome: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          deleted_at?: string | null
+          email?: string | null
+          id?: string | null
+          nome?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          deleted_at?: string | null
+          email?: string | null
+          id?: string | null
+          nome?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -566,6 +1054,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      service_order_samples_backup_20251111_000000: {
+        Row: {
+          created_at: string | null
+          id: number | null
+          liberacao_n_amostras: number | null
+          sample_code: string | null
+          service_order_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number | null
+          liberacao_n_amostras?: number | null
+          sample_code?: string | null
+          service_order_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number | null
+          liberacao_n_amostras?: number | null
+          sample_code?: string | null
+          service_order_id?: string | null
+        }
+        Relationships: []
       }
       service_order_stage_history: {
         Row: {
@@ -640,6 +1152,36 @@ export type Database = {
           },
         ]
       }
+      service_order_stage_history_backup_20251111_000000: {
+        Row: {
+          changed_at: string | null
+          changed_by: string | null
+          etapa: string | null
+          id: number | null
+          liberacao_n_amostras: number | null
+          notes: string | null
+          service_order_id: string | null
+        }
+        Insert: {
+          changed_at?: string | null
+          changed_by?: string | null
+          etapa?: string | null
+          id?: number | null
+          liberacao_n_amostras?: number | null
+          notes?: string | null
+          service_order_id?: string | null
+        }
+        Update: {
+          changed_at?: string | null
+          changed_by?: string | null
+          etapa?: string | null
+          id?: number | null
+          liberacao_n_amostras?: number | null
+          notes?: string | null
+          service_order_id?: string | null
+        }
+        Relationships: []
+      }
       service_orders: {
         Row: {
           client_id: string | null
@@ -677,6 +1219,7 @@ export type Database = {
           ordem_servico_ssgen: number
           prioridade: string | null
           received_at: string | null
+          result_file_path: string | null
           sla_days: number | null
           updated_at: string
           vri_data: string | null
@@ -720,6 +1263,7 @@ export type Database = {
           ordem_servico_ssgen: number
           prioridade?: string | null
           received_at?: string | null
+          result_file_path?: string | null
           sla_days?: number | null
           updated_at?: string
           vri_data?: string | null
@@ -763,6 +1307,7 @@ export type Database = {
           ordem_servico_ssgen?: number
           prioridade?: string | null
           received_at?: string | null
+          result_file_path?: string | null
           sla_days?: number | null
           updated_at?: string
           vri_data?: string | null
@@ -779,6 +1324,138 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      service_orders_backup_20251111_000000: {
+        Row: {
+          client_id: string | null
+          cliente_lat: number | null
+          cliente_lon: number | null
+          completed_at: string | null
+          cra_data: string | null
+          cra_status: string | null
+          created_at: string | null
+          deleted_at: string | null
+          dt_faturamento: string | null
+          dt_receb_resultados: string | null
+          envio_planilha_data: string | null
+          envio_planilha_status: string | null
+          envio_planilha_status_sla: string | null
+          envio_resultados_data: string | null
+          envio_resultados_data_prova: string | null
+          envio_resultados_ordem_id: number | null
+          envio_resultados_previsao: string | null
+          envio_resultados_status: string | null
+          envio_resultados_status_sla: string | null
+          etapa_atual: string | null
+          flag_reagendamento: boolean | null
+          id: string | null
+          issue_text: string | null
+          liberacao_data: string | null
+          liberacao_n_amostras: number | null
+          lpr_data: string | null
+          lpr_n_amostras: number | null
+          lpr_status_sla: string | null
+          nome_produto: string | null
+          numero_amostras: number | null
+          numero_nf_neogen: number | null
+          ordem_servico_neogen: number | null
+          ordem_servico_ssgen: number | null
+          prioridade: string | null
+          received_at: string | null
+          sla_days: number | null
+          updated_at: string | null
+          vri_data: string | null
+          vri_n_amostras: number | null
+          vri_resolvido_data: string | null
+          vri_status_sla: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          cliente_lat?: number | null
+          cliente_lon?: number | null
+          completed_at?: string | null
+          cra_data?: string | null
+          cra_status?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          dt_faturamento?: string | null
+          dt_receb_resultados?: string | null
+          envio_planilha_data?: string | null
+          envio_planilha_status?: string | null
+          envio_planilha_status_sla?: string | null
+          envio_resultados_data?: string | null
+          envio_resultados_data_prova?: string | null
+          envio_resultados_ordem_id?: number | null
+          envio_resultados_previsao?: string | null
+          envio_resultados_status?: string | null
+          envio_resultados_status_sla?: string | null
+          etapa_atual?: string | null
+          flag_reagendamento?: boolean | null
+          id?: string | null
+          issue_text?: string | null
+          liberacao_data?: string | null
+          liberacao_n_amostras?: number | null
+          lpr_data?: string | null
+          lpr_n_amostras?: number | null
+          lpr_status_sla?: string | null
+          nome_produto?: string | null
+          numero_amostras?: number | null
+          numero_nf_neogen?: number | null
+          ordem_servico_neogen?: number | null
+          ordem_servico_ssgen?: number | null
+          prioridade?: string | null
+          received_at?: string | null
+          sla_days?: number | null
+          updated_at?: string | null
+          vri_data?: string | null
+          vri_n_amostras?: number | null
+          vri_resolvido_data?: string | null
+          vri_status_sla?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          cliente_lat?: number | null
+          cliente_lon?: number | null
+          completed_at?: string | null
+          cra_data?: string | null
+          cra_status?: string | null
+          created_at?: string | null
+          deleted_at?: string | null
+          dt_faturamento?: string | null
+          dt_receb_resultados?: string | null
+          envio_planilha_data?: string | null
+          envio_planilha_status?: string | null
+          envio_planilha_status_sla?: string | null
+          envio_resultados_data?: string | null
+          envio_resultados_data_prova?: string | null
+          envio_resultados_ordem_id?: number | null
+          envio_resultados_previsao?: string | null
+          envio_resultados_status?: string | null
+          envio_resultados_status_sla?: string | null
+          etapa_atual?: string | null
+          flag_reagendamento?: boolean | null
+          id?: string | null
+          issue_text?: string | null
+          liberacao_data?: string | null
+          liberacao_n_amostras?: number | null
+          lpr_data?: string | null
+          lpr_n_amostras?: number | null
+          lpr_status_sla?: string | null
+          nome_produto?: string | null
+          numero_amostras?: number | null
+          numero_nf_neogen?: number | null
+          ordem_servico_neogen?: number | null
+          ordem_servico_ssgen?: number | null
+          prioridade?: string | null
+          received_at?: string | null
+          sla_days?: number | null
+          updated_at?: string | null
+          vri_data?: string | null
+          vri_n_amostras?: number | null
+          vri_resolvido_data?: string | null
+          vri_status_sla?: string | null
+        }
+        Relationships: []
       }
       sla_config: {
         Row: {
@@ -816,6 +1493,42 @@ export type Database = {
         }
         Relationships: []
       }
+      sla_config_backup_20251111_000000: {
+        Row: {
+          ativo: boolean | null
+          cor_dentro_prazo: string | null
+          cor_dia_zero: string | null
+          cor_fora_prazo: string | null
+          created_at: string | null
+          dias_alvo: number | null
+          etapa: string | null
+          id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          cor_dentro_prazo?: string | null
+          cor_dia_zero?: string | null
+          cor_fora_prazo?: string | null
+          created_at?: string | null
+          dias_alvo?: number | null
+          etapa?: string | null
+          id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          cor_dentro_prazo?: string | null
+          cor_dia_zero?: string | null
+          cor_fora_prazo?: string | null
+          created_at?: string | null
+          dias_alvo?: number | null
+          etapa?: string | null
+          id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       team_locations: {
         Row: {
           created_at: string | null
@@ -849,6 +1562,39 @@ export type Database = {
         }
         Relationships: []
       }
+      team_locations_backup_20251111_000000: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          lat: number | null
+          lon: number | null
+          nome: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          lat?: number | null
+          lon?: number | null
+          nome?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          lat?: number | null
+          lon?: number | null
+          nome?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           coord: string | null
@@ -873,6 +1619,33 @@ export type Database = {
           rep?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles_backup_20251111_000000: {
+        Row: {
+          coord: string | null
+          created_at: string | null
+          id: string | null
+          rep: string | null
+          role: Database["public"]["Enums"]["app_role"] | null
+          user_id: string | null
+        }
+        Insert: {
+          coord?: string | null
+          created_at?: string | null
+          id?: string | null
+          rep?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
+          user_id?: string | null
+        }
+        Update: {
+          coord?: string | null
+          created_at?: string | null
+          id?: string | null
+          rep?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1263,6 +2036,8 @@ export type Database = {
         }[]
       }
       next_ordem_servico_ssgen: { Args: never; Returns: number }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       update_order_date: {
         Args: { p_field: string; p_os_ssgen: string; p_value: string }
         Returns: undefined

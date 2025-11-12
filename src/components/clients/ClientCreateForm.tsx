@@ -26,6 +26,7 @@ export default function ClientCreateForm({
         coordenador: '',
         representante: '',
         data: new Date().toISOString().split('T')[0],
+        ordem_servico_ssgen: 0,
       })
       .select("id, nome")
       .single();
