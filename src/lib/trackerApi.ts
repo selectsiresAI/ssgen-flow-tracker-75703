@@ -75,6 +75,7 @@ export async function fetchMapOrders(): Promise<MapOrder[]> {
 export async function fetchOrderTimeline(
   orderId: string,
   source?: 'service_orders' | 'orders',
+  ctx?: UserScope,
 ): Promise<TrackerTimeline | null> {
   let builder = supabase
     .from('v_tracker_timelines')
@@ -84,6 +85,10 @@ export async function fetchOrderTimeline(
 
   if (source) {
     builder = builder.eq('source', source);
+  }
+
+  if (ctx && ctx.role !== 'ADM') {
+    builder = builder.contains('accessible_user_ids', [ctx.userId]);
   }
 
   const { data, error } = await builder.maybeSingle<TrackerTimelineRow>();
@@ -101,7 +106,7 @@ export async function fetchOrderTimeline(
 
 export async function fetchAllTimelines(
   accountId?: string,
-  _ctx?: UserScope,
+  ctx?: UserScope,
 ): Promise<TrackerTimeline[]> {
   let builder = supabase
     .from('v_tracker_timelines')
@@ -113,6 +118,10 @@ export async function fetchAllTimelines(
     if (!Number.isNaN(parsed)) {
       builder = builder.eq('id_conta_ssgen', parsed);
     }
+  }
+
+  if (ctx && ctx.role !== 'ADM') {
+    builder = builder.contains('accessible_user_ids', [ctx.userId]);
   }
 
   const { data, error } = await builder;

@@ -1866,6 +1866,7 @@ export type Database = {
       }
       v_tracker_timelines: {
         Row: {
+          accessible_user_ids: string[] | null
           aging_dias_total: number | null
           client_id: string | null
           cliente: string | null

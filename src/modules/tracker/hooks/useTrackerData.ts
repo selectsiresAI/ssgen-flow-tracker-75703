@@ -25,7 +25,7 @@ export function useTrackerTimelines(accountId?: string) {
 
   return useQuery({
     enabled: Boolean(profile),
-    queryKey: ['tracker_timelines', accountId ?? null, profile?.role, scopeHash],
+    queryKey: ['tracker_timelines', accountId ?? null, profile?.userId ?? null, profile?.role, scopeHash],
     queryFn: () =>
       fetchAllTimelines(accountId, {
         userId: profile!.userId,
@@ -45,7 +45,7 @@ export function useTrackerKPIs(accountId?: string) {
 
   return useQuery<TrackerKPI>({
     enabled: Boolean(profile),
-    queryKey: ['tracker_kpis', accountId ?? null, profile?.role, scopeHash],
+    queryKey: ['tracker_kpis', accountId ?? null, profile?.userId ?? null, profile?.role, scopeHash],
     queryFn: () =>
       fetchTrackerKPIs(accountId, {
         userId: profile!.userId,
