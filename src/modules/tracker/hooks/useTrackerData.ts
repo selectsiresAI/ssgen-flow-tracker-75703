@@ -7,23 +7,56 @@ import {
   updateOrderPriority,
   toggleReagendamento,
   updateIssueText,
-  deleteServiceOrder
+  deleteServiceOrder,
 } from '@/lib/trackerApi';
+import type { TrackerQueryOptions } from '@/lib/trackerApi';
 import type { TrackerKPI } from '@/types/ssgen';
 
-export function useTrackerTimelines() {
+type TrackerQueryConfig = {
+  enabled?: boolean;
+};
+
+const buildTrackerQueryKey = (options: TrackerQueryOptions) => [
+  'tracker_timelines',
+  options.accountId ?? 'all',
+  options.role ?? 'all',
+  options.coord ?? 'all',
+  options.rep ?? 'all',
+];
+
+export function useTrackerTimelines(
+  options: TrackerQueryOptions = {},
+  config: TrackerQueryConfig = {}
+) {
+  const { enabled = true } = config;
+
   return useQuery({
-    queryKey: ['tracker_timelines'],
-    queryFn: fetchAllTimelines,
+    queryKey: buildTrackerQueryKey(options),
+    queryFn: () => fetchAllTimelines(options),
     refetchInterval: 30000,
+    enabled,
   });
 }
 
-export function useTrackerKPIs() {
+const buildKpiQueryKey = (options: TrackerQueryOptions) => [
+  'tracker_kpis',
+  options.accountId ?? 'all',
+  options.role ?? 'all',
+  options.coord ?? 'all',
+  options.rep ?? 'all',
+];
+
+export function useTrackerKPIs(
+  options: TrackerQueryOptions = {},
+  config: TrackerQueryConfig = {}
+) {
+  const { enabled = true } = config;
+
   return useQuery<TrackerKPI>({
-    queryKey: ['tracker_kpis'],
-    queryFn: fetchTrackerKPIs,
+    queryKey: buildKpiQueryKey(options),
+    queryFn: () => fetchTrackerKPIs(options),
     refetchInterval: 30000,
+    enabled,
   });
 }
 

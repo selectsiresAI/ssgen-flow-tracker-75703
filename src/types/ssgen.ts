@@ -184,6 +184,7 @@ export type TrackerTimeline = {
   id: string;
   ordem_servico_ssgen: number;
   cliente: string;
+  id_conta_ssgen?: number | null;
   prioridade?: string | null;
   flag_reagendamento?: boolean;
   issue_text?: string | null;

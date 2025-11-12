@@ -1,13 +1,15 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
-import type { TeamLocation, MapOrder, TrackerTimeline, TrackerKPI } from '@/types/ssgen';
+import type { TeamLocation, MapOrder, TrackerTimeline, TrackerKPI, Role } from '@/types/ssgen';
 import { requireAdmin } from '@/lib/ssgenClient';
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 type ServiceOrderRow = Database['public']['Tables']['service_orders']['Row'];
 type LegacyOrderRow = Database['public']['Tables']['orders']['Row'];
-type ClientRow = Pick<Database['public']['Tables']['clients']['Row'], 'nome' | 'deleted_at'>;
+type ClientRow = Pick<Database['public']['Tables']['clients']['Row'],
+  'nome' | 'deleted_at' | 'id_conta_ssgen' | 'coordenador' | 'representante'
+>;
 type ServiceOrderWithClient = ServiceOrderRow & {
   clients?: ClientRow | ClientRow[] | null;
 };
@@ -15,6 +17,39 @@ type ServiceOrderWithClient = ServiceOrderRow & {
 type TrackerSources = {
   serviceOrders: ServiceOrderWithClient[];
   legacyOrders: LegacyOrderRow[];
+};
+
+export type TrackerQueryOptions = {
+  accountId?: number | null;
+  role?: Role | null;
+  coord?: string | null;
+  rep?: string | null;
+};
+
+type NormalizedTrackerQueryOptions = {
+  accountId: number | null;
+  role: Role | null;
+  coord: string | null;
+  rep: string | null;
+};
+
+const normalizeAccountId = (value?: number | null): number | null => {
+  if (value == null) return null;
+  if (typeof value !== 'number') return null;
+  return Number.isFinite(value) ? value : null;
+};
+
+const normalizeTrackerQueryOptions = (options: TrackerQueryOptions = {}): NormalizedTrackerQueryOptions => {
+  const role = options.role ?? null;
+  const coord = options.coord ? String(options.coord).trim() : '';
+  const rep = options.rep ? String(options.rep).trim() : '';
+
+  return {
+    accountId: normalizeAccountId(options.accountId),
+    role,
+    coord: coord || null,
+    rep: rep || null,
+  };
 };
 
 const toStartOfDay = (date: Date) => {
@@ -50,6 +85,23 @@ const getClientName = (row: ServiceOrderWithClient): string => {
   return relation.nome ?? '';
 };
 
+const getClientAccountId = (row: ServiceOrderWithClient): number | null => {
+  const relation = row.clients;
+  if (!relation) return null;
+
+  if (Array.isArray(relation)) {
+    const active = relation.find((client) => !client?.deleted_at);
+    const target = active ?? relation[0];
+    return target?.id_conta_ssgen ?? null;
+  }
+
+  if (relation.deleted_at) {
+    return null;
+  }
+
+  return relation.id_conta_ssgen ?? null;
+};
+
 const computeServiceOrderStage = (row: ServiceOrderRow): string | null => {
   if (row.dt_faturamento) return 'Faturamento';
   if (row.envio_resultados_data) return 'Envio Resultados';
@@ -66,6 +118,7 @@ const mapServiceOrderToTimeline = (row: ServiceOrderWithClient): TrackerTimeline
   id: row.id,
   ordem_servico_ssgen: row.ordem_servico_ssgen,
   cliente: getClientName(row) || '—',
+  id_conta_ssgen: getClientAccountId(row) ?? undefined,
   prioridade: row.prioridade,
   flag_reagendamento: row.flag_reagendamento ?? undefined,
   issue_text: row.issue_text ?? undefined,
@@ -130,15 +183,35 @@ const mapLegacyOrderToTimeline = (row: LegacyOrderRow): TrackerTimeline => ({
   etapa7_status_sla: null,
 });
 
-async function fetchServiceOrdersRaw(): Promise<ServiceOrderWithClient[]> {
-  const { data, error } = await supabase
+async function fetchServiceOrdersRaw(options: NormalizedTrackerQueryOptions): Promise<ServiceOrderWithClient[]> {
+  const { accountId, role, coord, rep } = options;
+
+  if ((role === 'GERENTE' && !coord) || (role === 'REPRESENTANTE' && !rep)) {
+    return [];
+  }
+
+  let query = supabase
     .from('service_orders')
     .select(`
       *,
-      clients:clients!service_orders_client_id_fkey ( nome, deleted_at )
+      clients:clients!service_orders_client_id_fkey ( nome, deleted_at, id_conta_ssgen, coordenador, representante )
     `)
     .is('deleted_at', null)
     .order('cra_data', { ascending: false });
+
+  if (accountId != null) {
+    query = query.eq('clients.id_conta_ssgen', accountId);
+  }
+
+  if (role === 'GERENTE' && coord) {
+    query = query.eq('clients.coordenador', coord);
+  }
+
+  if (role === 'REPRESENTANTE' && rep) {
+    query = query.eq('clients.representante', rep);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Error fetching service orders for tracker:', error);
@@ -148,7 +221,16 @@ async function fetchServiceOrdersRaw(): Promise<ServiceOrderWithClient[]> {
   return (data ?? []) as ServiceOrderWithClient[];
 }
 
-async function fetchLegacyOrdersRaw(): Promise<LegacyOrderRow[]> {
+async function fetchLegacyOrdersRaw(
+  allowedCodes: Set<string> | null,
+  options: NormalizedTrackerQueryOptions
+): Promise<LegacyOrderRow[]> {
+  const { role, coord, rep } = options;
+
+  if ((role === 'GERENTE' && !coord) || (role === 'REPRESENTANTE' && !rep)) {
+    return [];
+  }
+
   const { data, error } = await supabase
     .from('orders')
     .select('*')
@@ -160,13 +242,89 @@ async function fetchLegacyOrdersRaw(): Promise<LegacyOrderRow[]> {
     return [];
   }
 
-  return (data ?? []) as LegacyOrderRow[];
+  const rows = (data ?? []) as LegacyOrderRow[];
+
+  const roleFiltered = rows.filter((row) => {
+    if (role === 'GERENTE') {
+      return row.coord === coord;
+    }
+    if (role === 'REPRESENTANTE') {
+      return row.rep === rep;
+    }
+    return true;
+  });
+
+  if (!allowedCodes) {
+    return roleFiltered;
+  }
+
+  if (allowedCodes.size === 0) {
+    return [];
+  }
+
+  return roleFiltered.filter((row) => {
+    if (!row.os_ssgen) return false;
+    return allowedCodes.has(String(row.os_ssgen));
+  });
 }
 
-async function loadTrackerSources(): Promise<TrackerSources> {
-  const [serviceOrders, legacyOrdersRaw] = await Promise.all([
-    fetchServiceOrdersRaw(),
-    fetchLegacyOrdersRaw(),
+type ClientCodeRow = Pick<Database['public']['Tables']['clients']['Row'],
+  'ordem_servico_ssgen' | 'coordenador' | 'representante'
+>;
+
+async function fetchAccountClientCodes(
+  accountId: number,
+  options: NormalizedTrackerQueryOptions
+): Promise<Set<string>> {
+  const { role, coord, rep } = options;
+
+  if ((role === 'GERENTE' && !coord) || (role === 'REPRESENTANTE' && !rep)) {
+    return new Set();
+  }
+
+  let query = supabase
+    .from('clients')
+    .select('ordem_servico_ssgen, coordenador, representante')
+    .eq('id_conta_ssgen', accountId)
+    .not('ordem_servico_ssgen', 'is', null);
+
+  if (role === 'GERENTE' && coord) {
+    query = query.eq('coordenador', coord);
+  }
+
+  if (role === 'REPRESENTANTE' && rep) {
+    query = query.eq('representante', rep);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Error fetching client codes for account:', error);
+    return new Set();
+  }
+
+  const codes = new Set<string>();
+  (data as ClientCodeRow[] | null)?.forEach((row) => {
+    const code = row?.ordem_servico_ssgen;
+    if (typeof code === 'number' && Number.isFinite(code)) {
+      codes.add(String(code));
+    }
+  });
+
+  return codes;
+}
+
+async function loadTrackerSources(options: TrackerQueryOptions = {}): Promise<TrackerSources> {
+  const normalized = normalizeTrackerQueryOptions(options);
+
+  const accountCodesPromise = normalized.accountId != null
+    ? fetchAccountClientCodes(normalized.accountId, normalized)
+    : Promise.resolve<Set<string> | null>(null);
+
+  const [serviceOrders, accountCodes, legacyOrdersRaw] = await Promise.all([
+    fetchServiceOrdersRaw(normalized),
+    accountCodesPromise,
+    fetchLegacyOrdersRaw(accountCodes ?? null, normalized),
   ]);
 
   const serviceOrderCodes = new Set(
@@ -176,10 +334,24 @@ async function loadTrackerSources(): Promise<TrackerSources> {
       .map((code) => String(code))
   );
 
+  const allowedLegacyCodes = accountCodes;
+
   const legacyOrders = legacyOrdersRaw.filter((row) => {
     const os = row.os_ssgen;
-    if (!os) return true;
-    return !serviceOrderCodes.has(String(os));
+    if (!os) {
+      return !allowedLegacyCodes;
+    }
+
+    const code = String(os);
+    if (serviceOrderCodes.has(code)) {
+      return false;
+    }
+
+    if (allowedLegacyCodes && !allowedLegacyCodes.has(code)) {
+      return false;
+    }
+
+    return true;
   });
 
   return { serviceOrders, legacyOrders };
@@ -190,7 +362,7 @@ async function fetchServiceOrderTimeline(orderId: string): Promise<TrackerTimeli
     .from('service_orders')
     .select(`
       *,
-      clients:clients!service_orders_client_id_fkey ( nome, deleted_at )
+      clients:clients!service_orders_client_id_fkey ( nome, deleted_at, id_conta_ssgen, coordenador, representante )
     `)
     .eq('id', orderId)
     .maybeSingle();
@@ -254,8 +426,8 @@ export async function fetchOrderTimeline(orderId: string): Promise<TrackerTimeli
   return fetchLegacyOrderTimeline(orderId);
 }
 
-export async function fetchAllTimelines(): Promise<TrackerTimeline[]> {
-  const { serviceOrders, legacyOrders } = await loadTrackerSources();
+export async function fetchAllTimelines(options: TrackerQueryOptions = {}): Promise<TrackerTimeline[]> {
+  const { serviceOrders, legacyOrders } = await loadTrackerSources(options);
   const timelines = [
     ...serviceOrders.map(mapServiceOrderToTimeline),
     ...legacyOrders.map(mapLegacyOrderToTimeline),
@@ -266,8 +438,8 @@ export async function fetchAllTimelines(): Promise<TrackerTimeline[]> {
   );
 }
 
-export async function fetchTrackerKPIs(): Promise<TrackerKPI> {
-  const { serviceOrders, legacyOrders } = await loadTrackerSources();
+export async function fetchTrackerKPIs(options: TrackerQueryOptions = {}): Promise<TrackerKPI> {
+  const { serviceOrders, legacyOrders } = await loadTrackerSources(options);
   const totalOrders = serviceOrders.length + legacyOrders.length;
 
   const totalClientesSet = new Set<string>();

@@ -1,4 +1,6 @@
 import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useSearchParams, useParams } from 'react-router-dom';
 import { useTrackerTimelines } from '../hooks/useTrackerData';
 import { useTrackerKpis } from '../hooks/useTrackerKpis';
 import { OrdersTable } from '../components/OrdersTable';
@@ -12,10 +14,72 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Bell, BellOff } from 'lucide-react';
+import { getProfile } from '@/lib/ssgenClient';
 
 export default function TrackerDashboard() {
-  const { data: rows = [] } = useTrackerTimelines();
-  const { data: kpis, isLoading: loadingKpis } = useTrackerKpis();
+  const [searchParams] = useSearchParams();
+  const routeParams = useParams();
+
+  const accountId = useMemo(() => {
+    const candidates: Array<string | number | undefined | null> = [
+      routeParams?.accountId,
+      routeParams?.conta,
+      routeParams?.contaId,
+      routeParams?.id_conta,
+      routeParams?.id_conta_ssgen,
+      searchParams.get('accountId'),
+      searchParams.get('account'),
+      searchParams.get('conta'),
+      searchParams.get('contaId'),
+      searchParams.get('id_conta'),
+      searchParams.get('id_conta_ssgen'),
+    ];
+
+    if (typeof window !== 'undefined') {
+      const globalAny = window as unknown as Record<string, unknown>;
+      candidates.push(globalAny?.SSGEN_ACCOUNT_ID);
+      candidates.push(globalAny?.ACCOUNT_ID);
+      candidates.push(globalAny?.CURRENT_ACCOUNT_ID);
+    }
+
+    for (const value of candidates) {
+      if (value == null) continue;
+      const raw = String(value).trim();
+      if (!raw) continue;
+      const parsed = Number(raw);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+
+    return null;
+  }, [routeParams, searchParams]);
+
+  const { data: profile, isLoading: loadingProfile } = useQuery({
+    queryKey: ['my_profile'],
+    queryFn: getProfile,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const trackerOptions = useMemo(() => ({
+    accountId: accountId ?? undefined,
+    role: profile?.role,
+    coord: profile?.coord ?? null,
+    rep: profile?.rep ?? null,
+  }), [accountId, profile?.role, profile?.coord, profile?.rep]);
+
+  const trackerEnabled = Boolean(profile?.role);
+
+  const {
+    data: rows = [],
+  } = useTrackerTimelines(trackerOptions, { enabled: trackerEnabled });
+
+  const {
+    data: kpis,
+    isLoading: loadingKpis,
+  } = useTrackerKpis(trackerOptions, { enabled: trackerEnabled });
+  const kpisLoading = loadingProfile || (trackerEnabled && loadingKpis);
+  const effectiveKpis = trackerEnabled ? kpis : null;
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState<'table' | 'cards'>('table');
   const [alarmsEnabled, setAlarmsEnabled] = useState(true);
@@ -89,14 +153,14 @@ export default function TrackerDashboard() {
         </div>
       </div>
 
-      {loadingKpis ? (
+      {kpisLoading ? (
         <div className="text-center text-black py-8">Carregando KPIs...</div>
       ) : (
         <>
-          <KpiCards k={kpis} />
+          <KpiCards k={effectiveKpis} />
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            <KpiSlaBlock k={kpis} />
+            <KpiSlaBlock k={effectiveKpis} />
             <div className="grid grid-cols-1 gap-4">
               <AlertCenter rows={rows} />
               <div className="bg-white rounded-2xl p-4 border border-gray-200">
@@ -105,7 +169,7 @@ export default function TrackerDashboard() {
                   <p>
                     Operação com{' '}
                     <span className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-black">
-                      {kpis?.em_processamento ?? 0}
+                      {effectiveKpis?.em_processamento ?? 0}
                     </span>{' '}
                     OS ativas.
                   </p>

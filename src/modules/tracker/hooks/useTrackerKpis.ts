@@ -1,11 +1,13 @@
-import { useQuery } from '@tanstack/react-query';
-import { fetchTrackerKPIs } from '@/lib/trackerApi';
-import type { TrackerKPI } from '@/types/ssgen';
+import type { TrackerQueryOptions } from '@/lib/trackerApi';
+import { useTrackerKPIs } from './useTrackerData';
 
-export function useTrackerKpis() {
-  return useQuery<TrackerKPI>({
-    queryKey: ['tracker_kpis'],
-    queryFn: fetchTrackerKPIs,
-    refetchInterval: 30000,
-  });
+type TrackerQueryConfig = {
+  enabled?: boolean;
+};
+
+export function useTrackerKpis(
+  options: TrackerQueryOptions = {},
+  config: TrackerQueryConfig = {}
+) {
+  return useTrackerKPIs(options, config);
 }
