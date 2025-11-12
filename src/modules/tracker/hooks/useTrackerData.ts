@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   fetchAllTimelines,
@@ -10,26 +11,56 @@ import {
   deleteServiceOrder
 } from '@/lib/trackerApi';
 import type { TrackerKPI } from '@/types/ssgen';
+import { useAuthProfile } from '@/hooks/useAuthProfile';
 
-export function useTrackerTimelines() {
+const buildScopeHash = (values: string[] = []) => values.slice().sort().join('|');
+
+export function useTrackerTimelines(accountId?: string) {
+  const { data: profile } = useAuthProfile();
+
+  const scopeHash = useMemo(() => {
+    if (!profile) return 'no-scope';
+    return `${buildScopeHash(profile.managerOfRepIds)}::${buildScopeHash(profile.repOfClientIds)}`;
+  }, [profile]);
+
   return useQuery({
-    queryKey: ['tracker_timelines'],
-    queryFn: fetchAllTimelines,
+    enabled: Boolean(profile),
+    queryKey: ['tracker_timelines', accountId ?? null, profile?.role, scopeHash],
+    queryFn: () =>
+      fetchAllTimelines(accountId, {
+        userId: profile!.userId,
+        role: profile!.role,
+      }),
     refetchInterval: 30000,
   });
 }
 
-export function useTrackerKPIs() {
+export function useTrackerKPIs(accountId?: string) {
+  const { data: profile } = useAuthProfile();
+
+  const scopeHash = useMemo(() => {
+    if (!profile) return 'no-scope';
+    return `${buildScopeHash(profile.managerOfRepIds)}::${buildScopeHash(profile.repOfClientIds)}`;
+  }, [profile]);
+
   return useQuery<TrackerKPI>({
-    queryKey: ['tracker_kpis'],
-    queryFn: fetchTrackerKPIs,
+    enabled: Boolean(profile),
+    queryKey: ['tracker_kpis', accountId ?? null, profile?.role, scopeHash],
+    queryFn: () =>
+      fetchTrackerKPIs(accountId, {
+        userId: profile!.userId,
+        role: profile!.role,
+      }),
     refetchInterval: 30000,
   });
 }
 
 export function useTrackerMapOrders() {
+  const { data: profile } = useAuthProfile();
+  const scopeKey = useMemo(() => profile?.role ?? 'unknown', [profile]);
+
   return useQuery({
-    queryKey: ['tracker_map_orders'],
+    queryKey: ['tracker_map_orders', scopeKey],
     queryFn: fetchMapOrders,
     refetchInterval: 30000,
   });

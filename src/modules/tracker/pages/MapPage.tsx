@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { MapLayer } from '../components/MapLayer';
 import { useTrackerMapOrders, useTeamLocations } from '../hooks/useTrackerData';
 import { supabase } from '@/integrations/supabase/client';
+import { withRole } from '@/components/auth/withRole';
 
-export default function MapPage() {
+function MapPage() {
   const { data: orders = [], refetch: refetchOrders } = useTrackerMapOrders();
   const { data: team = [], refetch: refetchTeam } = useTeamLocations();
   const navigate = useNavigate();
@@ -45,3 +46,5 @@ export default function MapPage() {
     </div>
   );
 }
+
+export default withRole(['ADM', 'GERENTE', 'REPRESENTANTE'])(MapPage);

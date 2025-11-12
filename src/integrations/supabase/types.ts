@@ -1595,6 +1595,63 @@ export type Database = {
         }
         Relationships: []
       }
+      managers_reps: {
+        Row: {
+          created_at: string | null
+          manager_id: string
+          rep_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          manager_id: string
+          rep_id: string
+        }
+        Update: {
+          created_at?: string | null
+          manager_id?: string
+          rep_id?: string
+        }
+        Relationships: []
+      }
+      reps_clients: {
+        Row: {
+          client_id: string
+          created_at: string | null
+          rep_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string | null
+          rep_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string | null
+          rep_id?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string
+          role: 'ADM' | 'GERENTE' | 'REPRESENTANTE'
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id: string
+          role?: 'ADM' | 'GERENTE' | 'REPRESENTANTE'
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          role?: 'ADM' | 'GERENTE' | 'REPRESENTANTE'
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           coord: string | null
@@ -1804,6 +1861,37 @@ export type Database = {
           total_amostras: number | null
           total_clientes: number | null
           total_ordens: number | null
+        }
+        Relationships: []
+      }
+      v_tracker_timelines: {
+        Row: {
+          aging_dias_total: number | null
+          client_id: string | null
+          cliente: string | null
+          cra_data: string | null
+          created_at: string | null
+          dt_faturamento: string | null
+          dt_receb_resultados: string | null
+          envio_planilha_data: string | null
+          envio_planilha_status_sla: string | null
+          envio_resultados_data: string | null
+          envio_resultados_status_sla: string | null
+          flag_reagendamento: boolean | null
+          id_conta_ssgen: number | null
+          issue_text: string | null
+          lpr_data: string | null
+          lpr_status_sla: string | null
+          numero_amostras: number | null
+          ordem_servico_ssgen: number | null
+          prioridade: string | null
+          source: string | null
+          source_id: string | null
+          etapa_atual: string | null
+          updated_at: string | null
+          vri_data: string | null
+          vri_resolvido_data: string | null
+          vri_status_sla: string | null
         }
         Relationships: []
       }
