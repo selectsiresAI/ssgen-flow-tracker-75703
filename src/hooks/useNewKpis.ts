@@ -35,49 +35,36 @@ export interface MonthlyBilling {
   n_invoices: number;
 }
 
+const toNumber = (value: number | string | null | undefined) => {
+  if (value == null) return 0;
+  const numeric = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(numeric) ? numeric : 0;
+};
+
 export function useKpiOrders() {
   return useQuery({
-    queryKey: ['kpi_orders_unified'],
+    queryKey: ['v_kpi_orders'],
     queryFn: async () => {
-      const ordersData = await fetchUnifiedOrderRows();
-      
-      // Calculate KPIs from unified orders
-      const total_orders = ordersData.length;
-      const open_orders = ordersData.filter((o: any) => !o.DT_FATUR_SSG).length;
-      const closed_orders = ordersData.filter((o: any) => o.DT_FATUR_SSG).length;
-      const total_samples = ordersData.reduce((acc: number, o: any) => acc + (o.N_AMOSTRAS_SSG || 0), 0);
-      const active_clients = new Set(ordersData.map((o: any) => o.CLIENTE).filter(Boolean)).size;
-      const em_processamento = ordersData.filter((o: any) => o.DT_SSGEN_OS && !o.DT_RESULT_SSG).length;
-      const a_faturar = ordersData.filter((o: any) => o.DT_RESULT_SSG && !o.DT_FATUR_SSG).length;
-      
-      const today = new Date().toISOString().split('T')[0];
-      const concluidas_hoje = ordersData.filter((o: any) => 
-        o.DT_FATUR_SSG && o.DT_FATUR_SSG.split('T')[0] === today
-      ).length;
-      
-      // Calculate average TAT
-      const completedOrders = ordersData.filter((o: any) => o.DT_FATUR_SSG && o.DT_SSGEN_OS);
-      const avg_tat_days = completedOrders.length > 0
-        ? completedOrders.reduce((acc: number, o: any) => {
-            const start = new Date(o.DT_SSGEN_OS).getTime();
-            const end = new Date(o.DT_FATUR_SSG).getTime();
-            return acc + (end - start) / (1000 * 60 * 60 * 24);
-          }, 0) / completedOrders.length
-        : 0;
-      
-      const sla_on_time_ratio = total_orders > 0 ? closed_orders / total_orders : 0;
-      
+      const { data, error } = await supabase
+        .from('v_kpi_orders' as any)
+        .select('*')
+        .maybeSingle();
+
+      if (error) throw error;
+
+      const response = data ?? {};
+
       return {
-        total_orders,
-        open_orders,
-        closed_orders,
-        avg_tat_days,
-        sla_on_time_ratio,
-        total_samples,
-        active_clients,
-        em_processamento,
-        a_faturar,
-        concluidas_hoje,
+        total_orders: toNumber(response.total_orders),
+        open_orders: toNumber(response.open_orders),
+        closed_orders: toNumber(response.closed_orders),
+        avg_tat_days: toNumber(response.avg_tat_days),
+        sla_on_time_ratio: toNumber(response.sla_on_time_ratio),
+        total_samples: toNumber(response.total_samples),
+        active_clients: toNumber(response.active_clients),
+        em_processamento: toNumber(response.em_processamento),
+        a_faturar: toNumber(response.a_faturar),
+        concluidas_hoje: toNumber(response.concluidas_hoje),
       } as KpiOrders;
     },
     refetchInterval: 30000,
