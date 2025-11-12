@@ -24,18 +24,31 @@ export async function fetchRepresentantes(): Promise<Representante[]> {
     .order('nome', { ascending: true });
   
   if (error) throw error;
-  return data || [];
+  return (data || []).map((r: any) => ({
+    id: r.id,
+    nome: r.nome,
+    email: r.email,
+    ativo: r.ativo,
+    coordenador_id: r.coordenador_id || null
+  }));
 }
 
 export async function createRepresentante(rep: RepresentantePayload): Promise<Representante> {
   const { data, error } = await supabase
     .from('representantes')
-    .insert(rep)
-    .select()
+    .insert(rep as any)
+    .select('*')
     .single();
   
   if (error) throw error;
-  return data;
+  const result: any = data;
+  return {
+    id: result.id,
+    nome: result.nome,
+    email: result.email,
+    ativo: result.ativo,
+    coordenador_id: result.coordenador_id || null
+  };
 }
 
 export async function updateRepresentante(
@@ -44,13 +57,20 @@ export async function updateRepresentante(
 ): Promise<Representante> {
   const { data, error } = await supabase
     .from('representantes')
-    .update(rep)
+    .update(rep as any)
     .eq('id', id)
-    .select()
+    .select('*')
     .single();
   
   if (error) throw error;
-  return data;
+  const result: any = data;
+  return {
+    id: result.id,
+    nome: result.nome,
+    email: result.email,
+    ativo: result.ativo,
+    coordenador_id: result.coordenador_id || null
+  };
 }
 
 export async function deleteRepresentante(id: string): Promise<void> {
