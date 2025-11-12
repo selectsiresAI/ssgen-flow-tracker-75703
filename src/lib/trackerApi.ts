@@ -7,7 +7,7 @@ const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 type ServiceOrderRow = Database['public']['Tables']['service_orders']['Row'];
 type LegacyOrderRow = Database['public']['Tables']['orders']['Row'];
-type ClientRow = Pick<Database['public']['Tables']['clients']['Row'], 'nome' | 'deleted_at'>;
+type ClientRow = Pick<Database['public']['Tables']['clients']['Row'], 'nome' | 'deleted_at' | 'id_conta_ssgen'>;
 type ServiceOrderWithClient = ServiceOrderRow & {
   clients?: ClientRow | ClientRow[] | null;
 };
@@ -15,6 +15,16 @@ type ServiceOrderWithClient = ServiceOrderRow & {
 type TrackerSources = {
   serviceOrders: ServiceOrderWithClient[];
   legacyOrders: LegacyOrderRow[];
+};
+
+type TrackerQueryOptions = {
+  accountId?: number | null;
+};
+
+const normalizeAccountId = (value?: number | null): number | null => {
+  if (value == null) return null;
+  if (typeof value !== 'number') return null;
+  return Number.isFinite(value) ? value : null;
 };
 
 const toStartOfDay = (date: Date) => {
@@ -50,6 +60,23 @@ const getClientName = (row: ServiceOrderWithClient): string => {
   return relation.nome ?? '';
 };
 
+const getClientAccountId = (row: ServiceOrderWithClient): number | null => {
+  const relation = row.clients;
+  if (!relation) return null;
+
+  if (Array.isArray(relation)) {
+    const active = relation.find((client) => !client?.deleted_at);
+    const target = active ?? relation[0];
+    return target?.id_conta_ssgen ?? null;
+  }
+
+  if (relation.deleted_at) {
+    return null;
+  }
+
+  return relation.id_conta_ssgen ?? null;
+};
+
 const computeServiceOrderStage = (row: ServiceOrderRow): string | null => {
   if (row.dt_faturamento) return 'Faturamento';
   if (row.envio_resultados_data) return 'Envio Resultados';
@@ -66,6 +93,7 @@ const mapServiceOrderToTimeline = (row: ServiceOrderWithClient): TrackerTimeline
   id: row.id,
   ordem_servico_ssgen: row.ordem_servico_ssgen,
   cliente: getClientName(row) || '—',
+  id_conta_ssgen: getClientAccountId(row) ?? undefined,
   prioridade: row.prioridade,
   flag_reagendamento: row.flag_reagendamento ?? undefined,
   issue_text: row.issue_text ?? undefined,
@@ -130,15 +158,21 @@ const mapLegacyOrderToTimeline = (row: LegacyOrderRow): TrackerTimeline => ({
   etapa7_status_sla: null,
 });
 
-async function fetchServiceOrdersRaw(): Promise<ServiceOrderWithClient[]> {
-  const { data, error } = await supabase
+async function fetchServiceOrdersRaw(accountId?: number | null): Promise<ServiceOrderWithClient[]> {
+  let query = supabase
     .from('service_orders')
     .select(`
       *,
-      clients:clients!service_orders_client_id_fkey ( nome, deleted_at )
+      clients:clients!service_orders_client_id_fkey ( nome, deleted_at, id_conta_ssgen )
     `)
     .is('deleted_at', null)
     .order('cra_data', { ascending: false });
+
+  if (accountId != null) {
+    query = query.eq('clients.id_conta_ssgen', accountId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Error fetching service orders for tracker:', error);
@@ -148,7 +182,7 @@ async function fetchServiceOrdersRaw(): Promise<ServiceOrderWithClient[]> {
   return (data ?? []) as ServiceOrderWithClient[];
 }
 
-async function fetchLegacyOrdersRaw(): Promise<LegacyOrderRow[]> {
+async function fetchLegacyOrdersRaw(allowedCodes?: Set<string> | null): Promise<LegacyOrderRow[]> {
   const { data, error } = await supabase
     .from('orders')
     .select('*')
@@ -160,13 +194,58 @@ async function fetchLegacyOrdersRaw(): Promise<LegacyOrderRow[]> {
     return [];
   }
 
-  return (data ?? []) as LegacyOrderRow[];
+  const rows = (data ?? []) as LegacyOrderRow[];
+
+  if (!allowedCodes) {
+    return rows;
+  }
+
+  if (allowedCodes.size === 0) {
+    return [];
+  }
+
+  return rows.filter((row) => {
+    if (!row.os_ssgen) return false;
+    return allowedCodes.has(String(row.os_ssgen));
+  });
 }
 
-async function loadTrackerSources(): Promise<TrackerSources> {
-  const [serviceOrders, legacyOrdersRaw] = await Promise.all([
-    fetchServiceOrdersRaw(),
-    fetchLegacyOrdersRaw(),
+type ClientCodeRow = Pick<Database['public']['Tables']['clients']['Row'], 'ordem_servico_ssgen'>;
+
+async function fetchAccountClientCodes(accountId: number): Promise<Set<string>> {
+  const { data, error } = await supabase
+    .from('clients')
+    .select('ordem_servico_ssgen')
+    .eq('id_conta_ssgen', accountId)
+    .not('ordem_servico_ssgen', 'is', null);
+
+  if (error) {
+    console.error('Error fetching client codes for account:', error);
+    return new Set();
+  }
+
+  const codes = new Set<string>();
+  (data as ClientCodeRow[] | null)?.forEach((row) => {
+    const code = row?.ordem_servico_ssgen;
+    if (typeof code === 'number' && Number.isFinite(code)) {
+      codes.add(String(code));
+    }
+  });
+
+  return codes;
+}
+
+async function loadTrackerSources(accountId?: number | null): Promise<TrackerSources> {
+  const normalizedAccountId = normalizeAccountId(accountId);
+
+  const accountCodesPromise = normalizedAccountId != null
+    ? fetchAccountClientCodes(normalizedAccountId)
+    : Promise.resolve<Set<string> | null>(null);
+
+  const [serviceOrders, accountCodes, legacyOrdersRaw] = await Promise.all([
+    fetchServiceOrdersRaw(normalizedAccountId),
+    accountCodesPromise,
+    fetchLegacyOrdersRaw(accountCodes ?? null),
   ]);
 
   const serviceOrderCodes = new Set(
@@ -176,10 +255,24 @@ async function loadTrackerSources(): Promise<TrackerSources> {
       .map((code) => String(code))
   );
 
+  const allowedLegacyCodes = accountCodes;
+
   const legacyOrders = legacyOrdersRaw.filter((row) => {
     const os = row.os_ssgen;
-    if (!os) return true;
-    return !serviceOrderCodes.has(String(os));
+    if (!os) {
+      return !allowedLegacyCodes;
+    }
+
+    const code = String(os);
+    if (serviceOrderCodes.has(code)) {
+      return false;
+    }
+
+    if (allowedLegacyCodes && !allowedLegacyCodes.has(code)) {
+      return false;
+    }
+
+    return true;
   });
 
   return { serviceOrders, legacyOrders };
@@ -254,8 +347,9 @@ export async function fetchOrderTimeline(orderId: string): Promise<TrackerTimeli
   return fetchLegacyOrderTimeline(orderId);
 }
 
-export async function fetchAllTimelines(): Promise<TrackerTimeline[]> {
-  const { serviceOrders, legacyOrders } = await loadTrackerSources();
+export async function fetchAllTimelines(options: TrackerQueryOptions = {}): Promise<TrackerTimeline[]> {
+  const { accountId } = options;
+  const { serviceOrders, legacyOrders } = await loadTrackerSources(accountId);
   const timelines = [
     ...serviceOrders.map(mapServiceOrderToTimeline),
     ...legacyOrders.map(mapLegacyOrderToTimeline),
@@ -266,8 +360,9 @@ export async function fetchAllTimelines(): Promise<TrackerTimeline[]> {
   );
 }
 
-export async function fetchTrackerKPIs(): Promise<TrackerKPI> {
-  const { serviceOrders, legacyOrders } = await loadTrackerSources();
+export async function fetchTrackerKPIs(options: TrackerQueryOptions = {}): Promise<TrackerKPI> {
+  const { accountId } = options;
+  const { serviceOrders, legacyOrders } = await loadTrackerSources(accountId);
   const totalOrders = serviceOrders.length + legacyOrders.length;
 
   const totalClientesSet = new Set<string>();

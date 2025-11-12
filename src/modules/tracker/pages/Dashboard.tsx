@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useSearchParams, useParams } from 'react-router-dom';
 import { useTrackerTimelines } from '../hooks/useTrackerData';
 import { useTrackerKpis } from '../hooks/useTrackerKpis';
 import { OrdersTable } from '../components/OrdersTable';
@@ -14,8 +15,46 @@ import { Label } from '@/components/ui/label';
 import { Bell, BellOff } from 'lucide-react';
 
 export default function TrackerDashboard() {
-  const { data: rows = [] } = useTrackerTimelines();
-  const { data: kpis, isLoading: loadingKpis } = useTrackerKpis();
+  const [searchParams] = useSearchParams();
+  const routeParams = useParams();
+
+  const accountId = useMemo(() => {
+    const candidates: Array<string | number | undefined | null> = [
+      routeParams?.accountId,
+      routeParams?.conta,
+      routeParams?.contaId,
+      routeParams?.id_conta,
+      routeParams?.id_conta_ssgen,
+      searchParams.get('accountId'),
+      searchParams.get('account'),
+      searchParams.get('conta'),
+      searchParams.get('contaId'),
+      searchParams.get('id_conta'),
+      searchParams.get('id_conta_ssgen'),
+    ];
+
+    if (typeof window !== 'undefined') {
+      const globalAny = window as unknown as Record<string, unknown>;
+      candidates.push(globalAny?.SSGEN_ACCOUNT_ID);
+      candidates.push(globalAny?.ACCOUNT_ID);
+      candidates.push(globalAny?.CURRENT_ACCOUNT_ID);
+    }
+
+    for (const value of candidates) {
+      if (value == null) continue;
+      const raw = String(value).trim();
+      if (!raw) continue;
+      const parsed = Number(raw);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+
+    return null;
+  }, [routeParams, searchParams]);
+
+  const { data: rows = [] } = useTrackerTimelines(accountId ?? undefined);
+  const { data: kpis, isLoading: loadingKpis } = useTrackerKpis(accountId ?? undefined);
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState<'table' | 'cards'>('table');
   const [alarmsEnabled, setAlarmsEnabled] = useState(true);

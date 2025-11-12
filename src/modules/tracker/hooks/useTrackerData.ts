@@ -11,18 +11,18 @@ import {
 } from '@/lib/trackerApi';
 import type { TrackerKPI } from '@/types/ssgen';
 
-export function useTrackerTimelines() {
+export function useTrackerTimelines(accountId?: number | null) {
   return useQuery({
-    queryKey: ['tracker_timelines'],
-    queryFn: fetchAllTimelines,
+    queryKey: ['tracker_timelines', accountId ?? 'all'],
+    queryFn: () => fetchAllTimelines({ accountId }),
     refetchInterval: 30000,
   });
 }
 
-export function useTrackerKPIs() {
+export function useTrackerKPIs(accountId?: number | null) {
   return useQuery<TrackerKPI>({
-    queryKey: ['tracker_kpis'],
-    queryFn: fetchTrackerKPIs,
+    queryKey: ['tracker_kpis', accountId ?? 'all'],
+    queryFn: () => fetchTrackerKPIs({ accountId }),
     refetchInterval: 30000,
   });
 }
