@@ -22,7 +22,7 @@ type DeleteTarget = {
   source?: 'service_orders' | 'orders';
 };
 
-export function OrdersTable({ rows }: { rows: TrackerTimeline[] }) {
+export function OrdersTable({ rows, onOpen }: { rows: TrackerTimeline[]; onOpen?: (row: TrackerTimeline) => void }) {
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   const deleteMutation = useDeleteOrder();
   const { data: profile } = useAuthProfile();
@@ -117,7 +117,10 @@ export function OrdersTable({ rows }: { rows: TrackerTimeline[] }) {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-center gap-2">
-                      <button className="px-3 py-1 text-xs rounded bg-gray-200 text-black hover:bg-gray-300 transition-colors">
+                      <button
+                        className="px-3 py-1 text-xs rounded bg-gray-200 text-black hover:bg-gray-300 transition-colors"
+                        onClick={() => onOpen?.(r)}
+                      >
                         Abrir
                       </button>
                       <Button
