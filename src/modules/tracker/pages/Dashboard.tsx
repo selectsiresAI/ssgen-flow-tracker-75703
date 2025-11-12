@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTrackerTimelines } from '../hooks/useTrackerData';
 import { useTrackerKpis } from '../hooks/useTrackerKpis';
+import { withRole } from '@/components/auth/withRole';
 import { OrdersTable } from '../components/OrdersTable';
 import { OrderCard } from '../components/OrderCard';
 import { AlertCenter } from '../components/AlertCenter';
@@ -12,14 +14,16 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Bell, BellOff } from 'lucide-react';
-export default function TrackerDashboard() {
+function TrackerDashboard() {
+  const [searchParams] = useSearchParams();
+  const accountId = searchParams.get('accountId') ?? undefined;
   const {
     data: rows = []
-  } = useTrackerTimelines();
+  } = useTrackerTimelines(accountId);
   const {
     data: kpis,
     isLoading: loadingKpis
-  } = useTrackerKpis();
+  } = useTrackerKpis(accountId);
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState<'table' | 'cards'>('table');
   const [alarmsEnabled, setAlarmsEnabled] = useState(true);
@@ -91,3 +95,5 @@ export default function TrackerDashboard() {
         </div>}
     </div>;
 }
+
+export default withRole(['ADM', 'GERENTE', 'REPRESENTANTE'])(TrackerDashboard);

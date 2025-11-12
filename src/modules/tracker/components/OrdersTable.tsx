@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { TrackerTimeline } from '@/types/ssgen';
 import { useDeleteOrder } from '../hooks/useTrackerData';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { OrderTimer } from './OrderTimer';
-import { getProfile } from '@/lib/ssgenClient';
+import { useAuthProfile } from '@/hooks/useAuthProfile';
 
 type DeleteTarget = {
   id: string;
@@ -25,15 +25,8 @@ type DeleteTarget = {
 export function OrdersTable({ rows }: { rows: TrackerTimeline[] }) {
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   const deleteMutation = useDeleteOrder();
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    const loadProfile = async () => {
-      const profile = await getProfile();
-      setIsAdmin(profile?.role === 'ADM');
-    };
-    loadProfile();
-  }, []);
+  const { data: profile } = useAuthProfile();
+  const isAdmin = profile?.role === 'ADM';
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
