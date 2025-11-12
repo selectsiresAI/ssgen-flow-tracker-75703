@@ -68,7 +68,19 @@ export default function TrackerDashboard() {
     rep: profile?.rep ?? null,
   }), [accountId, profile?.role, profile?.coord, profile?.rep]);
 
-  const trackerEnabled = Boolean(profile?.role);
+  const roleRequirementsMet = useMemo(() => {
+    if (!profile?.role) return false;
+    if (profile.role === 'GERENTE') {
+      return Boolean(profile.coord && profile.coord.trim());
+    }
+    if (profile.role === 'REPRESENTANTE') {
+      return Boolean(profile.rep && profile.rep.trim());
+    }
+    return true;
+  }, [profile?.role, profile?.coord, profile?.rep]);
+
+  const trackerEnabled = roleRequirementsMet;
+  const missingRoleMetadata = Boolean(profile?.role) && !roleRequirementsMet;
 
   const {
     data: rows = [],
@@ -153,7 +165,12 @@ export default function TrackerDashboard() {
         </div>
       </div>
 
-      {kpisLoading ? (
+      {missingRoleMetadata ? (
+        <div className="text-center text-black py-8">
+          Não foi possível determinar o coordenador/representante associado ao seu usuário. Solicite ao administrador a
+          configuração do seu perfil para visualizar os dados.
+        </div>
+      ) : kpisLoading ? (
         <div className="text-center text-black py-8">Carregando KPIs...</div>
       ) : (
         <>
@@ -181,19 +198,21 @@ export default function TrackerDashboard() {
         </>
       )}
 
-      {mode === 'table' ? (
-        <OrdersTable rows={filtered} />
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filtered.map((r) => (
-            <OrderCard 
-              key={r.id} 
-              row={r} 
-              onOpen={() => {}} 
-              onMap={() => {}} 
-            />
-          ))}
-        </div>
+      {!missingRoleMetadata && (
+        mode === 'table' ? (
+          <OrdersTable rows={filtered} />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {filtered.map((r) => (
+              <OrderCard
+                key={r.id}
+                row={r}
+                onOpen={() => {}}
+                onMap={() => {}}
+              />
+            ))}
+          </div>
+        )
       )}
     </div>
   );

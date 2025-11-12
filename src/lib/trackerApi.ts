@@ -69,37 +69,83 @@ const computeAgingDays = (startDate?: string | null): number | null => {
   return Math.floor(diff / MS_PER_DAY);
 };
 
-const getClientName = (row: ServiceOrderWithClient): string => {
+const normalizeText = (value?: string | null) => {
+  if (!value) return '';
+  return String(value).trim().toLowerCase();
+};
+
+const getClientRelations = (row: ServiceOrderWithClient): ClientRow[] => {
   const relation = row.clients;
-  if (!relation) return '';
+  if (!relation) return [];
 
   if (Array.isArray(relation)) {
-    const active = relation.find((client) => !client?.deleted_at);
-    return (active ?? relation[0] ?? { nome: '' }).nome ?? '';
+    return relation.filter((client): client is ClientRow => Boolean(client) && !client?.deleted_at);
   }
 
   if (relation.deleted_at) {
-    return '';
+    return [];
   }
 
-  return relation.nome ?? '';
+  return [relation];
+};
+
+const getClientName = (row: ServiceOrderWithClient): string => {
+  const relations = getClientRelations(row);
+  if (relations.length === 0) {
+    const raw = row.clients;
+    if (Array.isArray(raw)) {
+      return raw[0]?.nome ?? '';
+    }
+    return (raw as ClientRow | null | undefined)?.nome ?? '';
+  }
+  return relations[0]?.nome ?? '';
 };
 
 const getClientAccountId = (row: ServiceOrderWithClient): number | null => {
-  const relation = row.clients;
-  if (!relation) return null;
+  const relations = getClientRelations(row);
+  if (relations.length === 0) return null;
+  return relations[0]?.id_conta_ssgen ?? null;
+};
 
-  if (Array.isArray(relation)) {
-    const active = relation.find((client) => !client?.deleted_at);
-    const target = active ?? relation[0];
-    return target?.id_conta_ssgen ?? null;
+const matchesCoordinator = (row: ServiceOrderWithClient, coord: string | null): boolean => {
+  if (!coord) return false;
+  const target = normalizeText(coord);
+  if (!target) return false;
+  return getClientRelations(row).some((client) => normalizeText(client.coordenador) === target);
+};
+
+const matchesRepresentative = (row: ServiceOrderWithClient, rep: string | null): boolean => {
+  if (!rep) return false;
+  const target = normalizeText(rep);
+  if (!target) return false;
+  return getClientRelations(row).some((client) => normalizeText(client.representante) === target);
+};
+
+const filterServiceOrdersByRole = (
+  rows: ServiceOrderWithClient[],
+  options: NormalizedTrackerQueryOptions,
+): ServiceOrderWithClient[] => {
+  const { role, coord, rep } = options;
+
+  if (role === 'GERENTE') {
+    if (!coord) return [];
+    return rows.filter((row) => matchesCoordinator(row, coord));
   }
 
-  if (relation.deleted_at) {
-    return null;
+  if (role === 'REPRESENTANTE') {
+    if (!rep) return [];
+    return rows.filter((row) => matchesRepresentative(row, rep));
   }
 
-  return relation.id_conta_ssgen ?? null;
+  return rows;
+};
+
+const filterServiceOrdersByAccount = (
+  rows: ServiceOrderWithClient[],
+  accountId: number | null,
+): ServiceOrderWithClient[] => {
+  if (accountId == null) return rows;
+  return rows.filter((row) => getClientAccountId(row) === accountId);
 };
 
 const computeServiceOrderStage = (row: ServiceOrderRow): string | null => {
@@ -307,6 +353,12 @@ async function fetchAccountClientCodes(
   (data as ClientCodeRow[] | null)?.forEach((row) => {
     const code = row?.ordem_servico_ssgen;
     if (typeof code === 'number' && Number.isFinite(code)) {
+      if (role === 'GERENTE' && coord && normalizeText(row?.coordenador) !== normalizeText(coord)) {
+        return;
+      }
+      if (role === 'REPRESENTANTE' && rep && normalizeText(row?.representante) !== normalizeText(rep)) {
+        return;
+      }
       codes.add(String(code));
     }
   });
@@ -321,11 +373,14 @@ async function loadTrackerSources(options: TrackerQueryOptions = {}): Promise<Tr
     ? fetchAccountClientCodes(normalized.accountId, normalized)
     : Promise.resolve<Set<string> | null>(null);
 
-  const [serviceOrders, accountCodes, legacyOrdersRaw] = await Promise.all([
+  const [serviceOrdersRaw, accountCodes, legacyOrdersRaw] = await Promise.all([
     fetchServiceOrdersRaw(normalized),
     accountCodesPromise,
     fetchLegacyOrdersRaw(accountCodes ?? null, normalized),
   ]);
+
+  const serviceOrdersByAccount = filterServiceOrdersByAccount(serviceOrdersRaw, normalized.accountId);
+  const serviceOrders = filterServiceOrdersByRole(serviceOrdersByAccount, normalized);
 
   const serviceOrderCodes = new Set(
     serviceOrders
