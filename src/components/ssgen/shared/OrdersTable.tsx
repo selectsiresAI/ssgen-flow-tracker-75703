@@ -19,29 +19,37 @@ export const TableOrdens: React.FC<TableOrdensProps> = ({
   allowAttach,
   allowFinance,
   onOpen,
-}) => (
-  <div className="overflow-x-auto rounded-xl border">
-    <table className="min-w-[1200px] text-sm">
-      <thead className="bg-muted/40 sticky top-0 z-20">
-        <tr className="text-left">
-          <th
-            className={cn(
-              'sticky left-0 top-0 z-40 bg-muted/40',
-              'whitespace-nowrap p-3',
-              'w-40'
-            )}
-          >
-            OS_SSGEN
-          </th>
-          <th
-            className={cn(
-              'sticky top-0 z-30 bg-muted/40',
-              'whitespace-nowrap p-3',
-              'left-[calc(10rem+1.5rem)] w-60'
-            )}
-          >
-            CLIENTE
-          </th>
+}) => {
+  const firstColumnWidth = '10rem';
+  const firstColumnHorizontalPadding = '1.5rem';
+  const secondColumnOffset = `calc(${firstColumnWidth} + ${firstColumnHorizontalPadding})`;
+
+  const stickySecondColumnStyle: React.CSSProperties = { left: secondColumnOffset };
+
+  return (
+    <div className="overflow-x-auto rounded-xl border">
+      <table className="min-w-[1200px] text-sm">
+        <thead className="bg-muted/40 sticky top-0 z-20">
+          <tr className="text-left">
+            <th
+              className={cn(
+                'sticky left-0 top-0 z-40 bg-muted/40',
+                'whitespace-nowrap p-3',
+                'w-40'
+              )}
+            >
+              OS_SSGEN
+            </th>
+            <th
+              className={cn(
+                'sticky top-0 z-30 bg-muted/40',
+                'whitespace-nowrap p-3',
+                'w-60'
+              )}
+              style={stickySecondColumnStyle}
+            >
+              Nome do cliente
+            </th>
           {[
             'COORD',
             'REP',
@@ -78,6 +86,9 @@ export const TableOrdens: React.FC<TableOrdensProps> = ({
       <tbody>
         {rows.map((r, i) => {
           const sla = slaBadge(r);
+          const clientName = (r as PowerRow & { client_name?: string | null }).client_name;
+          const resolvedClientName = clientName ?? r.CLIENTE ?? '—';
+
           return (
             <tr key={r.OS_SSGEN + '-' + i} className="group border-t hover:bg-muted/30">
               <td
@@ -92,11 +103,12 @@ export const TableOrdens: React.FC<TableOrdensProps> = ({
               </td>
               <td
                 className={cn(
-                  'sticky left-[calc(10rem+1.5rem)] z-20 bg-background',
+                  'sticky z-20 bg-background',
                   'w-60 p-3 transition-colors group-hover:bg-muted/30'
                 )}
+                style={stickySecondColumnStyle}
               >
-                {r.CLIENTE}
+                {resolvedClientName}
               </td>
               <td className="p-3">{r.COORD}</td>
               <td className="p-3">{r.REP}</td>
@@ -152,4 +164,5 @@ export const TableOrdens: React.FC<TableOrdensProps> = ({
       </tbody>
     </table>
   </div>
-);
+  );
+};
