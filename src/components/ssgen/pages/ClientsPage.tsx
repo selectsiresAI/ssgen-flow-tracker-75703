@@ -29,6 +29,12 @@ type ClientFormData = {
   representante?: string;
   coordenador?: string;
   id_conta_ssgen: string;
+  cep: string;
+  endereco: string;
+  numero: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
 };
 
 const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
@@ -48,6 +54,12 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
     representante: profile.rep ?? undefined,
     coordenador: profile.coord ?? undefined,
     id_conta_ssgen: '',
+    cep: '',
+    endereco: '',
+    numero: '',
+    bairro: '',
+    cidade: '',
+    estado: '',
   });
 
   const [formData, setFormData] = useState<ClientFormData>(() => createInitialFormData());
@@ -117,6 +129,12 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
         representante: formData.representante,
         coordenador: formData.coordenador,
         id_conta_ssgen: formData.id_conta_ssgen ? Number(formData.id_conta_ssgen) : null,
+        cep: formData.cep || null,
+        endereco: formData.endereco || null,
+        numero: formData.numero || null,
+        bairro: formData.bairro || null,
+        cidade: formData.cidade || null,
+        estado: formData.estado || null,
       };
 
       if (editingClient) {
@@ -151,6 +169,12 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
       representante: client.representante || undefined,
       coordenador: client.coordenador || undefined,
       id_conta_ssgen: client.id_conta_ssgen ? String(client.id_conta_ssgen) : '',
+      cep: (client as any).cep || '',
+      endereco: (client as any).endereco || '',
+      numero: (client as any).numero || '',
+      bairro: (client as any).bairro || '',
+      cidade: (client as any).cidade || '',
+      estado: (client as any).estado || '',
     });
     setShowForm(true);
   };

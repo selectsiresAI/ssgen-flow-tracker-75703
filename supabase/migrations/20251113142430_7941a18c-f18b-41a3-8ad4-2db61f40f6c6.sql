@@ -1,0 +1,8 @@
+-- Adicionar campos de endereço na tabela clients
+ALTER TABLE public.clients
+ADD COLUMN IF NOT EXISTS cep TEXT,
+ADD COLUMN IF NOT EXISTS endereco TEXT,
+ADD COLUMN IF NOT EXISTS numero TEXT,
+ADD COLUMN IF NOT EXISTS bairro TEXT,
+ADD COLUMN IF NOT EXISTS cidade TEXT,
+ADD COLUMN IF NOT EXISTS estado TEXT;

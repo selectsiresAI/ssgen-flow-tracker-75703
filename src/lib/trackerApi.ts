@@ -1,5 +1,4 @@
 import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
 import type { TeamLocation, MapOrder, TrackerTimeline, TrackerKPI } from '@/types/ssgen';
 import { requireAdmin } from '@/lib/ssgenClient';
 
@@ -8,8 +7,6 @@ export type UserScope = {
   role: 'ADM' | 'GERENTE' | 'REPRESENTANTE';
 };
 
-type TrackerTimelineRow = Database['public']['Views']['v_tracker_timelines']['Row'];
-
 const sanitizeNumber = (value: number | string | null | undefined): number => {
   if (typeof value === 'number' && Number.isFinite(value)) return value;
   if (typeof value === 'string') {
@@ -17,35 +14,6 @@ const sanitizeNumber = (value: number | string | null | undefined): number => {
     if (Number.isFinite(parsed)) return parsed;
   }
   return 0;
-};
-
-const mapTimelineRow = (row: TrackerTimelineRow): TrackerTimeline => {
-  const ordem = row.ordem_servico_ssgen;
-  const fallbackId = ordem != null ? String(ordem) : '';
-  return {
-    id: row.source_id ?? fallbackId,
-    ordem_servico_ssgen: sanitizeNumber(ordem),
-    cliente: row.cliente ?? '—',
-    prioridade: row.prioridade ?? undefined,
-    flag_reagendamento: row.flag_reagendamento ?? undefined,
-    issue_text: row.issue_text ?? undefined,
-    source_table: row.source ?? undefined,
-    etapa1_cra_data: row.cra_data ?? undefined,
-    etapa2_envio_planilha_data: row.envio_planilha_data ?? undefined,
-    etapa3_vri_data: row.vri_data ?? undefined,
-    etapa4_vri_resolucao_data: row.vri_resolvido_data ?? undefined,
-    etapa5_lpr_data: row.lpr_data ?? undefined,
-    etapa6_receb_resultados_data: row.dt_receb_resultados ?? undefined,
-    etapa7_envio_resultados_data: row.envio_resultados_data ?? undefined,
-    etapa8_faturamento_data: row.dt_faturamento ?? undefined,
-    aging_dias_total: row.aging_dias_total ?? undefined,
-    etapa_atual: row.etapa_atual ?? undefined,
-    etapa2_status_sla: row.envio_planilha_status_sla ?? undefined,
-    etapa3_status_sla: row.vri_status_sla ?? undefined,
-    etapa5_status_sla: row.lpr_status_sla ?? undefined,
-    etapa7_status_sla: row.envio_resultados_status_sla ?? undefined,
-    numero_amostras: row.numero_amostras ?? undefined,
-  };
 };
 
 const countWhere = <T,>(rows: T[], predicate: (row: T) => boolean) =>
