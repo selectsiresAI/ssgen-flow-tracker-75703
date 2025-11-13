@@ -144,6 +144,8 @@ export async function requireAdmin(): Promise<Profile> {
 }
 
 async function fetchServiceOrders(): Promise<PowerRow[]> {
+  // RLS policies will automatically filter based on user role
+  // No need for manual filtering - Supabase handles it
   const { data, error } = await supabase
     .from('service_orders')
     .select('*, clients!service_orders_client_id_fkey ( nome, coordenador, representante, deleted_at )')
@@ -160,6 +162,8 @@ async function fetchServiceOrders(): Promise<PowerRow[]> {
 }
 
 async function fetchLegacyOrders(serviceOrderCodes: Set<string>): Promise<PowerRow[]> {
+  // RLS policies will automatically filter based on user role
+  // No need for manual filtering - Supabase handles it
   const { data, error } = await supabase
     .from('orders')
     .select('*')
