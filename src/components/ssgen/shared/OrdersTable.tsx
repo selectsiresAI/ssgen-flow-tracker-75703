@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import type { PowerRow } from '@/types/ssgen';
 import { isSet, fmt, slaBadge } from '@/types/ssgen';
 
@@ -21,12 +22,24 @@ export const TableOrdens: React.FC<TableOrdensProps> = ({
 }) => (
   <div className="overflow-x-auto rounded-xl border">
     <table className="min-w-[1200px] text-sm">
-      <thead className="bg-muted/40 sticky top-0">
+      <thead className="bg-muted/40 sticky top-0 z-20">
         <tr className="text-left">
-          <th className="p-3 whitespace-nowrap sticky left-0 z-30 bg-muted/40 w-40">
+          <th
+            className={cn(
+              'sticky left-0 top-0 z-40 bg-muted/40',
+              'whitespace-nowrap p-3',
+              'w-40'
+            )}
+          >
             OS_SSGEN
           </th>
-          <th className="p-3 whitespace-nowrap sticky left-40 z-30 bg-muted/40 w-60">
+          <th
+            className={cn(
+              'sticky top-0 z-30 bg-muted/40',
+              'whitespace-nowrap p-3',
+              'left-[calc(10rem+1.5rem)] w-60'
+            )}
+          >
             CLIENTE
           </th>
           {[
@@ -66,14 +79,23 @@ export const TableOrdens: React.FC<TableOrdensProps> = ({
         {rows.map((r, i) => {
           const sla = slaBadge(r);
           return (
-            <tr key={r.OS_SSGEN + '-' + i} className="border-t hover:bg-muted/30 group">
+            <tr key={r.OS_SSGEN + '-' + i} className="group border-t hover:bg-muted/30">
               <td
-                className="p-3 font-medium text-primary cursor-pointer sticky left-0 z-20 bg-background group-hover:bg-muted/30 w-40"
+                className={cn(
+                  'sticky left-0 z-30 bg-background',
+                  'w-40 p-3 font-medium text-primary',
+                  'cursor-pointer transition-colors group-hover:bg-muted/30'
+                )}
                 onClick={() => onOpen(r)}
               >
                 {r.OS_SSGEN}
               </td>
-              <td className="p-3 sticky left-40 z-20 bg-background group-hover:bg-muted/30 w-60">
+              <td
+                className={cn(
+                  'sticky left-[calc(10rem+1.5rem)] z-20 bg-background',
+                  'w-60 p-3 transition-colors group-hover:bg-muted/30'
+                )}
+              >
                 {r.CLIENTE}
               </td>
               <td className="p-3">{r.COORD}</td>
