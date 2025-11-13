@@ -23,9 +23,13 @@ export const TableOrdens: React.FC<TableOrdensProps> = ({
     <table className="min-w-[1200px] text-sm">
       <thead className="bg-muted/40 sticky top-0">
         <tr className="text-left">
+          <th className="p-3 whitespace-nowrap sticky left-0 z-30 bg-muted/40 w-40">
+            OS_SSGEN
+          </th>
+          <th className="p-3 whitespace-nowrap sticky left-40 z-30 bg-muted/40 w-60">
+            CLIENTE
+          </th>
           {[
-            'OS_SSGEN',
-            'CLIENTE',
             'COORD',
             'REP',
             'PROD_SSG',
@@ -62,14 +66,16 @@ export const TableOrdens: React.FC<TableOrdensProps> = ({
         {rows.map((r, i) => {
           const sla = slaBadge(r);
           return (
-            <tr key={r.OS_SSGEN + '-' + i} className="border-t hover:bg-muted/30">
+            <tr key={r.OS_SSGEN + '-' + i} className="border-t hover:bg-muted/30 group">
               <td
-                className="p-3 font-medium text-primary cursor-pointer"
+                className="p-3 font-medium text-primary cursor-pointer sticky left-0 z-20 bg-background group-hover:bg-muted/30 w-40"
                 onClick={() => onOpen(r)}
               >
                 {r.OS_SSGEN}
               </td>
-              <td className="p-3">{r.CLIENTE}</td>
+              <td className="p-3 sticky left-40 z-20 bg-background group-hover:bg-muted/30 w-60">
+                {r.CLIENTE}
+              </td>
               <td className="p-3">{r.COORD}</td>
               <td className="p-3">{r.REP}</td>
               <td className="p-3">{r.PROD_SSG || '—'}</td>
