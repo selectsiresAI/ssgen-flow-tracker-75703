@@ -324,6 +324,20 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin,
               <FileUp className="h-4 w-4" />
               <span className="hidden xl:inline">{uploadingFile ? 'Enviando...' : 'Upload'}</span>
             </Button>
+            {row.result_file_path ? (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1"
+                onClick={handleDownloadClick}
+                disabled={uploadingFile}
+              >
+                <Download className="h-4 w-4" />
+                <span className="hidden xl:inline">Download</span>
+              </Button>
+            ) : (
+              <span className="text-muted-foreground text-xs">—</span>
+            )}
           </div>
         ) : (
           row.result_file_path ? (
@@ -433,6 +447,7 @@ const OrdersManagement: React.FC = () => {
             ...row,
             CLIENTE: resolvedClientName ?? '',
             client_name: resolvedClientName,
+            result_file_path: view?.result_file_path ?? row.result_file_path ?? null,
           } satisfies OrdersManagementRow;
         });
 
