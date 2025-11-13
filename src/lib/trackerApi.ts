@@ -28,6 +28,42 @@ const sumNumbers = (values: Array<number | string | null | undefined>): number =
 
 const roundOneDecimal = (value: number) => Math.round(value * 10) / 10;
 
+const calculateAgingDays = (createdAt?: string, completedAt?: string | null): number => {
+  if (!createdAt) return 0;
+  const start = new Date(createdAt);
+  const end = completedAt ? new Date(completedAt) : new Date();
+  return Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+};
+
+const mapServiceOrderToTimeline = (order: any, clientName?: string): TrackerTimeline => {
+  const aging = calculateAgingDays(order.created_at, order.dt_faturamento);
+  
+  return {
+    id: order.id,
+    ordem_servico_ssgen: order.ordem_servico_ssgen || 0,
+    cliente: clientName || 'N/A',
+    prioridade: order.prioridade,
+    flag_reagendamento: order.flag_reagendamento,
+    issue_text: order.issue_text,
+    source_table: 'service_orders',
+    numero_amostras: order.numero_amostras,
+    etapa1_cra_data: order.cra_data,
+    etapa2_envio_planilha_data: order.envio_planilha_data,
+    etapa3_vri_data: order.vri_data,
+    etapa4_vri_resolucao_data: order.vri_resolvido_data,
+    etapa5_lpr_data: order.lpr_data,
+    etapa6_receb_resultados_data: order.dt_receb_resultados,
+    etapa7_envio_resultados_data: order.envio_resultados_data,
+    etapa8_faturamento_data: order.dt_faturamento,
+    aging_dias_total: aging,
+    etapa_atual: order.etapa_atual || 'Recebida',
+    etapa2_status_sla: order.envio_planilha_status_sla,
+    etapa3_status_sla: order.vri_status_sla,
+    etapa5_status_sla: order.lpr_status_sla,
+    etapa7_status_sla: order.envio_resultados_status_sla,
+  };
+};
+
 export async function fetchMapOrders(): Promise<MapOrder[]> {
   const { data, error } = await supabase
     .from('v_map_orders' as any)
@@ -45,59 +81,62 @@ export async function fetchOrderTimeline(
   source?: 'service_orders' | 'orders',
   ctx?: UserScope,
 ): Promise<TrackerTimeline | null> {
-  let builder = supabase
-    .from('v_tracker_timelines')
-    .select('*')
-    .eq('source_id', orderId)
-    .limit(1);
-
-  if (source) {
-    builder = builder.eq('source', source);
-  }
-
-  if (ctx && ctx.role !== 'ADM') {
-    builder = builder.contains('accessible_user_ids', [ctx.userId]);
-  }
-
-  const { data, error } = await builder.maybeSingle<TrackerTimelineRow>();
+  const { data: order, error } = await supabase
+    .from('service_orders')
+    .select(`
+      *,
+      clients!service_orders_client_id_fkey (
+        nome
+      )
+    `)
+    .eq('id', orderId)
+    .is('deleted_at', null)
+    .maybeSingle();
 
   if (error) {
-    if (error.code !== 'PGRST116') {
-      console.error('Error fetching tracker timeline:', error);
-    }
+    console.error('Error fetching order timeline:', error);
     return null;
   }
 
-  if (!data) return null;
-  return mapTimelineRow(data as TrackerTimelineRow);
+  if (!order) return null;
+
+  const clientName = (order.clients as any)?.nome || 'N/A';
+  return mapServiceOrderToTimeline(order, clientName);
 }
 
 export async function fetchAllTimelines(
   accountId?: string,
   ctx?: UserScope,
 ): Promise<TrackerTimeline[]> {
-  let builder = supabase
-    .from('v_tracker_timelines')
-    .select('*')
+  let query = supabase
+    .from('service_orders')
+    .select(`
+      *,
+      clients!service_orders_client_id_fkey (
+        nome
+      )
+    `)
+    .is('deleted_at', null)
     .order('created_at', { ascending: false });
 
   if (accountId && accountId.length > 0) {
     const parsed = Number(accountId);
     if (!Number.isNaN(parsed)) {
-      builder = builder.eq('id_conta_ssgen', parsed);
+      query = query.eq('ordem_servico_ssgen', parsed);
     }
   }
 
-  if (ctx && ctx.role !== 'ADM') {
-    builder = builder.contains('accessible_user_ids', [ctx.userId]);
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Error fetching timelines:', error);
+    throw error;
   }
 
-  const { data, error } = await builder;
-
-  if (error) throw error;
-
-  const rows = (data ?? []) as TrackerTimelineRow[];
-  return rows.map(mapTimelineRow);
+  return (data || []).map((order) => {
+    const clientName = (order.clients as any)?.nome || 'N/A';
+    return mapServiceOrderToTimeline(order, clientName);
+  });
 }
 
 export async function fetchTrackerKPIs(
