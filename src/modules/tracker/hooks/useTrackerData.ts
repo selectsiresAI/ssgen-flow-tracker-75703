@@ -13,19 +13,12 @@ import {
 import type { TrackerKPI } from '@/types/ssgen';
 import { useAuthProfile } from '@/hooks/useAuthProfile';
 
-const buildScopeHash = (values: string[] = []) => values.slice().sort().join('|');
-
 export function useTrackerTimelines(accountId?: string) {
   const { data: profile } = useAuthProfile();
 
-  const scopeHash = useMemo(() => {
-    if (!profile) return 'no-scope';
-    return `${buildScopeHash(profile.managerOfRepIds)}::${buildScopeHash(profile.repOfClientIds)}`;
-  }, [profile]);
-
   return useQuery({
     enabled: Boolean(profile),
-    queryKey: ['tracker_timelines', accountId ?? null, profile?.userId ?? null, profile?.role, scopeHash],
+    queryKey: ['tracker_timelines', accountId ?? null, profile?.userId ?? null, profile?.role],
     queryFn: () =>
       fetchAllTimelines(accountId, {
         userId: profile!.userId,
@@ -38,14 +31,9 @@ export function useTrackerTimelines(accountId?: string) {
 export function useTrackerKPIs(accountId?: string) {
   const { data: profile } = useAuthProfile();
 
-  const scopeHash = useMemo(() => {
-    if (!profile) return 'no-scope';
-    return `${buildScopeHash(profile.managerOfRepIds)}::${buildScopeHash(profile.repOfClientIds)}`;
-  }, [profile]);
-
   return useQuery<TrackerKPI>({
     enabled: Boolean(profile),
-    queryKey: ['tracker_kpis', accountId ?? null, profile?.userId ?? null, profile?.role, scopeHash],
+    queryKey: ['tracker_kpis', accountId ?? null, profile?.userId ?? null, profile?.role],
     queryFn: () =>
       fetchTrackerKPIs(accountId, {
         userId: profile!.userId,

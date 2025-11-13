@@ -1,20 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
 import type { Role } from '@/types/ssgen';
 
 export type AuthProfile = {
   userId: string;
   role: Role;
-  managerOfRepIds: string[];
-  repOfClientIds: string[];
+  coord?: string | null;
+  rep?: string | null;
 };
 
 const DEFAULT_PROFILE: AuthProfile = {
   userId: '',
   role: 'REPRESENTANTE',
-  managerOfRepIds: [],
-  repOfClientIds: [],
+  coord: null,
+  rep: null,
 };
 
 export function useAuthProfile() {
@@ -32,39 +31,20 @@ export function useAuthProfile() {
 
       const userId = user.id;
 
-      const [userRowResult, managerRowsResult, repsRowsResult] = await Promise.all([
-        supabase
-          .from('users')
-          .select('id, role')
-          .eq('id', userId)
-          .maybeSingle<Database['public']['Tables']['users']['Row']>(),
-        supabase
-          .from('managers_reps')
-          .select('rep_id')
-          .eq('manager_id', userId),
-        supabase
-          .from('reps_clients')
-          .select('client_id')
-          .eq('rep_id', userId),
-      ]);
+      // Use RPC function to get user profile with role
+      const { data, error } = await supabase.rpc('my_profile');
 
-      if (userRowResult.error) throw userRowResult.error;
-      if (managerRowsResult.error) throw managerRowsResult.error;
-      if (repsRowsResult.error) throw repsRowsResult.error;
+      if (error) throw error;
 
-      const role = (userRowResult.data?.role as Role | undefined) ?? DEFAULT_PROFILE.role;
-      const managerOfRepIds = (managerRowsResult.data ?? []).map(
-        (row: Pick<Database['public']['Tables']['managers_reps']['Row'], 'rep_id'>) => row.rep_id,
-      );
-      const repOfClientIds = (repsRowsResult.data ?? []).map(
-        (row: Pick<Database['public']['Tables']['reps_clients']['Row'], 'client_id'>) => row.client_id,
-      );
+      const profile = Array.isArray(data) ? data[0] : data;
+
+      if (!profile) return null;
 
       return {
         userId,
-        role,
-        managerOfRepIds,
-        repOfClientIds,
+        role: (profile.role as Role) ?? DEFAULT_PROFILE.role,
+        coord: profile.coord ?? null,
+        rep: profile.rep ?? null,
       } satisfies AuthProfile;
     },
   });
