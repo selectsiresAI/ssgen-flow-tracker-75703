@@ -117,12 +117,22 @@ interface EtapasRowProps {
   isAdmin: boolean;
   onFileUpload?: (row: OrdersManagementRow, file: File) => Promise<void>;
   onFileDownload?: (row: OrdersManagementRow) => Promise<void>;
+  onFileDelete?: (row: OrdersManagementRow) => Promise<void>;
 }
 
-const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin, onFileUpload, onFileDownload }) => {
+const EtapasRow: React.FC<EtapasRowProps> = ({
+  row,
+  onChange,
+  onDelete,
+  isAdmin,
+  onFileUpload,
+  onFileDownload,
+  onFileDelete,
+}) => {
   const [saving, setSaving] = useState<StageKey | null>(null);
   const [errorStage, setErrorStage] = useState<StageKey | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [deletingFile, setDeletingFile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -146,12 +156,27 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin,
 
   const handleDownloadClick = async () => {
     if (!onFileDownload) return;
-    
+
     try {
       await onFileDownload(row);
     } catch (error) {
       console.error('Erro ao baixar arquivo', error);
       toast.error('Erro ao baixar arquivo');
+    }
+  };
+
+  const handleFileDelete = async () => {
+    if (!onFileDelete) return;
+
+    setDeletingFile(true);
+    try {
+      await onFileDelete(row);
+      toast.success('Arquivo excluído com sucesso');
+    } catch (error) {
+      console.error('Erro ao excluir arquivo', error);
+      toast.error('Erro ao excluir arquivo');
+    } finally {
+      setDeletingFile(false);
     }
   };
 
@@ -325,16 +350,43 @@ const EtapasRow: React.FC<EtapasRowProps> = ({ row, onChange, onDelete, isAdmin,
               <span className="hidden xl:inline">{uploadingFile ? 'Enviando...' : 'Upload'}</span>
             </Button>
             {row.result_file_path ? (
-              <Button
-                size="sm"
-                variant="outline"
-                className="gap-1"
-                onClick={handleDownloadClick}
-                disabled={uploadingFile}
-              >
-                <Download className="h-4 w-4" />
-                <span className="hidden xl:inline">Download</span>
-              </Button>
+              <>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1"
+                  onClick={handleDownloadClick}
+                  disabled={uploadingFile || deletingFile}
+                >
+                  <Download className="h-4 w-4" />
+                  <span className="hidden xl:inline">Download</span>
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="gap-1"
+                      disabled={deletingFile}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="hidden xl:inline">{deletingFile ? 'Excluindo…' : 'Excluir'}</span>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Excluir arquivo</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Tem certeza que deseja excluir o arquivo enviado para a ordem {row.OS_SSGEN}?
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleFileDelete}>Confirmar</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
             ) : (
               <span className="text-muted-foreground text-xs">—</span>
             )}
@@ -575,6 +627,40 @@ const OrdersManagement: React.FC = () => {
     toast.success('Download iniciado');
   };
 
+  const handleFileDelete = async (row: OrdersManagementRow) => {
+    if (!row.result_file_path) {
+      toast.error('Nenhum arquivo para excluir');
+      return;
+    }
+
+    if (!row.id) {
+      throw new Error('ID da ordem não encontrado');
+    }
+
+    const { error: deleteError } = await supabase.storage
+      .from('order-results')
+      .remove([row.result_file_path]);
+
+    if (deleteError) {
+      throw deleteError;
+    }
+
+    const { error: updateError } = await supabase
+      .from('service_orders')
+      .update({ result_file_path: null })
+      .eq('id', row.id);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    setRows((prev) =>
+      prev.map((item) =>
+        item.id === row.id ? { ...item, result_file_path: null } : item
+      )
+    );
+  };
+
   const handleDeleteRow = async (row: OrdersManagementRow) => {
     if (!isAdmin) {
       toast.error('Apenas administradores podem apagar ordens.');
@@ -643,10 +729,11 @@ const OrdersManagement: React.FC = () => {
                 key={row.id ?? row.OS_SSGEN} 
                 row={row} 
                 onChange={updateRow} 
-                onDelete={handleDeleteRow} 
+                onDelete={handleDeleteRow}
                 isAdmin={isAdmin}
                 onFileUpload={handleFileUpload}
                 onFileDownload={handleFileDownload}
+                onFileDelete={handleFileDelete}
               />
             ))}
           </tbody>
