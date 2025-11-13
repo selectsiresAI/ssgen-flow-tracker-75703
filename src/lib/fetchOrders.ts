@@ -7,6 +7,7 @@ export type ManagementOrderRow = {
   created_at: string;
   deleted_at: string | null;
   client_id?: string | null; // opcional
+  result_file_path: string | null;
 };
 
 function isMissingColumnError(e: any) {
@@ -36,6 +37,7 @@ export async function fetchManagementOrders(): Promise<ManagementOrderRow[]> {
       ordem_servico_ssgen,
       created_at,
       deleted_at,
+      result_file_path,
       clients:client_id (id, nome)
     `)
     .is("deleted_at", null)
@@ -52,6 +54,7 @@ export async function fetchManagementOrders(): Promise<ManagementOrderRow[]> {
     created_at: r.created_at,
     deleted_at: r.deleted_at,
     client_id: r?.clients?.id ?? null,
+    result_file_path: r.result_file_path ?? null,
   })) as ManagementOrderRow[];
 
   return rows;

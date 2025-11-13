@@ -43,6 +43,7 @@ export type PowerRow = {
   LR_RASTREIO?: string | null;
   NF_NEOGEM?: string | null;
   NF_NA_NEOGEN?: string | null;
+  result_file_path?: string | null;
   created_at?: string;
   updated_at?: string;
   prioridade?: string | null;

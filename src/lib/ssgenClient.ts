@@ -69,6 +69,7 @@ function mapServiceOrderRow(row: ServiceOrderWithClient): PowerRow {
     LR_RASTREIO: null,
     NF_NEOGEM: null,
     NF_NA_NEOGEN: null,
+    result_file_path: row.result_file_path ?? null,
     created_at: row.created_at ?? undefined,
     updated_at: row.updated_at ?? undefined,
     prioridade: row.prioridade ?? null,
