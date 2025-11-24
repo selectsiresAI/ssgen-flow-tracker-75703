@@ -10,12 +10,11 @@ import { createServiceOrder } from '@/lib/serviceOrdersApi';
 import { getProfile } from '@/lib/ssgenClient';
 import type { Client } from '@/types/ssgen';
 import { useToast } from '@/hooks/use-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import ClientSelect from '@/components/orders/ClientSelect';
 
 const NewOrderPage: React.FC = () => {
-  const [clients, setClients] = useState<Client[]>([]);
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const { toast } = useToast();
   const [isAdmin, setIsAdmin] = useState(false);
   const [profileChecked, setProfileChecked] = useState(false);
@@ -59,10 +58,6 @@ const NewOrderPage: React.FC = () => {
       const profile = await getProfile();
       const admin = profile?.role === 'ADM';
       setIsAdmin(admin);
-      if (admin) {
-        const data = await fetchClients();
-        setClients(data);
-      }
       setProfileChecked(true);
     };
     loadInitialData();
@@ -81,8 +76,7 @@ const NewOrderPage: React.FC = () => {
 
     try {
       const orderData: any = {
-        client_id: selectedClient?.id || null,
-        ordem_servico_neogen: selectedClient?.ordem_servico_neogen || null,
+        client_id: selectedClientId || null,
         numero_nf_neogen: formData.numero_nf_neogen ? Number(formData.numero_nf_neogen) : null,
         nome_produto: formData.nome_produto || null,
         numero_amostras: formData.numero_amostras ? Number(formData.numero_amostras) : null,
@@ -113,7 +107,7 @@ const NewOrderPage: React.FC = () => {
       toast({ title: 'Ordem cadastrada com sucesso!' });
       
       // Reset form
-      setSelectedClient(null);
+      setSelectedClientId(null);
       setFormData({
         numero_nf_neogen: '',
         nome_produto: '',
@@ -170,42 +164,10 @@ const NewOrderPage: React.FC = () => {
             <CardTitle>Selecionar Cliente (Opcional)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <Label>Cliente</Label>
-              <Select
-                value={selectedClient ? String(selectedClient.id) : 'no-client'}
-                onValueChange={(value) => {
-                  if (value === 'no-client') {
-                    setSelectedClient(null);
-                    return;
-                  }
-
-                  const client = clients.find(c => String(c.id) === value);
-                  setSelectedClient(client || null);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um cliente ou deixe em branco" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="no-client">Sem cliente</SelectItem>
-                  {clients
-                    .filter(client => client.id && String(client.id).trim() !== '')
-                    .map((client) => (
-                      <SelectItem key={client.id} value={String(client.id)}>
-                      {client.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selectedClient && (
-                <div className="mt-2 p-3 bg-muted rounded-md text-sm">
-                  <p><strong>Nome:</strong> {selectedClient.nome}</p>
-                  <p><strong>Representante:</strong> {selectedClient.representante}</p>
-                  <p><strong>Coordenador:</strong> {selectedClient.coordenador}</p>
-                </div>
-              )}
-            </div>
+            <ClientSelect 
+              value={selectedClientId} 
+              onChange={setSelectedClientId} 
+            />
           </CardContent>
         </Card>
           <Card>
