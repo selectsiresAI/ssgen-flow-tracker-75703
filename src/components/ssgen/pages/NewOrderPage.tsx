@@ -12,8 +12,9 @@ import type { Client } from '@/types/ssgen';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
 import ClientSelect from '@/components/orders/ClientSelect';
+import { withRole } from '@/components/auth/withRole';
 
-const NewOrderPage: React.FC = () => {
+const NewOrderPageComponent: React.FC = () => {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const { toast } = useToast();
   const [isAdmin, setIsAdmin] = useState(false);
@@ -404,5 +405,7 @@ const NewOrderPage: React.FC = () => {
     </div>
   );
 };
+
+const NewOrderPage = withRole(['ADM'])(NewOrderPageComponent);
 
 export default NewOrderPage;
