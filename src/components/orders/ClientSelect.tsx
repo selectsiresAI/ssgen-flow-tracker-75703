@@ -1,8 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Check, ChevronsUpDown, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 type ClientRow = {
   client_id: string;
@@ -18,6 +32,7 @@ export default function ClientSelect({
   value?: string | null;
   onChange: (clientId: string) => void;
 }) {
+  const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [rows, setRows] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,6 +77,8 @@ export default function ClientSelect({
     return rows.filter((r) => r.client_name.toLowerCase().includes(q));
   }, [rows, query]);
 
+  const selectedClient = rows.find((r) => r.client_id === value);
+
   const createInline = async () => {
     const name = query.trim();
     if (name.length < 3) {
@@ -90,52 +107,91 @@ export default function ClientSelect({
     }
     
     toast.success("Cliente criado com sucesso!");
-    setRows((prev) => [
-      { client_id: data.id, client_name: data.nome, os_count: 0, last_os_ssgen: null }, 
-      ...prev
-    ]);
+    const newClient = { client_id: data.id, client_name: data.nome, os_count: 0, last_os_ssgen: null };
+    setRows((prev) => [newClient, ...prev]);
     onChange(data.id);
+    setOpen(false);
+    setQuery("");
   };
 
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium">Cliente</label>
-      <Input
-        placeholder="Buscar cliente pelo nome…"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
-      <div className="max-h-64 overflow-auto border rounded-md">
-        {loading ? (
-          <div className="p-3 text-sm text-muted-foreground">Carregando…</div>
-        ) : filtered.length === 0 ? (
-          <div className="p-3 text-sm">
-            Nenhum cliente encontrado.
-            <div className="mt-2">
-              <Button size="sm" onClick={createInline} disabled={creating}>
-                {creating ? "Criando…" : `Criar "${query.trim()}"`}
-              </Button>
-            </div>
-          </div>
-        ) : (
-          filtered.map((r) => (
-            <button
-              key={r.client_id}
-              type="button"
-              onClick={() => onChange(r.client_id)}
-              className={`w-full text-left px-3 py-2 hover:bg-muted ${
-                value === r.client_id ? "bg-muted" : ""
-              }`}
-            >
-              <div className="font-medium">{r.client_name}</div>
-              <div className="text-xs text-muted-foreground">
-                {(r.os_count ?? 0)} ordens
-                {typeof r.last_os_ssgen === "number" ? ` · última OS ${r.last_os_ssgen}` : ""}
-              </div>
-            </button>
-          ))
-        )}
-      </div>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-full justify-between"
+            disabled={loading}
+          >
+            {loading ? (
+              "Carregando..."
+            ) : selectedClient ? (
+              <span className="truncate">{selectedClient.client_name}</span>
+            ) : (
+              "Selecione um cliente..."
+            )}
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0" align="start">
+          <Command>
+            <CommandInput 
+              placeholder="Buscar cliente..." 
+              value={query}
+              onValueChange={setQuery}
+            />
+            <CommandList>
+              <CommandEmpty>
+                <div className="p-4 text-sm text-center">
+                  <p className="mb-3">Nenhum cliente encontrado.</p>
+                  {query.trim().length >= 3 && (
+                    <Button 
+                      size="sm" 
+                      onClick={createInline} 
+                      disabled={creating}
+                      className="w-full"
+                    >
+                      {creating ? "Criando…" : `Criar "${query.trim()}"`}
+                    </Button>
+                  )}
+                </div>
+              </CommandEmpty>
+              <CommandGroup>
+                {filtered.map((client) => (
+                  <CommandItem
+                    key={client.client_id}
+                    value={client.client_name}
+                    onSelect={() => {
+                      onChange(client.client_id);
+                      setOpen(false);
+                      setQuery("");
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        value === client.client_id ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium">{client.client_name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {(client.os_count ?? 0)} ordens
+                        {typeof client.last_os_ssgen === "number" 
+                          ? ` · última OS ${client.last_os_ssgen}` 
+                          : ""}
+                      </div>
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
