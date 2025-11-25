@@ -1,4 +1,5 @@
 import { OrderRow } from "@/types/order";
+import { formatDateBR } from '@/lib/dateUtils';
 
 export const isSet = (v: any) => v !== null && v !== undefined && v !== "";
 
@@ -9,7 +10,7 @@ export const daysBetween = (a?: string | null, b?: string | null) => {
   return Math.round((db - da) / (1000 * 60 * 60 * 24));
 };
 
-export const fmt = (s?: string | null) => (s ? new Date(s).toLocaleDateString('pt-BR') : "—");
+export const fmt = formatDateBR;
 
 export const slaBadge = (row: OrderRow) => {
   const target = row.dt_prev_result_ssg;

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import InlineClientEditor from "@/components/orders/InlineClientEditor";
 import { toast } from "sonner";
+import { formatDateTimeBR } from '@/lib/dateUtils';
 
 type Row = {
   id: string;
@@ -119,7 +120,7 @@ export default function OrdersListPage() {
                       onCommitted={(payload) => handleCommitted(r.id, payload)}
                     />
                   </td>
-                  <td className="p-2">{new Date(r.created_at).toLocaleString()}</td>
+                  <td className="p-2">{formatDateTimeBR(r.created_at)}</td>
                 </tr>
               ))
             )}
