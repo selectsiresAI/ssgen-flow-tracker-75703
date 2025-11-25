@@ -1,0 +1,2 @@
+DELETE FROM clients_backup_20251111_000000 
+WHERE id = '221ad302-3472-4eed-b8b5-21a52730b0c1';
