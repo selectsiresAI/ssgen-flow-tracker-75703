@@ -11,7 +11,14 @@ export const formatDateBR = (dateString?: string | null): string => {
   if (!dateString) return '—';
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR');
+    if (isNaN(date.getTime())) return '—';
+    
+    return date.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      timeZone: 'America/Sao_Paulo'
+    });
   } catch {
     return '—';
   }
@@ -26,6 +33,8 @@ export const formatDateTimeBR = (dateString?: string | null): string => {
   if (!dateString) return '—';
   try {
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '—';
+    
     return date.toLocaleString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
@@ -33,6 +42,7 @@ export const formatDateTimeBR = (dateString?: string | null): string => {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
+      timeZone: 'America/Sao_Paulo'
     });
   } catch {
     return '—';
@@ -48,12 +58,15 @@ export const formatDateTimeShortBR = (dateString?: string | null): string => {
   if (!dateString) return '—';
   try {
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '—';
+    
     return date.toLocaleString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
+      timeZone: 'America/Sao_Paulo'
     });
   } catch {
     return '—';
@@ -69,9 +82,21 @@ export const formatDateForInput = (dateString?: string | null): string => {
   if (!dateString) return '';
   try {
     const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    if (isNaN(date.getTime())) return '';
+    
+    // Usar timezone de São Paulo para evitar problemas de conversão
+    const formatter = new Intl.DateTimeFormat('pt-BR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: 'America/Sao_Paulo'
+    });
+    
+    const parts = formatter.formatToParts(date);
+    const day = parts.find(p => p.type === 'day')?.value || '';
+    const month = parts.find(p => p.type === 'month')?.value || '';
+    const year = parts.find(p => p.type === 'year')?.value || '';
+    
     return `${year}-${month}-${day}`;
   } catch {
     return '';

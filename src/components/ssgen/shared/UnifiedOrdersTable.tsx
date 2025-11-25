@@ -128,7 +128,7 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                       {row.ordem_servico_ssgen}
                     </button>
                   </td>
-                  <td className="p-2 border">{fmt(row.data_cadastro)}</td>
+                  <td className="p-2 border">{fmt(row.updated_at)}</td>
                   <td className="p-2 border">
                     <EditableCell
                       value={row.ordem_servico_neogen}
