@@ -26,7 +26,7 @@ export async function createClient(client: NewClientPayload) {
   const { ordem_servico_ssgen, ...rest } = client;
   const payload = {
     ...rest,
-    ordem_servico_ssgen: ordem_servico_ssgen ?? 0,
+    ordem_servico_ssgen: ordem_servico_ssgen ?? null,
   };
 
   const { data, error } = await supabase
