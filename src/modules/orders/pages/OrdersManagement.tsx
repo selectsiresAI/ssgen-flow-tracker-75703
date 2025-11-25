@@ -58,7 +58,11 @@ type StageKey = keyof typeof fieldMap;
 
 const stageOrder: StageKey[] = ['CRA', 'PLANILHA', 'VRI', 'LPR', 'LR', 'RESULTADOS', 'FATURAR'];
 
-const formatDate = (value?: string | null) => (value ? new Date(value).toISOString().slice(0, 10) : '');
+import { formatDateForInput } from '@/lib/dateUtils';
+
+// ... keep existing code
+
+const formatDate = formatDateForInput;
 
 async function updateOrderById(
   orderId: string,

@@ -1,3 +1,5 @@
+import { formatDateBR } from '@/lib/dateUtils';
+
 export type Role = 'ADM' | 'GERENTE' | 'REPRESENTANTE';
 
 export type Profile = {
@@ -54,8 +56,7 @@ export type PowerRow = {
 
 export const isSet = (v: any) => v !== null && v !== undefined && v !== '';
 
-export const fmt = (s?: string | null) =>
-  s ? new Date(s).toLocaleDateString() : '—';
+export const fmt = formatDateBR;
 
 export const dBetween = (a?: string | null, b?: string | null) => {
   if (!a || !b) return null;

@@ -32,9 +32,11 @@ const calculateDaysBetween = (date1?: string | null, date2?: string | null): num
   return Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
 };
 
+import { formatDateBR } from '@/lib/dateUtils';
+
 const formatDate = (date?: string | null) => {
   if (!date) return '—';
-  return new Date(date).toLocaleDateString('pt-BR');
+  return formatDateBR(date);
 };
 
 export const StageFlowTable: React.FC<StageFlowTableProps> = ({ order }) => {
