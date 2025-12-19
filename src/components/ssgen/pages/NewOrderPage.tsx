@@ -22,6 +22,7 @@ const NewOrderPageComponent: React.FC = () => {
 
   const [formData, setFormData] = useState({
     // Dados básicos
+    ordem_servico_neogen: '',
     numero_nf_neogen: '',
     nome_produto: '',
     numero_amostras: '',
@@ -78,6 +79,7 @@ const NewOrderPageComponent: React.FC = () => {
     try {
       const orderData: any = {
         client_id: selectedClientId || null,
+        ordem_servico_neogen: formData.ordem_servico_neogen ? Number(formData.ordem_servico_neogen) : null,
         numero_nf_neogen: formData.numero_nf_neogen ? Number(formData.numero_nf_neogen) : null,
         nome_produto: formData.nome_produto || null,
         numero_amostras: formData.numero_amostras ? Number(formData.numero_amostras) : null,
@@ -110,6 +112,7 @@ const NewOrderPageComponent: React.FC = () => {
       // Reset form
       setSelectedClientId(null);
       setFormData({
+        ordem_servico_neogen: '',
         numero_nf_neogen: '',
         nome_produto: '',
         numero_amostras: '',
@@ -176,7 +179,16 @@ const NewOrderPageComponent: React.FC = () => {
               <CardTitle>Dados Básicos</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <Label htmlFor="ordem_servico_neogen">Número Ordem Neogen</Label>
+                  <Input
+                    id="ordem_servico_neogen"
+                    type="number"
+                    value={formData.ordem_servico_neogen}
+                    onChange={(e) => setFormData({ ...formData, ordem_servico_neogen: e.target.value })}
+                  />
+                </div>
                 <div>
                   <Label htmlFor="numero_nf_neogen">Número da Nota Fiscal Neogen</Label>
                   <Input

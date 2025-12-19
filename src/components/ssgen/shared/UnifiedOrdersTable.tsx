@@ -70,63 +70,80 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
     }
   };
 
+  // Classes para colunas fixas (sticky)
+  const stickyColBase = "p-2 border bg-background";
+  const stickyColHeaderBase = "p-2 text-left border bg-muted";
+
   return (
     <ScrollArea className="w-full">
-      <div className="min-w-[2400px]">
-        <table className="w-full text-sm">
-          <thead className="bg-muted sticky top-0 z-10">
+      <div className="min-w-[2600px] relative">
+        <table className="w-full text-sm border-collapse">
+          <thead className="sticky top-0 z-20">
             <tr>
-              <th className="p-2 text-left border">OS SSGen</th>
-              <th className="p-2 text-left border">Data</th>
-              <th className="p-2 text-left border">OS Neogen</th>
-              <th className="p-2 text-left border">Nome</th>
-              <th className="p-2 text-left border">CPF/CNPJ</th>
-              <th className="p-2 text-left border">IE/RG</th>
-              <th className="p-2 text-left border">Código</th>
-              <th className="p-2 text-left border">Status</th>
-              <th className="p-2 text-left border">Representante</th>
-              <th className="p-2 text-left border">Coordenador</th>
-              <th className="p-2 text-left border">ID Conta</th>
-              <th className="p-2 text-left border">NF Neogen</th>
-              <th className="p-2 text-left border">Produto</th>
-              <th className="p-2 text-left border">N° Amostras</th>
-              <th className="p-2 text-left border">CRA Data</th>
-              <th className="p-2 text-left border">CRA Status</th>
-              <th className="p-2 text-left border">Envio Plan. Data</th>
-              <th className="p-2 text-left border">Envio Plan. Status</th>
-              <th className="p-2 text-left border">Envio Plan. SLA</th>
-              <th className="p-2 text-left border">VRI Data</th>
-              <th className="p-2 text-left border">VRI N° Amostras</th>
-              <th className="p-2 text-left border">VRI Resolvido</th>
-              <th className="p-2 text-left border">VRI SLA</th>
-              <th className="p-2 text-left border">LPR Data</th>
-              <th className="p-2 text-left border">LPR N° Amostras</th>
-              <th className="p-2 text-left border">LPR SLA</th>
-              <th className="p-2 text-left border">Env. Result. Data</th>
-              <th className="p-2 text-left border">Env. Result. Status</th>
-              <th className="p-2 text-left border">Env. Result. SLA</th>
-              <th className="p-2 text-left border">Receb. Result. Data</th>
-              <th className="p-2 text-left border">Faturamento Data</th>
-              <th className="p-2 text-left border">Ações</th>
+              {/* Colunas fixas */}
+              <th className={`${stickyColHeaderBase} sticky left-0 z-30 min-w-[100px]`}>OS SSGen</th>
+              <th className={`${stickyColHeaderBase} sticky left-[100px] z-30 min-w-[180px]`}>Nome</th>
+              {/* Colunas normais */}
+              <th className="p-2 text-left border bg-muted">Order ID</th>
+              <th className="p-2 text-left border bg-muted">Data</th>
+              <th className="p-2 text-left border bg-muted">OS Neogen</th>
+              <th className="p-2 text-left border bg-muted">CPF/CNPJ</th>
+              <th className="p-2 text-left border bg-muted">IE/RG</th>
+              <th className="p-2 text-left border bg-muted">Código</th>
+              <th className="p-2 text-left border bg-muted">Status</th>
+              <th className="p-2 text-left border bg-muted">Representante</th>
+              <th className="p-2 text-left border bg-muted">Coordenador</th>
+              <th className="p-2 text-left border bg-muted">ID Conta</th>
+              <th className="p-2 text-left border bg-muted">NF Neogen</th>
+              <th className="p-2 text-left border bg-muted">Produto</th>
+              <th className="p-2 text-left border bg-muted">N° Amostras</th>
+              <th className="p-2 text-left border bg-muted">CRA Data</th>
+              <th className="p-2 text-left border bg-muted">CRA Status</th>
+              <th className="p-2 text-left border bg-muted">Envio Plan. Data</th>
+              <th className="p-2 text-left border bg-muted">Envio Plan. Status</th>
+              <th className="p-2 text-left border bg-muted">Envio Plan. SLA</th>
+              <th className="p-2 text-left border bg-muted">VRI Data</th>
+              <th className="p-2 text-left border bg-muted">VRI N° Amostras</th>
+              <th className="p-2 text-left border bg-muted">VRI Resolvido</th>
+              <th className="p-2 text-left border bg-muted">VRI SLA</th>
+              <th className="p-2 text-left border bg-muted">LPR Data</th>
+              <th className="p-2 text-left border bg-muted">LPR N° Amostras</th>
+              <th className="p-2 text-left border bg-muted">LPR SLA</th>
+              <th className="p-2 text-left border bg-muted">Env. Result. Data</th>
+              <th className="p-2 text-left border bg-muted">Env. Result. Status</th>
+              <th className="p-2 text-left border bg-muted">Env. Result. SLA</th>
+              <th className="p-2 text-left border bg-muted">Receb. Result. Data</th>
+              <th className="p-2 text-left border bg-muted">Faturamento Data</th>
+              <th className="p-2 text-left border bg-muted">Ações</th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={32} className="p-4 text-center text-muted-foreground">
+                <td colSpan={33} className="p-4 text-center text-muted-foreground">
                   Nenhuma ordem encontrada
                 </td>
               </tr>
             ) : (
               rows.map((row, idx) => (
                 <tr key={idx} className="hover:bg-muted/50">
-                  <td className="p-2 border">
+                  {/* Colunas fixas */}
+                  <td className={`${stickyColBase} sticky left-0 z-10 min-w-[100px]`}>
                     <button
                       onClick={() => onOpen(row)}
                       className="text-primary hover:underline font-medium"
                     >
                       {row.ordem_servico_ssgen}
                     </button>
+                  </td>
+                  <td className={`${stickyColBase} sticky left-[100px] z-10 min-w-[180px]`}>
+                    {row.cliente_nome || '—'}
+                  </td>
+                  {/* Colunas normais */}
+                  <td className="p-2 border">
+                    <span className="text-xs text-muted-foreground font-mono">
+                      {row.ordem_id ? row.ordem_id.slice(0, 8) + '...' : '—'}
+                    </span>
                   </td>
                   <td className="p-2 border">{fmt(row.updated_at)}</td>
                   <td className="p-2 border">
@@ -137,7 +154,6 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                       type="number"
                     />
                   </td>
-                  <td className="p-2 border">{row.cliente_nome || '—'}</td>
                   <td className="p-2 border">{row.cpf_cnpj || '—'}</td>
                   <td className="p-2 border">{row.ie_rg || '—'}</td>
                   <td className="p-2 border">{row.codigo || '—'}</td>
