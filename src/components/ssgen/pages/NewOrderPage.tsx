@@ -22,11 +22,11 @@ const NewOrderPageComponent: React.FC = () => {
 
   const [formData, setFormData] = useState({
     // Dados básicos
-    order_id: '',
     ordem_servico_neogen: '',
     numero_nf_neogen: '',
     nome_produto: '',
     numero_amostras: '',
+    envio_resultados_ordem_id: '',
     
     // CRA
     cra_data: '',
@@ -50,7 +50,6 @@ const NewOrderPageComponent: React.FC = () => {
     
     // Envio Resultados
     envio_resultados_data: '',
-    envio_resultados_ordem_id: '',
     envio_resultados_previsao: '',
     envio_resultados_status: '',
     envio_resultados_data_prova: '',
@@ -113,11 +112,11 @@ const NewOrderPageComponent: React.FC = () => {
       // Reset form
       setSelectedClientId(null);
       setFormData({
-        order_id: '',
         ordem_servico_neogen: '',
         numero_nf_neogen: '',
         nome_produto: '',
         numero_amostras: '',
+        envio_resultados_ordem_id: '',
         cra_data: '',
         cra_status: '',
         envio_planilha_data: '',
@@ -129,7 +128,6 @@ const NewOrderPageComponent: React.FC = () => {
         liberacao_data: '',
         liberacao_n_amostras: '',
         envio_resultados_data: '',
-        envio_resultados_ordem_id: '',
         envio_resultados_previsao: '',
         envio_resultados_status: '',
         envio_resultados_data_prova: '',
@@ -183,12 +181,13 @@ const NewOrderPageComponent: React.FC = () => {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div>
-                  <Label htmlFor="order_id">Order ID</Label>
+                  <Label htmlFor="envio_resultados_ordem_id">Order ID</Label>
                   <Input
-                    id="order_id"
-                    value={formData.order_id}
-                    onChange={(e) => setFormData({ ...formData, order_id: e.target.value })}
-                    placeholder="UUID opcional"
+                    id="envio_resultados_ordem_id"
+                    type="number"
+                    value={formData.envio_resultados_ordem_id}
+                    onChange={(e) => setFormData({ ...formData, envio_resultados_ordem_id: e.target.value })}
+                    placeholder="Número identificador"
                   />
                 </div>
                 <div>
@@ -379,15 +378,6 @@ const NewOrderPageComponent: React.FC = () => {
                       type="date"
                       value={formData.envio_resultados_data}
                       onChange={(e) => setFormData({ ...formData, envio_resultados_data: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="envio_resultados_ordem_id">Ordem ID</Label>
-                    <Input
-                      id="envio_resultados_ordem_id"
-                      type="number"
-                      value={formData.envio_resultados_ordem_id}
-                      onChange={(e) => setFormData({ ...formData, envio_resultados_ordem_id: e.target.value })}
                     />
                   </div>
                   <div>

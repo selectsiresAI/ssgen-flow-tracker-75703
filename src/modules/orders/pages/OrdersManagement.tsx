@@ -321,7 +321,7 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
       <td className="p-3 whitespace-nowrap">{currentStage}</td>
       <td className="p-3">
         <span className="text-xs text-muted-foreground font-mono">
-          {row.id ? row.id.slice(0, 8) + '...' : '—'}
+          {row.envio_resultados_ordem_id ?? '—'}
         </span>
       </td>
       <td className="p-3 whitespace-nowrap">{row.OS_NEOGEN || '—'}</td>
