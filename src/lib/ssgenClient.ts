@@ -76,6 +76,7 @@ function mapServiceOrderRow(row: ServiceOrderWithClient): PowerRow {
     flag_reagendamento: row.flag_reagendamento ?? null,
     issue_text: row.issue_text ?? null,
     source_table: 'service_orders',
+    envio_resultados_ordem_id: row.envio_resultados_ordem_id ?? null,
   };
 }
 
