@@ -85,8 +85,10 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
               <th className={`${stickyColHeaderBase} sticky left-[100px] z-30 min-w-[180px]`}>Nome</th>
               {/* Colunas normais */}
               <th className="p-2 text-left border bg-muted">Order ID</th>
-              <th className="p-2 text-left border bg-muted">Data</th>
               <th className="p-2 text-left border bg-muted">OS Neogen</th>
+              <th className="p-2 text-left border bg-muted">N° Amostras</th>
+              <th className="p-2 text-left border bg-muted">CRA Data</th>
+              <th className="p-2 text-left border bg-muted">Data</th>
               <th className="p-2 text-left border bg-muted">CPF/CNPJ</th>
               <th className="p-2 text-left border bg-muted">IE/RG</th>
               <th className="p-2 text-left border bg-muted">Código</th>
@@ -96,8 +98,6 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
               <th className="p-2 text-left border bg-muted">ID Conta</th>
               <th className="p-2 text-left border bg-muted">NF Neogen</th>
               <th className="p-2 text-left border bg-muted">Produto</th>
-              <th className="p-2 text-left border bg-muted">N° Amostras</th>
-              <th className="p-2 text-left border bg-muted">CRA Data</th>
               <th className="p-2 text-left border bg-muted">CRA Status</th>
               <th className="p-2 text-left border bg-muted">Envio Plan. Data</th>
               <th className="p-2 text-left border bg-muted">Envio Plan. Status</th>
@@ -145,7 +145,6 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                       {row.ordem_id ? row.ordem_id.slice(0, 8) + '...' : '—'}
                     </span>
                   </td>
-                  <td className="p-2 border">{fmt(row.updated_at)}</td>
                   <td className="p-2 border">
                     <EditableCell
                       value={row.ordem_servico_neogen}
@@ -154,6 +153,23 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                       type="number"
                     />
                   </td>
+                  <td className="p-2 border">
+                    <EditableCell
+                      value={row.numero_amostras}
+                      onSave={(v) => handleCellUpdate(row.ordem_id, 'numero_amostras', v)}
+                      isEditable={isAdmin}
+                      type="number"
+                    />
+                  </td>
+                  <td className="p-2 border">
+                    <EditableCell
+                      value={row.cra_data}
+                      onSave={(v) => handleCellUpdate(row.ordem_id, 'cra_data', v)}
+                      isEditable={isAdmin}
+                      type="date"
+                    />
+                  </td>
+                  <td className="p-2 border">{fmt(row.updated_at)}</td>
                   <td className="p-2 border">{row.cpf_cnpj || '—'}</td>
                   <td className="p-2 border">{row.ie_rg || '—'}</td>
                   <td className="p-2 border">{row.codigo || '—'}</td>
@@ -180,22 +196,6 @@ export const UnifiedOrdersTable: React.FC<UnifiedOrdersTableProps> = ({
                       value={row.nome_produto}
                       onSave={(v) => handleCellUpdate(row.ordem_id, 'nome_produto', v)}
                       isEditable={isAdmin}
-                    />
-                  </td>
-                  <td className="p-2 border">
-                    <EditableCell
-                      value={row.numero_amostras}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'numero_amostras', v)}
-                      isEditable={isAdmin}
-                      type="number"
-                    />
-                  </td>
-                  <td className="p-2 border">
-                    <EditableCell
-                      value={row.cra_data}
-                      onSave={(v) => handleCellUpdate(row.ordem_id, 'cra_data', v)}
-                      isEditable={isAdmin}
-                      type="date"
                     />
                   </td>
                   <td className="p-2 border">
