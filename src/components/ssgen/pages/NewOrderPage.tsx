@@ -22,6 +22,7 @@ const NewOrderPageComponent: React.FC = () => {
 
   const [formData, setFormData] = useState({
     // Dados básicos
+    order_id: '',
     ordem_servico_neogen: '',
     numero_nf_neogen: '',
     nome_produto: '',
@@ -112,6 +113,7 @@ const NewOrderPageComponent: React.FC = () => {
       // Reset form
       setSelectedClientId(null);
       setFormData({
+        order_id: '',
         ordem_servico_neogen: '',
         numero_nf_neogen: '',
         nome_produto: '',
@@ -179,7 +181,16 @@ const NewOrderPageComponent: React.FC = () => {
               <CardTitle>Dados Básicos</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div>
+                  <Label htmlFor="order_id">Order ID</Label>
+                  <Input
+                    id="order_id"
+                    value={formData.order_id}
+                    onChange={(e) => setFormData({ ...formData, order_id: e.target.value })}
+                    placeholder="UUID opcional"
+                  />
+                </div>
                 <div>
                   <Label htmlFor="ordem_servico_neogen">Número Ordem Neogen</Label>
                   <Input
