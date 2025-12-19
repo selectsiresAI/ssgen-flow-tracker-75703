@@ -292,8 +292,8 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
 
   return (
     <tr className="align-top">
-      <td className="p-3 font-medium whitespace-nowrap">{row.OS_SSGEN}</td>
-      <td className="p-3 whitespace-nowrap">
+      <td className="p-3 font-medium whitespace-nowrap sticky left-0 z-10 bg-background">{row.OS_SSGEN}</td>
+      <td className="p-3 whitespace-nowrap sticky left-[100px] z-10 bg-background">
         {row.id ? (
           <InlineClientEditor
             orderId={row.id}
@@ -319,6 +319,13 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
       </td>
       <td className="p-3 whitespace-nowrap">{row.PROD_SSG || 'SSGEN'}</td>
       <td className="p-3 whitespace-nowrap">{currentStage}</td>
+      <td className="p-3">
+        <span className="text-xs text-muted-foreground font-mono">
+          {row.id ? row.id.slice(0, 8) + '...' : '—'}
+        </span>
+      </td>
+      <td className="p-3 whitespace-nowrap">{row.OS_NEOGEN || '—'}</td>
+      <td className="p-3 whitespace-nowrap">{row.N_AMOSTRAS_SSG ?? '—'}</td>
       {stageOrder.map((label) => renderField(label))}
       <td className="p-3"><Badge variant="outline">{priorityLabel}</Badge></td>
       <td className="p-3">
@@ -411,33 +418,35 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
           )
         )}
       </td>
-      <td className="p-3">
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              variant="destructive"
-              size="sm"
-              className="gap-1"
-              disabled={!row.id || !isAdmin}
-            >
-              <Trash2 className="h-4 w-4" />
-              <span className="hidden 2xl:inline">Apagar</span>
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Apagar ordem</AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta ação não pode ser desfeita. Tem certeza que deseja apagar a ordem {row.OS_SSGEN}?
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={() => onDelete(row)}>Confirmar</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </td>
+      {isAdmin && (
+        <td className="p-3">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="destructive"
+                size="sm"
+                className="gap-1"
+                disabled={!row.id}
+              >
+                <Trash2 className="h-4 w-4" />
+                <span className="hidden 2xl:inline">Apagar</span>
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Apagar ordem</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta ação não pode ser desfeita. Tem certeza que deseja apagar a ordem {row.OS_SSGEN}?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={() => onDelete(row)}>Confirmar</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </td>
+      )}
     </tr>
   );
 };
@@ -709,10 +718,13 @@ const OrdersManagement: React.FC = () => {
         <table className="min-w-[1400px] text-sm border-separate border-spacing-0">
           <thead className="bg-muted/40 sticky top-0">
             <tr className="text-left">
-              <th className="p-3">OS SSGEN</th>
-              <th className="p-3">Nome do cliente</th>
+              <th className="p-3 sticky left-0 z-10 bg-muted/40">OS SSGEN</th>
+              <th className="p-3 sticky left-[100px] z-10 bg-muted/40">Nome do cliente</th>
               <th className="p-3">Produto</th>
               <th className="p-3">Etapa</th>
+              <th className="p-3">Order ID</th>
+              <th className="p-3">OS Neogen</th>
+              <th className="p-3">N° Amostras</th>
               <th className="p-3">CRA</th>
               <th className="p-3">Envio de Planilha</th>
               <th className="p-3">VRI</th>
@@ -724,7 +736,7 @@ const OrdersManagement: React.FC = () => {
               <th className="p-3">Aging</th>
               <th className="p-3">Status</th>
               <th className="p-3">Arquivo</th>
-              <th className="p-3">Ações</th>
+              {isAdmin && <th className="p-3">Ações</th>}
             </tr>
           </thead>
           <tbody>
