@@ -572,11 +572,19 @@ const OrdersManagement: React.FC = () => {
   };
 
   const filteredRows = useMemo(() => {
-    if (!query) return rows;
-    const lower = query.toLowerCase();
-    return rows.filter((row) => {
-      const fields = [row.OS_SSGEN, row.CLIENTE ?? '', row.REP ?? '', row.COORD ?? ''];
-      return fields.some((field) => field?.toLowerCase().includes(lower));
+    let result = rows;
+    if (query) {
+      const lower = query.toLowerCase();
+      result = rows.filter((row) => {
+        const fields = [row.OS_SSGEN, row.CLIENTE ?? '', row.REP ?? '', row.COORD ?? ''];
+        return fields.some((field) => field?.toLowerCase().includes(lower));
+      });
+    }
+    // Sort by OS_SSGEN descending (highest first)
+    return [...result].sort((a, b) => {
+      const aVal = typeof a.OS_SSGEN === 'number' ? a.OS_SSGEN : Number(a.OS_SSGEN) || 0;
+      const bVal = typeof b.OS_SSGEN === 'number' ? b.OS_SSGEN : Number(b.OS_SSGEN) || 0;
+      return bVal - aVal;
     });
   }, [query, rows]);
 
