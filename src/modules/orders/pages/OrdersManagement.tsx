@@ -138,6 +138,51 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
   const [uploadingFile, setUploadingFile] = useState(false);
   const [deletingFile, setDeletingFile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [editingOs, setEditingOs] = useState(false);
+  const [osValue, setOsValue] = useState(String(row.OS_SSGEN ?? ''));
+  const [savingOs, setSavingOs] = useState(false);
+
+  const handleOsSave = async () => {
+    const newVal = Number(osValue);
+    if (!Number.isFinite(newVal) || newVal <= 0) {
+      toast.error('Número OS SSGEN inválido.');
+      return;
+    }
+    if (!row.id) {
+      toast.error('Ordem sem ID, não é possível editar.');
+      setEditingOs(false);
+      return;
+    }
+    const oldVal = row.OS_SSGEN;
+    if (String(oldVal) === String(newVal)) {
+      setEditingOs(false);
+      return;
+    }
+    setSavingOs(true);
+    try {
+      const { error } = await supabase
+        .from('service_orders')
+        .update({ ordem_servico_ssgen: newVal })
+        .eq('id', row.id)
+        .is('deleted_at', null);
+      if (error) throw error;
+      await logOrderChange({
+        order_id: row.id,
+        field_name: 'ordem_servico_ssgen',
+        old_value: String(oldVal),
+        new_value: String(newVal),
+      });
+      onChange({ ...row, OS_SSGEN: String(newVal) } as OrdersManagementRow);
+      toast.success(`OS SSGEN alterada de ${oldVal} para ${newVal}`);
+      setEditingOs(false);
+    } catch (err) {
+      console.error('Erro ao atualizar OS SSGEN', err);
+      toast.error('Erro ao atualizar OS SSGEN.');
+      setOsValue(String(row.OS_SSGEN ?? ''));
+    } finally {
+      setSavingOs(false);
+    }
+  };
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -292,7 +337,32 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
 
   return (
     <tr className="align-top">
-      <td className="p-3 font-medium whitespace-nowrap sticky left-0 z-10 bg-background">{row.OS_SSGEN}</td>
+      <td className="p-3 font-medium whitespace-nowrap sticky left-0 z-10 bg-background">
+        {isAdmin && editingOs ? (
+          <div className="flex items-center gap-1">
+            <input
+              type="number"
+              className="border rounded-md px-2 py-1 w-24 bg-background text-sm"
+              value={osValue}
+              onChange={(e) => setOsValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleOsSave();
+                if (e.key === 'Escape') { setEditingOs(false); setOsValue(String(row.OS_SSGEN ?? '')); }
+              }}
+              onBlur={handleOsSave}
+              autoFocus
+              disabled={savingOs}
+            />
+          </div>
+        ) : (
+          <span
+            className={isAdmin ? 'cursor-pointer hover:underline' : ''}
+            onClick={() => { if (isAdmin) { setOsValue(String(row.OS_SSGEN ?? '')); setEditingOs(true); } }}
+          >
+            {row.OS_SSGEN}
+          </span>
+        )}
+      </td>
       <td className="p-3 whitespace-nowrap sticky left-[100px] z-10 bg-background">
         {row.id ? (
           <InlineClientEditor
