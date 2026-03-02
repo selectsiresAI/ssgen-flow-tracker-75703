@@ -48,7 +48,7 @@ export default function AuthPage() {
     setLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: 'https://ssgen-flow-tracker-75703.lovable.app/reset-password',
       });
       if (error) {
         toast({ title: 'Erro', description: error.message, variant: 'destructive' });
