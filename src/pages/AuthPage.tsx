@@ -36,6 +36,35 @@ export default function AuthPage() {
     return () => subscription.unsubscribe();
   }, [navigate, isSupabaseConfigured]);
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        title: 'Informe seu email',
+        description: 'Digite seu email no campo acima para receber o link de recuperação.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) {
+        toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+      } else {
+        toast({
+          title: 'Email enviado!',
+          description: 'Verifique sua caixa de entrada para redefinir sua senha.',
+        });
+      }
+    } catch {
+      toast({ title: 'Erro', description: 'Erro inesperado.', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -191,6 +220,14 @@ export default function AuthPage() {
                     'Entrar'
                   )}
                 </Button>
+                <button
+                  type="button"
+                  className="w-full text-sm text-muted-foreground hover:underline"
+                  onClick={handleForgotPassword}
+                  disabled={loading}
+                >
+                  Esqueci minha senha
+                </button>
               </form>
             </TabsContent>
 
