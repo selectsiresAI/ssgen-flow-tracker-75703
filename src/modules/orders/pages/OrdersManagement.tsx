@@ -141,6 +141,51 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
   const [editingOs, setEditingOs] = useState(false);
   const [osValue, setOsValue] = useState(String(row.OS_SSGEN ?? ''));
   const [savingOs, setSavingOs] = useState(false);
+  const [editingAmostras, setEditingAmostras] = useState(false);
+  const [amostrasValue, setAmostrasValue] = useState(String(row.N_AMOSTRAS_SSG ?? ''));
+  const [savingAmostras, setSavingAmostras] = useState(false);
+
+  const handleAmostrasSave = async () => {
+    const newVal = amostrasValue.trim() === '' ? null : Number(amostrasValue);
+    if (newVal !== null && (!Number.isFinite(newVal) || newVal < 0)) {
+      toast.error('Número de amostras inválido.');
+      return;
+    }
+    if (!row.id) {
+      toast.error('Ordem sem ID, não é possível editar.');
+      setEditingAmostras(false);
+      return;
+    }
+    const oldVal = row.N_AMOSTRAS_SSG;
+    if (String(oldVal ?? '') === String(newVal ?? '')) {
+      setEditingAmostras(false);
+      return;
+    }
+    setSavingAmostras(true);
+    try {
+      const { error } = await supabase
+        .from('service_orders')
+        .update({ numero_amostras: newVal })
+        .eq('id', row.id)
+        .is('deleted_at', null);
+      if (error) throw error;
+      await logOrderChange({
+        order_id: row.id,
+        field_name: 'numero_amostras',
+        old_value: String(oldVal ?? ''),
+        new_value: String(newVal ?? ''),
+      });
+      onChange({ ...row, N_AMOSTRAS_SSG: newVal } as OrdersManagementRow);
+      toast.success(`N° Amostras alterado de ${oldVal ?? '—'} para ${newVal ?? '—'}`);
+      setEditingAmostras(false);
+    } catch (err) {
+      console.error('Erro ao atualizar N° Amostras', err);
+      toast.error('Erro ao atualizar N° Amostras.');
+      setAmostrasValue(String(row.N_AMOSTRAS_SSG ?? ''));
+    } finally {
+      setSavingAmostras(false);
+    }
+  };
 
   const handleOsSave = async () => {
     const newVal = Number(osValue);
