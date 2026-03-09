@@ -141,6 +141,51 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
   const [editingOs, setEditingOs] = useState(false);
   const [osValue, setOsValue] = useState(String(row.OS_SSGEN ?? ''));
   const [savingOs, setSavingOs] = useState(false);
+  const [editingAmostras, setEditingAmostras] = useState(false);
+  const [amostrasValue, setAmostrasValue] = useState(String(row.N_AMOSTRAS_SSG ?? ''));
+  const [savingAmostras, setSavingAmostras] = useState(false);
+
+  const handleAmostrasSave = async () => {
+    const newVal = amostrasValue.trim() === '' ? null : Number(amostrasValue);
+    if (newVal !== null && (!Number.isFinite(newVal) || newVal < 0)) {
+      toast.error('Número de amostras inválido.');
+      return;
+    }
+    if (!row.id) {
+      toast.error('Ordem sem ID, não é possível editar.');
+      setEditingAmostras(false);
+      return;
+    }
+    const oldVal = row.N_AMOSTRAS_SSG;
+    if (String(oldVal ?? '') === String(newVal ?? '')) {
+      setEditingAmostras(false);
+      return;
+    }
+    setSavingAmostras(true);
+    try {
+      const { error } = await supabase
+        .from('service_orders')
+        .update({ numero_amostras: newVal })
+        .eq('id', row.id)
+        .is('deleted_at', null);
+      if (error) throw error;
+      await logOrderChange({
+        order_id: row.id,
+        field_name: 'numero_amostras',
+        old_value: String(oldVal ?? ''),
+        new_value: String(newVal ?? ''),
+      });
+      onChange({ ...row, N_AMOSTRAS_SSG: newVal } as OrdersManagementRow);
+      toast.success(`N° Amostras alterado de ${oldVal ?? '—'} para ${newVal ?? '—'}`);
+      setEditingAmostras(false);
+    } catch (err) {
+      console.error('Erro ao atualizar N° Amostras', err);
+      toast.error('Erro ao atualizar N° Amostras.');
+      setAmostrasValue(String(row.N_AMOSTRAS_SSG ?? ''));
+    } finally {
+      setSavingAmostras(false);
+    }
+  };
 
   const handleOsSave = async () => {
     const newVal = Number(osValue);
@@ -395,7 +440,32 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
         </span>
       </td>
       <td className="p-3 whitespace-nowrap">{row.OS_NEOGEN || '—'}</td>
-      <td className="p-3 whitespace-nowrap">{row.N_AMOSTRAS_SSG ?? '—'}</td>
+      <td className="p-3 whitespace-nowrap">
+        {isAdmin && editingAmostras ? (
+          <div className="flex items-center gap-1">
+            <input
+              type="number"
+              className="border rounded-md px-2 py-1 w-24 bg-background text-sm"
+              value={amostrasValue}
+              onChange={(e) => setAmostrasValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleAmostrasSave();
+                if (e.key === 'Escape') { setEditingAmostras(false); setAmostrasValue(String(row.N_AMOSTRAS_SSG ?? '')); }
+              }}
+              onBlur={handleAmostrasSave}
+              autoFocus
+              disabled={savingAmostras}
+            />
+          </div>
+        ) : (
+          <span
+            className={isAdmin ? 'cursor-pointer hover:underline' : ''}
+            onClick={() => { if (isAdmin) { setAmostrasValue(String(row.N_AMOSTRAS_SSG ?? '')); setEditingAmostras(true); } }}
+          >
+            {row.N_AMOSTRAS_SSG ?? '—'}
+          </span>
+        )}
+      </td>
       {stageOrder.map((label) => renderField(label))}
       <td className="p-3"><Badge variant="outline">{priorityLabel}</Badge></td>
       <td className="p-3">
