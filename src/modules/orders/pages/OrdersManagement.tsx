@@ -440,7 +440,32 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
         </span>
       </td>
       <td className="p-3 whitespace-nowrap">{row.OS_NEOGEN || '—'}</td>
-      <td className="p-3 whitespace-nowrap">{row.N_AMOSTRAS_SSG ?? '—'}</td>
+      <td className="p-3 whitespace-nowrap">
+        {isAdmin && editingAmostras ? (
+          <div className="flex items-center gap-1">
+            <input
+              type="number"
+              className="border rounded-md px-2 py-1 w-24 bg-background text-sm"
+              value={amostrasValue}
+              onChange={(e) => setAmostrasValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleAmostrasSave();
+                if (e.key === 'Escape') { setEditingAmostras(false); setAmostrasValue(String(row.N_AMOSTRAS_SSG ?? '')); }
+              }}
+              onBlur={handleAmostrasSave}
+              autoFocus
+              disabled={savingAmostras}
+            />
+          </div>
+        ) : (
+          <span
+            className={isAdmin ? 'cursor-pointer hover:underline' : ''}
+            onClick={() => { if (isAdmin) { setAmostrasValue(String(row.N_AMOSTRAS_SSG ?? '')); setEditingAmostras(true); } }}
+          >
+            {row.N_AMOSTRAS_SSG ?? '—'}
+          </span>
+        )}
+      </td>
       {stageOrder.map((label) => renderField(label))}
       <td className="p-3"><Badge variant="outline">{priorityLabel}</Badge></td>
       <td className="p-3">
