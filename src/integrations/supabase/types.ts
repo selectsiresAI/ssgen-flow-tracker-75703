@@ -1239,6 +1239,8 @@ export type Database = {
           received_at: string | null
           result_file_path: string | null
           sla_days: number | null
+          sync_error: string | null
+          sync_status: string | null
           updated_at: string
           vri_data: string | null
           vri_n_amostras: number | null
@@ -1283,6 +1285,8 @@ export type Database = {
           received_at?: string | null
           result_file_path?: string | null
           sla_days?: number | null
+          sync_error?: string | null
+          sync_status?: string | null
           updated_at?: string
           vri_data?: string | null
           vri_n_amostras?: number | null
@@ -1327,6 +1331,8 @@ export type Database = {
           received_at?: string | null
           result_file_path?: string | null
           sla_days?: number | null
+          sync_error?: string | null
+          sync_status?: string | null
           updated_at?: string
           vri_data?: string | null
           vri_n_amostras?: number | null
