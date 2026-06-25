@@ -319,7 +319,7 @@ export default function SSGENTrackApp() {
   return (
     <div className="flex min-h-screen">
       <Sidebar current={current} setCurrent={setCurrent} role={role}/>
-      <main className="flex-1">
+      <main className="flex-1 min-w-0 overflow-hidden">
         <header className="border-b bg-background px-6 py-4">
           <div className="flex items-center gap-3">
             <img src={ssgenLogo} alt="SSGEN Logo" className="h-8" />
