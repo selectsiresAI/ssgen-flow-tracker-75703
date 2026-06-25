@@ -866,7 +866,7 @@ const OrdersManagement: React.FC = () => {
         </div>
       )}
 
-      <div className="w-full min-w-0 overflow-auto max-h-[65vh] rounded-xl border custom-scrollbar">
+      <div className="w-full max-w-full overflow-x-auto overflow-y-auto max-h-[65vh] rounded-xl border custom-scrollbar">
         <table className="min-w-[2460px] w-full text-sm border-separate border-spacing-0 table-fixed">
           <thead className="bg-muted">
             <tr className="text-left">
