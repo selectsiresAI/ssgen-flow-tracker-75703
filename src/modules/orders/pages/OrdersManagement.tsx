@@ -375,7 +375,7 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
           </span>
         )}
       </td>
-      <td className="p-3 whitespace-nowrap sticky left-[120px] z-10 bg-background w-[300px] overflow-hidden box-border">
+      <td className="p-3 whitespace-nowrap sticky left-[90px] z-10 bg-background w-[260px] overflow-hidden box-border">
         {row.id ? (
           <InlineClientEditor
             orderId={row.id}
