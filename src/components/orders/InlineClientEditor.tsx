@@ -26,11 +26,13 @@ export default function InlineClientEditor({
   initialName,
   initialId,
   onCommitted,
+  className,
 }: {
   orderId: string;
   initialName: string | null;
   initialId?: string | null;
   onCommitted: (payload: { client_name: string | null; client_id: string | null }) => void;
+  className?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
