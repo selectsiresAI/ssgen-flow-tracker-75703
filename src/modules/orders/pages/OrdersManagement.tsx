@@ -382,7 +382,7 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
 
   return (
     <tr className="align-top">
-      <td className="p-3 font-medium whitespace-nowrap sticky left-0 z-10 bg-background">
+      <td className="p-3 font-medium whitespace-nowrap sticky left-0 z-10 bg-background w-[120px]">
         {isAdmin && editingOs ? (
           <div className="flex items-center gap-1">
             <input
