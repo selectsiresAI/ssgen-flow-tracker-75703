@@ -364,17 +364,21 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
     const hasError = errorStage === label;
 
     return (
-      <td className="p-3">
-        <div className="flex items-center gap-2">
+      <td className="p-3 w-[160px] box-border">
+        <div className="flex items-center gap-1.5 min-w-0">
           <input
             type="date"
-            className="border rounded-md px-2 py-1 bg-background"
+            className="border rounded-md px-2 py-1 bg-background min-w-0 w-full"
             value={formatDate(value as string | null)}
             onChange={(event) => persistField(label, event.target.value || null)}
             disabled={!isAdmin}
           />
-          {savingThisField && <Badge variant="secondary">Salvando…</Badge>}
-          {hasError && <Badge variant="destructive">Erro</Badge>}
+          {savingThisField && (
+            <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
+          )}
+          {hasError && (
+            <AlertCircle className="h-4 w-4 shrink-0 text-destructive" />
+          )}
         </div>
       </td>
     );
