@@ -86,3 +86,30 @@ All colors MUST be HSL.
     @apply font-semibold tracking-tight;
   }
 }
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: var(--radius);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.4);
+    border-radius: var(--radius);
+    border: 2px solid hsl(var(--muted));
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.6);
+  }
+
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.4) hsl(var(--muted));
+  }
+}
