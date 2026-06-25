@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Trash2, Upload, Download, FileUp } from 'lucide-react';
+import { AlertCircle, FileUp, Loader2, Trash2, Upload, Download } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
