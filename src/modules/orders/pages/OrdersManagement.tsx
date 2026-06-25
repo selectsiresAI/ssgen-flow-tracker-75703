@@ -862,12 +862,12 @@ const OrdersManagement: React.FC = () => {
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-xl">
-        <table className="min-w-[1400px] text-sm border-separate border-spacing-0">
-          <thead className="bg-muted/40 sticky top-0">
+      <div className="overflow-auto h-[calc(100vh-280px)] rounded-xl border">
+        <table className="min-w-[2200px] w-full text-sm border-separate border-spacing-0">
+          <thead className="bg-muted/40 sticky top-0 z-20">
             <tr className="text-left">
-              <th className="p-3 sticky left-0 z-10 bg-muted/40">OS SSGEN</th>
-              <th className="p-3 sticky left-[100px] z-10 bg-muted/40">Nome do cliente</th>
+              <th className="p-3 sticky left-0 z-30 bg-muted min-w-[100px]">OS SSGEN</th>
+              <th className="p-3 sticky left-[100px] z-30 bg-muted min-w-[180px]">Nome do cliente</th>
               <th className="p-3">Produto</th>
               <th className="p-3">Etapa</th>
               <th className="p-3">Order ID</th>
