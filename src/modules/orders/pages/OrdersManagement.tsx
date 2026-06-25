@@ -65,7 +65,7 @@ type StageKey = keyof typeof fieldMap;
 
 const stageOrder: StageKey[] = ['CRA', 'PLANILHA', 'VRI', 'LPR', 'LR', 'RESULTADOS', 'FATURAR'];
 
-import { formatDateForInput } from '@/lib/dateUtils';
+import { formatDateForInput, formatDateBR } from '@/lib/dateUtils';
 
 // ... keep existing code
 
