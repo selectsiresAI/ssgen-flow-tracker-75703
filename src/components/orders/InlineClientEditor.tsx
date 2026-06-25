@@ -112,8 +112,10 @@ export default function InlineClientEditor({
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <span>{currentClient.nome ?? "—"}</span>
+    <div className={cn("flex items-center gap-2 max-w-full", className)}>
+      <span className="truncate min-w-0" title={currentClient.nome ?? ""}>
+        {currentClient.nome ?? "—"}
+      </span>
       <Popover
         open={open}
         onOpenChange={(nextOpen) => {
