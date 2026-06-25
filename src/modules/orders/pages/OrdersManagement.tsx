@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Trash2, Upload, Download, FileUp } from 'lucide-react';
+import { AlertCircle, FileUp, Loader2, Trash2, Upload, Download } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -364,17 +364,21 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
     const hasError = errorStage === label;
 
     return (
-      <td className="p-3">
-        <div className="flex items-center gap-2">
+      <td className="p-3 w-[160px] box-border">
+        <div className="flex items-center gap-1.5 min-w-0">
           <input
             type="date"
-            className="border rounded-md px-2 py-1 bg-background"
+            className="border rounded-md px-2 py-1 bg-background min-w-0 w-full"
             value={formatDate(value as string | null)}
             onChange={(event) => persistField(label, event.target.value || null)}
             disabled={!isAdmin}
           />
-          {savingThisField && <Badge variant="secondary">Salvando…</Badge>}
-          {hasError && <Badge variant="destructive">Erro</Badge>}
+          {savingThisField && (
+            <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
+          )}
+          {hasError && (
+            <AlertCircle className="h-4 w-4 shrink-0 text-destructive" />
+          )}
         </div>
       </td>
     );
@@ -382,7 +386,7 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
 
   return (
     <tr className="align-top">
-      <td className="p-3 font-medium whitespace-nowrap sticky left-0 z-10 bg-background">
+      <td className="p-3 font-medium whitespace-nowrap sticky left-0 z-10 bg-background w-[120px] box-border">
         {isAdmin && editingOs ? (
           <div className="flex items-center gap-1">
             <input
@@ -408,7 +412,7 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
           </span>
         )}
       </td>
-      <td className="p-3 whitespace-nowrap sticky left-[100px] z-10 bg-background">
+      <td className="p-3 whitespace-nowrap sticky left-[120px] z-10 bg-background w-[300px] overflow-hidden box-border">
         {row.id ? (
           <InlineClientEditor
             orderId={row.id}
@@ -862,37 +866,37 @@ const OrdersManagement: React.FC = () => {
         </div>
       )}
 
-      <div className="overflow-auto max-h-[65vh] rounded-xl border custom-scrollbar">
-        <table className="min-w-[2200px] w-full text-sm border-separate border-spacing-0">
-          <thead className="bg-muted sticky top-0 z-20">
+      <div className="w-full min-w-0 overflow-auto max-h-[65vh] rounded-xl border custom-scrollbar">
+        <table className="min-w-[2460px] w-full text-sm border-separate border-spacing-0 table-fixed">
+          <thead className="bg-muted">
             <tr className="text-left">
-              <th className="p-3 sticky left-0 z-30 bg-muted min-w-[100px]">OS SSGEN</th>
-              <th className="p-3 sticky left-[100px] z-30 bg-muted min-w-[180px]">Nome do cliente</th>
-              <th className="p-3">Produto</th>
-              <th className="p-3">Etapa</th>
-              <th className="p-3">Order ID</th>
-              <th className="p-3">OS Neogen</th>
-              <th className="p-3">N° Amostras</th>
-              <th className="p-3">CRA</th>
-              <th className="p-3">Envio de Planilha</th>
-              <th className="p-3">VRI</th>
-              <th className="p-3">LPR</th>
-              <th className="p-3">LR</th>
-              <th className="p-3">Envio de Resultados</th>
-              <th className="p-3">Faturar</th>
-              <th className="p-3">Prioridade</th>
-              <th className="p-3">Aging</th>
-              <th className="p-3">Status</th>
-              <th className="p-3">Arquivo</th>
-              {isAdmin && <th className="p-3">Ações</th>}
+              <th className="p-3 sticky top-0 left-0 z-30 bg-muted w-[120px] whitespace-nowrap box-border">OS SSGEN</th>
+              <th className="p-3 sticky top-0 left-[120px] z-30 bg-muted w-[300px] whitespace-nowrap box-border">Nome do cliente</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[90px] whitespace-nowrap box-border">Produto</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[100px] whitespace-nowrap box-border">Etapa</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[90px] whitespace-nowrap box-border">Order ID</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[100px] whitespace-nowrap box-border">OS Neogen</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[110px] whitespace-nowrap box-border">N° Amostras</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">CRA</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">Envio de Planilha</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">VRI</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">LPR</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">LR</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">Envio de Resultados</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">Faturar</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[90px] whitespace-nowrap box-border">Prioridade</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[70px] whitespace-nowrap box-border">Aging</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[90px] whitespace-nowrap box-border">Status</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[100px] whitespace-nowrap box-border">Arquivo</th>
+              {isAdmin && <th className="p-3 sticky top-0 z-20 bg-muted w-[80px] whitespace-nowrap box-border">Ações</th>}
             </tr>
           </thead>
           <tbody>
             {filteredRows.map((row) => (
-              <EtapasRow 
-                key={row.id ?? row.OS_SSGEN} 
-                row={row} 
-                onChange={updateRow} 
+              <EtapasRow
+                key={row.id ?? row.OS_SSGEN}
+                row={row}
+                onChange={updateRow}
                 onDelete={handleDeleteRow}
                 isAdmin={isAdmin}
                 onFileUpload={handleFileUpload}
