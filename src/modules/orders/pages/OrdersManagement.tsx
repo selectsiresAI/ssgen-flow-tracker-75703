@@ -399,41 +399,52 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
           row.CLIENTE || '—'
         )}
       </td>
-      <td className="p-3 whitespace-nowrap">{row.PROD_SSG || 'SSGEN'}</td>
-      <td className="p-3 whitespace-nowrap">{currentStage}</td>
-      <td className="p-3">
-        <span className="text-xs text-muted-foreground font-mono">
-          {row.envio_resultados_ordem_id ?? '—'}
-        </span>
+      <td className="p-3 w-[150px] box-border">
+        <Dialog open={stageDialogOpen} onOpenChange={setStageDialogOpen}>
+          <DialogTrigger asChild>
+            <button
+              className="w-full text-left flex items-center gap-2 text-sm border rounded-md px-2 py-1 bg-background hover:bg-muted/50 transition-colors disabled:opacity-50"
+              disabled={!isAdmin}
+            >
+              <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className="truncate">{formatDateBR(agingBase) || '—'}</span>
+            </button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Editar datas - OS {row.OS_SSGEN}</DialogTitle>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-4 py-4">
+              {stageOrder.map((label) => {
+                const { view } = fieldMap[label];
+                const value = row[view];
+                const savingThisField = saving === label;
+                const hasError = errorStage === label;
+                return (
+                  <div key={label} className="space-y-1.5">
+                    <label className="text-sm font-medium">{label}</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="date"
+                        className="border rounded-md px-2 py-1 bg-background w-full"
+                        value={formatDateForInput(value as string | null)}
+                        onChange={(event) => persistField(label, event.target.value || null)}
+                        disabled={!isAdmin}
+                      />
+                      {savingThisField && (
+                        <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
+                      )}
+                      {hasError && (
+                        <AlertCircle className="h-4 w-4 shrink-0 text-destructive" />
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </DialogContent>
+        </Dialog>
       </td>
-      <td className="p-3 whitespace-nowrap">{row.OS_NEOGEN || '—'}</td>
-      <td className="p-3 whitespace-nowrap">
-        {isAdmin && editingAmostras ? (
-          <div className="flex items-center gap-1">
-            <input
-              type="number"
-              className="border rounded-md px-2 py-1 w-24 bg-background text-sm"
-              value={amostrasValue}
-              onChange={(e) => setAmostrasValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleAmostrasSave();
-                if (e.key === 'Escape') { setEditingAmostras(false); setAmostrasValue(String(row.N_AMOSTRAS_SSG ?? '')); }
-              }}
-              onBlur={handleAmostrasSave}
-              autoFocus
-              disabled={savingAmostras}
-            />
-          </div>
-        ) : (
-          <span
-            className={isAdmin ? 'cursor-pointer hover:underline' : ''}
-            onClick={() => { if (isAdmin) { setAmostrasValue(String(row.N_AMOSTRAS_SSG ?? '')); setEditingAmostras(true); } }}
-          >
-            {row.N_AMOSTRAS_SSG ?? '—'}
-          </span>
-        )}
-      </td>
-      {stageOrder.map((label) => renderField(label))}
       <td className="p-3"><Badge variant="outline">{priorityLabel}</Badge></td>
       <td className="p-3">
         <Badge variant="outline">{aging === null ? '—' : `${aging}d`}</Badge>
