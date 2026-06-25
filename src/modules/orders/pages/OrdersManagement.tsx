@@ -862,9 +862,9 @@ const OrdersManagement: React.FC = () => {
         </div>
       )}
 
-      <div className="overflow-auto h-[calc(100vh-280px)] rounded-xl border">
+      <div className="overflow-auto max-h-[65vh] rounded-xl border custom-scrollbar">
         <table className="min-w-[2200px] w-full text-sm border-separate border-spacing-0">
-          <thead className="bg-muted/40 sticky top-0 z-20">
+          <thead className="bg-muted sticky top-0 z-20">
             <tr className="text-left">
               <th className="p-3 sticky left-0 z-30 bg-muted min-w-[100px]">OS SSGEN</th>
               <th className="p-3 sticky left-[100px] z-30 bg-muted min-w-[180px]">Nome do cliente</th>
