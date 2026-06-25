@@ -402,13 +402,19 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
       <td className="p-3 w-[150px] box-border">
         <Dialog open={stageDialogOpen} onOpenChange={setStageDialogOpen}>
           <DialogTrigger asChild>
-            <button
-              className="w-full text-left flex items-center gap-2 text-sm border rounded-md px-2 py-1 bg-background hover:bg-muted/50 transition-colors disabled:opacity-50"
-              disabled={!isAdmin}
-            >
-              <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span className="truncate">{formatDateBR(agingBase) || '—'}</span>
-            </button>
+            {isAdmin ? (
+              <button
+                className="w-full text-left flex items-center gap-2 text-sm border rounded-md px-2 py-1 bg-background hover:bg-muted/50 transition-colors"
+              >
+                <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span className="truncate">{formatDateBR(agingBase) || 'dd/mm/aaaa'}</span>
+              </button>
+            ) : (
+              <div className="w-full text-left flex items-center gap-2 text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span className="truncate">{formatDateBR(agingBase) || '—'}</span>
+              </div>
+            )}
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
