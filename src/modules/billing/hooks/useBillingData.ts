@@ -61,3 +61,18 @@ export function useInvoiceOrder() {
     },
   });
 }
+
+export function useUpdateOrderValue() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ orderId, valor }: { orderId: string; valor: number | null }) =>
+      updateOrderValue(orderId, valor),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['billing_summary'] });
+      queryClient.invalidateQueries({ queryKey: ['ready_to_invoice'] });
+      queryClient.invalidateQueries({ queryKey: ['billing_monthly'] });
+      queryClient.invalidateQueries({ queryKey: ['billing_by_rep'] });
+      queryClient.invalidateQueries({ queryKey: ['billing_by_coord'] });
+    },
+  });
+}
