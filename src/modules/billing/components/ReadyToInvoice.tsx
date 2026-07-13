@@ -14,6 +14,8 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { EditableCurrency } from './EditableCurrency';
+import { useAuthProfile } from '@/hooks/useAuthProfile';
 
 interface ReadyToInvoiceProps {
   orders: ReadyToInvoiceType[];
