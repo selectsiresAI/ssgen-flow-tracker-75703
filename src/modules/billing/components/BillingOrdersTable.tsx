@@ -20,6 +20,8 @@ export function BillingOrdersTable({ orders }: BillingOrdersTableProps) {
   const [selectedOrder, setSelectedOrder] = useState<ReadyToInvoice | null>(null);
   const [invoiceDate, setInvoiceDate] = useState('');
   const invoiceMutation = useInvoiceOrder();
+  const { data: profile } = useAuthProfile();
+  const isAdmin = profile?.role === 'ADM';
 
   const handleInvoice = async () => {
     if (!selectedOrder || !invoiceDate) return;
