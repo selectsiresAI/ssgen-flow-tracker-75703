@@ -986,7 +986,7 @@ const OrdersManagement: React.FC = () => {
       )}
 
       <div className="w-full max-w-full overflow-x-auto overflow-y-auto max-h-[65vh] rounded-xl border custom-scrollbar">
-        <table className="min-w-[2700px] w-full text-sm border-separate border-spacing-0 table-fixed">
+        <table className="min-w-[2820px] w-full text-sm border-separate border-spacing-0 table-fixed">
           <thead className="bg-muted">
             <tr className="text-left">
               <th className="p-3 sticky top-0 left-0 z-30 bg-muted w-[90px] whitespace-nowrap box-border">OS SSGEN</th>
