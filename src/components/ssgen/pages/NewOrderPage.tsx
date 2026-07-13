@@ -23,7 +23,6 @@ const NewOrderPageComponent: React.FC = () => {
   const [formData, setFormData] = useState({
     // Dados básicos
     ordem_servico_neogen: '',
-    numero_nf_neogen: '',
     nome_produto: '',
     numero_amostras: '',
     envio_resultados_ordem_id: '',
@@ -82,11 +81,13 @@ const NewOrderPageComponent: React.FC = () => {
       const orderData: any = {
         client_id: selectedClientId || null,
         ordem_servico_neogen: formData.ordem_servico_neogen ? Number(formData.ordem_servico_neogen) : null,
-        numero_nf_neogen: formData.numero_nf_neogen ? Number(formData.numero_nf_neogen) : null,
         nome_produto: formData.nome_produto || null,
         numero_amostras: formData.numero_amostras ? Number(formData.numero_amostras) : null,
         valor_total_override: formData.valor_total_override ? Number(formData.valor_total_override) : null,
-        valor_por_amostra: formData.valor_por_amostra ? Number(formData.valor_por_amostra) : null,
+        valor_por_amostra:
+          formData.valor_total_override && formData.numero_amostras && Number(formData.numero_amostras) > 0
+            ? Number(formData.valor_total_override) / Number(formData.numero_amostras)
+            : null,
         
         cra_data: formData.cra_data || null,
         cra_status: formData.cra_status || null,
@@ -117,7 +118,7 @@ const NewOrderPageComponent: React.FC = () => {
       setSelectedClientId(null);
       setFormData({
         ordem_servico_neogen: '',
-        numero_nf_neogen: '',
+        
         nome_produto: '',
         numero_amostras: '',
         envio_resultados_ordem_id: '',
@@ -206,15 +207,6 @@ const NewOrderPageComponent: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="numero_nf_neogen">Número da Nota Fiscal Neogen</Label>
-                  <Input
-                    id="numero_nf_neogen"
-                    type="number"
-                    value={formData.numero_nf_neogen}
-                    onChange={(e) => setFormData({ ...formData, numero_nf_neogen: e.target.value })}
-                  />
-                </div>
-                <div>
                   <Label htmlFor="nome_produto">Nome do produto</Label>
                   <Input
                     id="nome_produto"
@@ -250,9 +242,14 @@ const NewOrderPageComponent: React.FC = () => {
                     type="number"
                     step="0.01"
                     min="0"
-                    value={formData.valor_por_amostra}
-                    onChange={(e) => setFormData({ ...formData, valor_por_amostra: e.target.value })}
-                    placeholder="0,00"
+                    value={
+                      formData.valor_total_override && formData.numero_amostras && Number(formData.numero_amostras) > 0
+                        ? (Number(formData.valor_total_override) / Number(formData.numero_amostras)).toFixed(2)
+                        : ''
+                    }
+                    readOnly
+                    disabled
+                    placeholder="Calculado automaticamente"
                   />
                 </div>
               </div>

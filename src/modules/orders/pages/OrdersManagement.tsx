@@ -511,6 +511,7 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
         )}
       </td>
       <td className="p-3 w-[120px] whitespace-nowrap box-border">{row.OS_NEOGEN || '—'}</td>
+      <td className="p-3 w-[120px] whitespace-nowrap box-border">{row.NF_NEOGEM || '—'}</td>
       <td className="p-3 w-[110px] whitespace-nowrap box-border">
         {isAdmin && editingAmostras ? (
           <input
@@ -985,7 +986,7 @@ const OrdersManagement: React.FC = () => {
       )}
 
       <div className="w-full max-w-full overflow-x-auto overflow-y-auto max-h-[65vh] rounded-xl border custom-scrollbar">
-        <table className="min-w-[2700px] w-full text-sm border-separate border-spacing-0 table-fixed">
+        <table className="min-w-[2820px] w-full text-sm border-separate border-spacing-0 table-fixed">
           <thead className="bg-muted">
             <tr className="text-left">
               <th className="p-3 sticky top-0 left-0 z-30 bg-muted w-[90px] whitespace-nowrap box-border">OS SSGEN</th>
@@ -994,6 +995,7 @@ const OrdersManagement: React.FC = () => {
               <th className="p-3 sticky top-0 z-20 bg-muted w-[140px] whitespace-nowrap box-border">Etapa</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[120px] whitespace-nowrap box-border">Order ID</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[120px] whitespace-nowrap box-border">OS Neogen</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[120px] whitespace-nowrap box-border">NF Neogen</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[110px] whitespace-nowrap box-border">N° Amostras</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">CRA</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">Envio de Planilha</th>
