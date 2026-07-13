@@ -53,6 +53,8 @@ export type PowerRow = {
   issue_text?: string | null;
   source_table?: string | null;
   envio_resultados_ordem_id?: number | null;
+  pedido_ssb?: string | null;
+  nf_ssb?: string | null;
 };
 
 export const isSet = (v: any) => v !== null && v !== undefined && v !== '';
