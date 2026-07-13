@@ -214,14 +214,6 @@ const NewOrderPageComponent: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="nome_produto">Nome do produto</Label>
-                  <Input
-                    id="nome_produto"
-                    value={formData.nome_produto}
-                    onChange={(e) => setFormData({ ...formData, nome_produto: e.target.value })}
-                  />
-                </div>
-                <div>
                   <Label htmlFor="numero_amostras">Número de Amostras</Label>
                   <Input
                     id="numero_amostras"
