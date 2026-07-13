@@ -148,7 +148,59 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
   const [editingOs, setEditingOs] = useState(false);
   const [osValue, setOsValue] = useState(String(row.OS_SSGEN ?? ''));
   const [savingOs, setSavingOs] = useState(false);
-  const [stageDialogOpen, setStageDialogOpen] = useState(false);
+  const [editingAmostras, setEditingAmostras] = useState(false);
+  const [amostrasValue, setAmostrasValue] = useState(String(row.N_AMOSTRAS_SSG ?? ''));
+  const [savingAmostras, setSavingAmostras] = useState(false);
+  const [editingOrderId, setEditingOrderId] = useState(false);
+  const [orderIdValue, setOrderIdValue] = useState(String(row.envio_resultados_ordem_id ?? ''));
+  const [savingOrderId, setSavingOrderId] = useState(false);
+
+  const handleAmostrasSave = async () => {
+    const newVal = amostrasValue === '' ? null : Number(amostrasValue);
+    if (newVal !== null && (!Number.isFinite(newVal) || newVal < 0)) {
+      toast.error('Número de amostras inválido.');
+      return;
+    }
+    if (!row.id) { setEditingAmostras(false); return; }
+    const oldVal = row.N_AMOSTRAS_SSG ?? null;
+    if (String(oldVal ?? '') === String(newVal ?? '')) { setEditingAmostras(false); return; }
+    setSavingAmostras(true);
+    try {
+      const { error } = await supabase.from('service_orders')
+        .update({ numero_amostras: newVal }).eq('id', row.id).is('deleted_at', null);
+      if (error) throw error;
+      await logOrderChange({ order_id: row.id, field_name: 'numero_amostras', old_value: String(oldVal ?? ''), new_value: String(newVal ?? '') });
+      onChange({ ...row, N_AMOSTRAS_SSG: newVal } as OrdersManagementRow);
+      setEditingAmostras(false);
+    } catch (e) {
+      console.error(e); toast.error('Erro ao salvar N° Amostras.');
+      setAmostrasValue(String(row.N_AMOSTRAS_SSG ?? ''));
+    } finally { setSavingAmostras(false); }
+  };
+
+  const handleOrderIdSave = async () => {
+    const newVal = orderIdValue === '' ? null : Number(orderIdValue);
+    if (newVal !== null && !Number.isFinite(newVal)) {
+      toast.error('Order ID inválido.');
+      return;
+    }
+    if (!row.id) { setEditingOrderId(false); return; }
+    const oldVal = row.envio_resultados_ordem_id ?? null;
+    if (String(oldVal ?? '') === String(newVal ?? '')) { setEditingOrderId(false); return; }
+    setSavingOrderId(true);
+    try {
+      const { error } = await supabase.from('service_orders')
+        .update({ envio_resultados_ordem_id: newVal }).eq('id', row.id).is('deleted_at', null);
+      if (error) throw error;
+      await logOrderChange({ order_id: row.id, field_name: 'envio_resultados_ordem_id', old_value: String(oldVal ?? ''), new_value: String(newVal ?? '') });
+      onChange({ ...row, envio_resultados_ordem_id: newVal } as OrdersManagementRow);
+      setEditingOrderId(false);
+    } catch (e) {
+      console.error(e); toast.error('Erro ao salvar Order ID.');
+      setOrderIdValue(String(row.envio_resultados_ordem_id ?? ''));
+    } finally { setSavingOrderId(false); }
+  };
+
 
   const handleOsSave = async () => {
     const newVal = Number(osValue);
