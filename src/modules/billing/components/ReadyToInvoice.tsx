@@ -87,7 +87,12 @@ export function ReadyToInvoice({ orders }: ReadyToInvoiceProps) {
                     {order.numero_amostras}
                   </td>
                   <td className="px-4 py-3 text-sm text-right font-semibold text-success">
-                    R$ {order.valor_estimado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    <EditableCurrency
+                      orderId={order.id}
+                      value={order.valor_estimado || 0}
+                      isOverride={order.valor_total_override != null}
+                      canEdit={isAdmin}
+                    />
                   </td>
                   <td className="px-4 py-3 text-center">
                     <span className={`text-xs px-2 py-1 rounded ${
