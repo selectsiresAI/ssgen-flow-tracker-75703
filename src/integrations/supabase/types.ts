@@ -1230,11 +1230,13 @@ export type Database = {
           lpr_data: string | null
           lpr_n_amostras: number | null
           lpr_status_sla: string | null
+          nf_ssb: string | null
           nome_produto: string | null
           numero_amostras: number | null
           numero_nf_neogen: number | null
           ordem_servico_neogen: number | null
           ordem_servico_ssgen: number
+          pedido_ssb: string | null
           prioridade: string | null
           received_at: string | null
           result_file_path: string | null
@@ -1277,11 +1279,13 @@ export type Database = {
           lpr_data?: string | null
           lpr_n_amostras?: number | null
           lpr_status_sla?: string | null
+          nf_ssb?: string | null
           nome_produto?: string | null
           numero_amostras?: number | null
           numero_nf_neogen?: number | null
           ordem_servico_neogen?: number | null
           ordem_servico_ssgen: number
+          pedido_ssb?: string | null
           prioridade?: string | null
           received_at?: string | null
           result_file_path?: string | null
@@ -1324,11 +1328,13 @@ export type Database = {
           lpr_data?: string | null
           lpr_n_amostras?: number | null
           lpr_status_sla?: string | null
+          nf_ssb?: string | null
           nome_produto?: string | null
           numero_amostras?: number | null
           numero_nf_neogen?: number | null
           ordem_servico_neogen?: number | null
           ordem_servico_ssgen?: number
+          pedido_ssb?: string | null
           prioridade?: string | null
           received_at?: string | null
           result_file_path?: string | null

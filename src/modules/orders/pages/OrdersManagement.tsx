@@ -154,6 +154,39 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
   const [editingOrderId, setEditingOrderId] = useState(false);
   const [orderIdValue, setOrderIdValue] = useState(String(row.envio_resultados_ordem_id ?? ''));
   const [savingOrderId, setSavingOrderId] = useState(false);
+  const [editingPedidoSsb, setEditingPedidoSsb] = useState(false);
+  const [pedidoSsbValue, setPedidoSsbValue] = useState(String(row.pedido_ssb ?? ''));
+  const [savingPedidoSsb, setSavingPedidoSsb] = useState(false);
+  const [editingNfSsb, setEditingNfSsb] = useState(false);
+  const [nfSsbValue, setNfSsbValue] = useState(String(row.nf_ssb ?? ''));
+  const [savingNfSsb, setSavingNfSsb] = useState(false);
+
+  const saveTextField = async (
+    column: 'pedido_ssb' | 'nf_ssb',
+    newValue: string,
+    oldValue: string | null,
+    setSaving: (b: boolean) => void,
+    setEditing: (b: boolean) => void,
+    setLocal: (s: string) => void,
+    rowKey: 'pedido_ssb' | 'nf_ssb',
+  ) => {
+    const val = newValue.trim() === '' ? null : newValue.trim();
+    if (!row.id) { setEditing(false); return; }
+    if ((oldValue ?? '') === (val ?? '')) { setEditing(false); return; }
+    setSaving(true);
+    try {
+      const { error } = await supabase.from('service_orders')
+        .update({ [column]: val } as any).eq('id', row.id).is('deleted_at', null);
+      if (error) throw error;
+      await logOrderChange({ order_id: row.id, field_name: column, old_value: oldValue ?? '', new_value: val ?? '' });
+      onChange({ ...row, [rowKey]: val } as OrdersManagementRow);
+      setEditing(false);
+    } catch (e) {
+      console.error(e); toast.error(`Erro ao salvar ${column}.`);
+      setLocal(String(oldValue ?? ''));
+    } finally { setSaving(false); }
+  };
+
 
   const handleAmostrasSave = async () => {
     const newVal = amostrasValue === '' ? null : Number(amostrasValue);
@@ -505,6 +538,56 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
       {stageOrder.map((label) => (
         <React.Fragment key={label}>{renderField(label)}</React.Fragment>
       ))}
+      <td className="p-3 w-[140px] whitespace-nowrap box-border">
+        {isAdmin && editingPedidoSsb ? (
+          <input
+            type="text"
+            className="border rounded-md px-2 py-1 w-full bg-background text-sm"
+            value={pedidoSsbValue}
+            onChange={(e) => setPedidoSsbValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') saveTextField('pedido_ssb', pedidoSsbValue, row.pedido_ssb ?? null, setSavingPedidoSsb, setEditingPedidoSsb, setPedidoSsbValue, 'pedido_ssb');
+              if (e.key === 'Escape') { setEditingPedidoSsb(false); setPedidoSsbValue(String(row.pedido_ssb ?? '')); }
+            }}
+            onBlur={() => saveTextField('pedido_ssb', pedidoSsbValue, row.pedido_ssb ?? null, setSavingPedidoSsb, setEditingPedidoSsb, setPedidoSsbValue, 'pedido_ssb')}
+            autoFocus
+            disabled={savingPedidoSsb}
+          />
+        ) : (
+          <span
+            className={isAdmin ? 'cursor-pointer hover:underline' : ''}
+            onClick={() => { if (isAdmin) { setPedidoSsbValue(String(row.pedido_ssb ?? '')); setEditingPedidoSsb(true); } }}
+          >
+            {row.pedido_ssb || '—'}
+          </span>
+        )}
+      </td>
+      <td className="p-3 w-[140px] whitespace-nowrap box-border">
+        {isAdmin && editingNfSsb ? (
+          <input
+            type="text"
+            className="border rounded-md px-2 py-1 w-full bg-background text-sm"
+            value={nfSsbValue}
+            onChange={(e) => setNfSsbValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') saveTextField('nf_ssb', nfSsbValue, row.nf_ssb ?? null, setSavingNfSsb, setEditingNfSsb, setNfSsbValue, 'nf_ssb');
+              if (e.key === 'Escape') { setEditingNfSsb(false); setNfSsbValue(String(row.nf_ssb ?? '')); }
+            }}
+            onBlur={() => saveTextField('nf_ssb', nfSsbValue, row.nf_ssb ?? null, setSavingNfSsb, setEditingNfSsb, setNfSsbValue, 'nf_ssb')}
+            autoFocus
+            disabled={savingNfSsb}
+          />
+        ) : (
+          <span
+            className={isAdmin ? 'cursor-pointer hover:underline' : ''}
+            onClick={() => { if (isAdmin) { setNfSsbValue(String(row.nf_ssb ?? '')); setEditingNfSsb(true); } }}
+          >
+            {row.nf_ssb || '—'}
+          </span>
+        )}
+      </td>
+
+
 
       <td className="p-3"><Badge variant="outline">{priorityLabel}</Badge></td>
       <td className="p-3">
@@ -902,7 +985,7 @@ const OrdersManagement: React.FC = () => {
       )}
 
       <div className="w-full max-w-full overflow-x-auto overflow-y-auto max-h-[65vh] rounded-xl border custom-scrollbar">
-        <table className="min-w-[2400px] w-full text-sm border-separate border-spacing-0 table-fixed">
+        <table className="min-w-[2700px] w-full text-sm border-separate border-spacing-0 table-fixed">
           <thead className="bg-muted">
             <tr className="text-left">
               <th className="p-3 sticky top-0 left-0 z-30 bg-muted w-[90px] whitespace-nowrap box-border">OS SSGEN</th>
@@ -919,6 +1002,8 @@ const OrdersManagement: React.FC = () => {
               <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">LR</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">Envio de Resultados</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">Faturar</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[140px] whitespace-nowrap box-border">Pedido SSB</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[140px] whitespace-nowrap box-border">NF SSB</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[100px] whitespace-nowrap box-border">Prioridade</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[80px] whitespace-nowrap box-border">Aging</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[90px] whitespace-nowrap box-border">Status</th>
