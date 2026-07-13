@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label';
 import { useInvoiceOrder } from '../hooks/useBillingData';
 import { toast } from 'sonner';
 import type { ReadyToInvoice } from '@/lib/billingApi';
+import { EditableCurrency } from './EditableCurrency';
+import { useAuthProfile } from '@/hooks/useAuthProfile';
 
 interface BillingOrdersTableProps {
   orders: ReadyToInvoice[];
