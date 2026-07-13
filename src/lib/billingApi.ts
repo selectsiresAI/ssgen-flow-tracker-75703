@@ -24,6 +24,7 @@ export interface ReadyToInvoice {
   representante: string;
   coordenador: string;
   valor_estimado: number;
+  valor_total_override: number | null;
   dias_desde_liberacao: number;
   created_at: string;
   updated_at: string;
