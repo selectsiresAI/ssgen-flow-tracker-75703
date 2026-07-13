@@ -206,12 +206,11 @@ const NewOrderPageComponent: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="numero_nf_neogen">Número da Nota Fiscal Neogen</Label>
+                  <Label htmlFor="nome_produto">Nome do produto</Label>
                   <Input
-                    id="numero_nf_neogen"
-                    type="number"
-                    value={formData.numero_nf_neogen}
-                    onChange={(e) => setFormData({ ...formData, numero_nf_neogen: e.target.value })}
+                    id="nome_produto"
+                    value={formData.nome_produto}
+                    onChange={(e) => setFormData({ ...formData, nome_produto: e.target.value })}
                   />
                 </div>
                 <div>
