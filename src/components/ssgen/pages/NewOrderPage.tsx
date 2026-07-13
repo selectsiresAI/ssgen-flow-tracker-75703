@@ -23,7 +23,6 @@ const NewOrderPageComponent: React.FC = () => {
   const [formData, setFormData] = useState({
     // Dados básicos
     ordem_servico_neogen: '',
-    numero_nf_neogen: '',
     nome_produto: '',
     numero_amostras: '',
     envio_resultados_ordem_id: '',
