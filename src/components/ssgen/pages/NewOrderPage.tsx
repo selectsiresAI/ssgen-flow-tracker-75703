@@ -241,9 +241,14 @@ const NewOrderPageComponent: React.FC = () => {
                     type="number"
                     step="0.01"
                     min="0"
-                    value={formData.valor_por_amostra}
-                    onChange={(e) => setFormData({ ...formData, valor_por_amostra: e.target.value })}
-                    placeholder="0,00"
+                    value={
+                      formData.valor_total_override && formData.numero_amostras && Number(formData.numero_amostras) > 0
+                        ? (Number(formData.valor_total_override) / Number(formData.numero_amostras)).toFixed(2)
+                        : ''
+                    }
+                    readOnly
+                    disabled
+                    placeholder="Calculado automaticamente"
                   />
                 </div>
               </div>
