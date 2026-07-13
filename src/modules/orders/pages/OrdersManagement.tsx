@@ -538,6 +538,56 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
       {stageOrder.map((label) => (
         <React.Fragment key={label}>{renderField(label)}</React.Fragment>
       ))}
+      <td className="p-3 w-[140px] whitespace-nowrap box-border">
+        {isAdmin && editingPedidoSsb ? (
+          <input
+            type="text"
+            className="border rounded-md px-2 py-1 w-full bg-background text-sm"
+            value={pedidoSsbValue}
+            onChange={(e) => setPedidoSsbValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') saveTextField('pedido_ssb', pedidoSsbValue, row.pedido_ssb ?? null, setSavingPedidoSsb, setEditingPedidoSsb, setPedidoSsbValue, 'pedido_ssb');
+              if (e.key === 'Escape') { setEditingPedidoSsb(false); setPedidoSsbValue(String(row.pedido_ssb ?? '')); }
+            }}
+            onBlur={() => saveTextField('pedido_ssb', pedidoSsbValue, row.pedido_ssb ?? null, setSavingPedidoSsb, setEditingPedidoSsb, setPedidoSsbValue, 'pedido_ssb')}
+            autoFocus
+            disabled={savingPedidoSsb}
+          />
+        ) : (
+          <span
+            className={isAdmin ? 'cursor-pointer hover:underline' : ''}
+            onClick={() => { if (isAdmin) { setPedidoSsbValue(String(row.pedido_ssb ?? '')); setEditingPedidoSsb(true); } }}
+          >
+            {row.pedido_ssb || '—'}
+          </span>
+        )}
+      </td>
+      <td className="p-3 w-[140px] whitespace-nowrap box-border">
+        {isAdmin && editingNfSsb ? (
+          <input
+            type="text"
+            className="border rounded-md px-2 py-1 w-full bg-background text-sm"
+            value={nfSsbValue}
+            onChange={(e) => setNfSsbValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') saveTextField('nf_ssb', nfSsbValue, row.nf_ssb ?? null, setSavingNfSsb, setEditingNfSsb, setNfSsbValue, 'nf_ssb');
+              if (e.key === 'Escape') { setEditingNfSsb(false); setNfSsbValue(String(row.nf_ssb ?? '')); }
+            }}
+            onBlur={() => saveTextField('nf_ssb', nfSsbValue, row.nf_ssb ?? null, setSavingNfSsb, setEditingNfSsb, setNfSsbValue, 'nf_ssb')}
+            autoFocus
+            disabled={savingNfSsb}
+          />
+        ) : (
+          <span
+            className={isAdmin ? 'cursor-pointer hover:underline' : ''}
+            onClick={() => { if (isAdmin) { setNfSsbValue(String(row.nf_ssb ?? '')); setEditingNfSsb(true); } }}
+          >
+            {row.nf_ssb || '—'}
+          </span>
+        )}
+      </td>
+
+
 
       <td className="p-3"><Badge variant="outline">{priorityLabel}</Badge></td>
       <td className="p-3">
