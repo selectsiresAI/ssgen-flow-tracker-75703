@@ -27,6 +27,8 @@ const NewOrderPageComponent: React.FC = () => {
     nome_produto: '',
     numero_amostras: '',
     envio_resultados_ordem_id: '',
+    valor_total_override: '',
+    valor_por_amostra: '',
     
     // CRA
     cra_data: '',
@@ -83,6 +85,8 @@ const NewOrderPageComponent: React.FC = () => {
         numero_nf_neogen: formData.numero_nf_neogen ? Number(formData.numero_nf_neogen) : null,
         nome_produto: formData.nome_produto || null,
         numero_amostras: formData.numero_amostras ? Number(formData.numero_amostras) : null,
+        valor_total_override: formData.valor_total_override ? Number(formData.valor_total_override) : null,
+        valor_por_amostra: formData.valor_por_amostra ? Number(formData.valor_por_amostra) : null,
         
         cra_data: formData.cra_data || null,
         cra_status: formData.cra_status || null,
@@ -117,6 +121,8 @@ const NewOrderPageComponent: React.FC = () => {
         nome_produto: '',
         numero_amostras: '',
         envio_resultados_ordem_id: '',
+        valor_total_override: '',
+        valor_por_amostra: '',
         cra_data: '',
         cra_status: '',
         envio_planilha_data: '',
@@ -223,6 +229,30 @@ const NewOrderPageComponent: React.FC = () => {
                     type="number"
                     value={formData.numero_amostras}
                     onChange={(e) => setFormData({ ...formData, numero_amostras: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="valor_total_override">Valor total do pedido (R$)</Label>
+                  <Input
+                    id="valor_total_override"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.valor_total_override}
+                    onChange={(e) => setFormData({ ...formData, valor_total_override: e.target.value })}
+                    placeholder="0,00"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="valor_por_amostra">Valor por amostra (R$)</Label>
+                  <Input
+                    id="valor_por_amostra"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.valor_por_amostra}
+                    onChange={(e) => setFormData({ ...formData, valor_por_amostra: e.target.value })}
+                    placeholder="0,00"
                   />
                 </div>
               </div>
