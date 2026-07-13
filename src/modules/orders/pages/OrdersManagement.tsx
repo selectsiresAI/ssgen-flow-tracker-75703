@@ -154,6 +154,39 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
   const [editingOrderId, setEditingOrderId] = useState(false);
   const [orderIdValue, setOrderIdValue] = useState(String(row.envio_resultados_ordem_id ?? ''));
   const [savingOrderId, setSavingOrderId] = useState(false);
+  const [editingPedidoSsb, setEditingPedidoSsb] = useState(false);
+  const [pedidoSsbValue, setPedidoSsbValue] = useState(String(row.pedido_ssb ?? ''));
+  const [savingPedidoSsb, setSavingPedidoSsb] = useState(false);
+  const [editingNfSsb, setEditingNfSsb] = useState(false);
+  const [nfSsbValue, setNfSsbValue] = useState(String(row.nf_ssb ?? ''));
+  const [savingNfSsb, setSavingNfSsb] = useState(false);
+
+  const saveTextField = async (
+    column: 'pedido_ssb' | 'nf_ssb',
+    newValue: string,
+    oldValue: string | null,
+    setSaving: (b: boolean) => void,
+    setEditing: (b: boolean) => void,
+    setLocal: (s: string) => void,
+    rowKey: 'pedido_ssb' | 'nf_ssb',
+  ) => {
+    const val = newValue.trim() === '' ? null : newValue.trim();
+    if (!row.id) { setEditing(false); return; }
+    if ((oldValue ?? '') === (val ?? '')) { setEditing(false); return; }
+    setSaving(true);
+    try {
+      const { error } = await supabase.from('service_orders')
+        .update({ [column]: val } as any).eq('id', row.id).is('deleted_at', null);
+      if (error) throw error;
+      await logOrderChange({ order_id: row.id, field_name: column, old_value: oldValue ?? '', new_value: val ?? '' });
+      onChange({ ...row, [rowKey]: val } as OrdersManagementRow);
+      setEditing(false);
+    } catch (e) {
+      console.error(e); toast.error(`Erro ao salvar ${column}.`);
+      setLocal(String(oldValue ?? ''));
+    } finally { setSaving(false); }
+  };
+
 
   const handleAmostrasSave = async () => {
     const newVal = amostrasValue === '' ? null : Number(amostrasValue);
