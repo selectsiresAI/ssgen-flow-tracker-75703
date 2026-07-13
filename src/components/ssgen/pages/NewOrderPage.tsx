@@ -119,6 +119,8 @@ const NewOrderPageComponent: React.FC = () => {
         nome_produto: '',
         numero_amostras: '',
         envio_resultados_ordem_id: '',
+        valor_total_override: '',
+        valor_por_amostra: '',
         cra_data: '',
         cra_status: '',
         envio_planilha_data: '',
