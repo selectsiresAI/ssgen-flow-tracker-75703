@@ -902,19 +902,31 @@ const OrdersManagement: React.FC = () => {
       )}
 
       <div className="w-full max-w-full overflow-x-auto overflow-y-auto max-h-[65vh] rounded-xl border custom-scrollbar">
-        <table className="min-w-[1100px] w-full text-sm border-separate border-spacing-0 table-fixed">
+        <table className="min-w-[2400px] w-full text-sm border-separate border-spacing-0 table-fixed">
           <thead className="bg-muted">
             <tr className="text-left">
               <th className="p-3 sticky top-0 left-0 z-30 bg-muted w-[90px] whitespace-nowrap box-border">OS SSGEN</th>
               <th className="p-3 sticky top-0 left-[90px] z-30 bg-muted w-[260px] whitespace-nowrap box-border">Nome do cliente</th>
-              <th className="p-3 sticky top-0 z-20 bg-muted w-[150px] whitespace-nowrap box-border">Data</th>
-              <th className="p-3 sticky top-0 z-20 bg-muted w-[90px] whitespace-nowrap box-border">Prioridade</th>
-              <th className="p-3 sticky top-0 z-20 bg-muted w-[70px] whitespace-nowrap box-border">Aging</th>
-              <th className="p-3 sticky top-0 z-20 bg-muted w-[80px] whitespace-nowrap box-border">Status</th>
-              <th className="p-3 sticky top-0 z-20 bg-muted w-[110px] whitespace-nowrap box-border">Arquivo</th>
-              {isAdmin && <th className="p-3 sticky top-0 z-20 bg-muted w-[70px] whitespace-nowrap box-border">Ações</th>}
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">Produto</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[140px] whitespace-nowrap box-border">Etapa</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[120px] whitespace-nowrap box-border">Order ID</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[120px] whitespace-nowrap box-border">OS Neogen</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[110px] whitespace-nowrap box-border">N° Amostras</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">CRA</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">Envio de Planilha</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">VRI</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">LPR</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">LR</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">Envio de Resultados</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">Faturar</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[100px] whitespace-nowrap box-border">Prioridade</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[80px] whitespace-nowrap box-border">Aging</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[90px] whitespace-nowrap box-border">Status</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[140px] whitespace-nowrap box-border">Arquivo</th>
+              {isAdmin && <th className="p-3 sticky top-0 z-20 bg-muted w-[90px] whitespace-nowrap box-border">Ações</th>}
             </tr>
           </thead>
+
           <tbody>
             {filteredRows.map((row) => (
               <EtapasRow
