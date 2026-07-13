@@ -451,58 +451,61 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
           row.CLIENTE || '—'
         )}
       </td>
-      <td className="p-3 w-[150px] box-border">
-        <Dialog open={stageDialogOpen} onOpenChange={setStageDialogOpen}>
-          <DialogTrigger asChild>
-            {isAdmin ? (
-              <button
-                className="w-full text-left flex items-center gap-2 text-sm border rounded-md px-2 py-1 bg-background hover:bg-muted/50 transition-colors"
-              >
-                <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="truncate">{formatDateBR(agingBase) || 'dd/mm/aaaa'}</span>
-              </button>
-            ) : (
-              <div className="w-full text-left flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="truncate">{formatDateBR(agingBase) || '—'}</span>
-              </div>
-            )}
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Editar datas - OS {row.OS_SSGEN}</DialogTitle>
-            </DialogHeader>
-            <div className="grid grid-cols-2 gap-4 py-4">
-              {stageOrder.map((label) => {
-                const { view } = fieldMap[label];
-                const value = row[view];
-                const savingThisField = saving === label;
-                const hasError = errorStage === label;
-                return (
-                  <div key={label} className="space-y-1.5">
-                    <label className="text-sm font-medium">{label}</label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="date"
-                        className="border rounded-md px-2 py-1 bg-background w-full"
-                        value={formatDateForInput(value as string | null)}
-                        onChange={(event) => persistField(label, event.target.value || null)}
-                        disabled={!isAdmin}
-                      />
-                      {savingThisField && (
-                        <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
-                      )}
-                      {hasError && (
-                        <AlertCircle className="h-4 w-4 shrink-0 text-destructive" />
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </DialogContent>
-        </Dialog>
+      <td className="p-3 w-[160px] whitespace-nowrap box-border truncate">{row.PROD_SSG || row.PROD_NEOGEN || '—'}</td>
+      <td className="p-3 w-[140px] whitespace-nowrap box-border">{currentStage}</td>
+      <td className="p-3 w-[120px] whitespace-nowrap box-border">
+        {isAdmin && editingOrderId ? (
+          <input
+            type="number"
+            className="border rounded-md px-2 py-1 w-24 bg-background text-sm"
+            value={orderIdValue}
+            onChange={(e) => setOrderIdValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleOrderIdSave();
+              if (e.key === 'Escape') { setEditingOrderId(false); setOrderIdValue(String(row.envio_resultados_ordem_id ?? '')); }
+            }}
+            onBlur={handleOrderIdSave}
+            autoFocus
+            disabled={savingOrderId}
+          />
+        ) : (
+          <span
+            className={isAdmin ? 'cursor-pointer hover:underline' : ''}
+            onClick={() => { if (isAdmin) { setOrderIdValue(String(row.envio_resultados_ordem_id ?? '')); setEditingOrderId(true); } }}
+          >
+            {row.envio_resultados_ordem_id ?? '—'}
+          </span>
+        )}
       </td>
+      <td className="p-3 w-[120px] whitespace-nowrap box-border">{row.OS_NEOGEN || '—'}</td>
+      <td className="p-3 w-[110px] whitespace-nowrap box-border">
+        {isAdmin && editingAmostras ? (
+          <input
+            type="number"
+            className="border rounded-md px-2 py-1 w-20 bg-background text-sm"
+            value={amostrasValue}
+            onChange={(e) => setAmostrasValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleAmostrasSave();
+              if (e.key === 'Escape') { setEditingAmostras(false); setAmostrasValue(String(row.N_AMOSTRAS_SSG ?? '')); }
+            }}
+            onBlur={handleAmostrasSave}
+            autoFocus
+            disabled={savingAmostras}
+          />
+        ) : (
+          <span
+            className={isAdmin ? 'cursor-pointer hover:underline' : ''}
+            onClick={() => { if (isAdmin) { setAmostrasValue(String(row.N_AMOSTRAS_SSG ?? '')); setEditingAmostras(true); } }}
+          >
+            {row.N_AMOSTRAS_SSG ?? '—'}
+          </span>
+        )}
+      </td>
+      {stageOrder.map((label) => (
+        <React.Fragment key={label}>{renderField(label)}</React.Fragment>
+      ))}
+
       <td className="p-3"><Badge variant="outline">{priorityLabel}</Badge></td>
       <td className="p-3">
         <Badge variant="outline">{aging === null ? '—' : `${aging}d`}</Badge>
