@@ -14,6 +14,8 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { EditableCurrency } from './EditableCurrency';
+import { useAuthProfile } from '@/hooks/useAuthProfile';
 
 interface ReadyToInvoiceProps {
   orders: ReadyToInvoiceType[];
@@ -23,6 +25,8 @@ export function ReadyToInvoice({ orders }: ReadyToInvoiceProps) {
   const [selectedOrder, setSelectedOrder] = useState<ReadyToInvoiceType | null>(null);
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
   const invoiceMutation = useInvoiceOrder();
+  const { data: profile } = useAuthProfile();
+  const isAdmin = profile?.role === 'ADM';
 
   const handleInvoice = async () => {
     if (!selectedOrder) return;
@@ -83,7 +87,12 @@ export function ReadyToInvoice({ orders }: ReadyToInvoiceProps) {
                     {order.numero_amostras}
                   </td>
                   <td className="px-4 py-3 text-sm text-right font-semibold text-success">
-                    R$ {order.valor_estimado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    <EditableCurrency
+                      orderId={order.id}
+                      value={order.valor_estimado || 0}
+                      isOverride={order.valor_total_override != null}
+                      canEdit={isAdmin}
+                    />
                   </td>
                   <td className="px-4 py-3 text-center">
                     <span className={`text-xs px-2 py-1 rounded ${

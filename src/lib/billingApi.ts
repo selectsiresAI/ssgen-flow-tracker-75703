@@ -24,6 +24,7 @@ export interface ReadyToInvoice {
   representante: string;
   coordenador: string;
   valor_estimado: number;
+  valor_total_override: number | null;
   dias_desde_liberacao: number;
   created_at: string;
   updated_at: string;
@@ -117,6 +118,17 @@ export async function invoiceOrder(orderId: string, dt_faturamento: string): Pro
   const { error } = await supabase
     .from('service_orders')
     .update({ dt_faturamento } as any)
+    .eq('id', orderId)
+    .is('deleted_at', null);
+
+  if (error) throw error;
+}
+
+export async function updateOrderValue(orderId: string, valor: number | null): Promise<void> {
+  await requireAdmin();
+  const { error } = await supabase
+    .from('service_orders')
+    .update({ valor_total_override: valor } as any)
     .eq('id', orderId)
     .is('deleted_at', null);
 
