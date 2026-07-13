@@ -82,11 +82,13 @@ const NewOrderPageComponent: React.FC = () => {
       const orderData: any = {
         client_id: selectedClientId || null,
         ordem_servico_neogen: formData.ordem_servico_neogen ? Number(formData.ordem_servico_neogen) : null,
-        numero_nf_neogen: formData.numero_nf_neogen ? Number(formData.numero_nf_neogen) : null,
         nome_produto: formData.nome_produto || null,
         numero_amostras: formData.numero_amostras ? Number(formData.numero_amostras) : null,
         valor_total_override: formData.valor_total_override ? Number(formData.valor_total_override) : null,
-        valor_por_amostra: formData.valor_por_amostra ? Number(formData.valor_por_amostra) : null,
+        valor_por_amostra:
+          formData.valor_total_override && formData.numero_amostras && Number(formData.numero_amostras) > 0
+            ? Number(formData.valor_total_override) / Number(formData.numero_amostras)
+            : null,
         
         cra_data: formData.cra_data || null,
         cra_status: formData.cra_status || null,
