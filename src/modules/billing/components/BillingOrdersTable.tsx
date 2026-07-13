@@ -101,7 +101,12 @@ export function BillingOrdersTable({ orders }: BillingOrdersTableProps) {
                 <TableCell className="text-sm text-muted-foreground">{order.nome_produto || '-'}</TableCell>
                 <TableCell className="text-center">{order.numero_amostras || 0}</TableCell>
                 <TableCell className="text-green-600 text-right font-semibold">
-                  R$ {(order.valor_estimado || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  <EditableCurrency
+                    orderId={order.id}
+                    value={order.valor_estimado || 0}
+                    isOverride={order.valor_total_override != null}
+                    canEdit={isAdmin}
+                  />
                 </TableCell>
                 <TableCell className="text-center">
                   <Badge variant={order.dias_desde_liberacao > 7 ? 'destructive' : order.dias_desde_liberacao > 3 ? 'warning' : 'default'}>
