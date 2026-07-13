@@ -1002,6 +1002,8 @@ const OrdersManagement: React.FC = () => {
               <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">LR</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">Envio de Resultados</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">Faturar</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[140px] whitespace-nowrap box-border">Pedido SSB</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[140px] whitespace-nowrap box-border">NF SSB</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[100px] whitespace-nowrap box-border">Prioridade</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[80px] whitespace-nowrap box-border">Aging</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[90px] whitespace-nowrap box-border">Status</th>
