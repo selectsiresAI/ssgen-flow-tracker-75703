@@ -995,6 +995,7 @@ const OrdersManagement: React.FC = () => {
               <th className="p-3 sticky top-0 z-20 bg-muted w-[140px] whitespace-nowrap box-border">Etapa</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[120px] whitespace-nowrap box-border">Order ID</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[120px] whitespace-nowrap box-border">OS Neogen</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[120px] whitespace-nowrap box-border">NF Neogen</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[110px] whitespace-nowrap box-border">N° Amostras</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">CRA</th>
               <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">Envio de Planilha</th>
