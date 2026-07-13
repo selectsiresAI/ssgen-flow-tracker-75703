@@ -1244,6 +1244,7 @@ export type Database = {
           sync_error: string | null
           sync_status: string | null
           updated_at: string
+          valor_por_amostra: number | null
           valor_total_override: number | null
           vri_data: string | null
           vri_n_amostras: number | null
@@ -1293,6 +1294,7 @@ export type Database = {
           sync_error?: string | null
           sync_status?: string | null
           updated_at?: string
+          valor_por_amostra?: number | null
           valor_total_override?: number | null
           vri_data?: string | null
           vri_n_amostras?: number | null
@@ -1342,6 +1344,7 @@ export type Database = {
           sync_error?: string | null
           sync_status?: string | null
           updated_at?: string
+          valor_por_amostra?: number | null
           valor_total_override?: number | null
           vri_data?: string | null
           vri_n_amostras?: number | null
