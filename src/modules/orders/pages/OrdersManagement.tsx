@@ -511,6 +511,7 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
         )}
       </td>
       <td className="p-3 w-[120px] whitespace-nowrap box-border">{row.OS_NEOGEN || '—'}</td>
+      <td className="p-3 w-[120px] whitespace-nowrap box-border">{row.NF_NEOGEM || '—'}</td>
       <td className="p-3 w-[110px] whitespace-nowrap box-border">
         {isAdmin && editingAmostras ? (
           <input
