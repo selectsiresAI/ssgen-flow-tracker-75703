@@ -148,7 +148,59 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
   const [editingOs, setEditingOs] = useState(false);
   const [osValue, setOsValue] = useState(String(row.OS_SSGEN ?? ''));
   const [savingOs, setSavingOs] = useState(false);
-  const [stageDialogOpen, setStageDialogOpen] = useState(false);
+  const [editingAmostras, setEditingAmostras] = useState(false);
+  const [amostrasValue, setAmostrasValue] = useState(String(row.N_AMOSTRAS_SSG ?? ''));
+  const [savingAmostras, setSavingAmostras] = useState(false);
+  const [editingOrderId, setEditingOrderId] = useState(false);
+  const [orderIdValue, setOrderIdValue] = useState(String(row.envio_resultados_ordem_id ?? ''));
+  const [savingOrderId, setSavingOrderId] = useState(false);
+
+  const handleAmostrasSave = async () => {
+    const newVal = amostrasValue === '' ? null : Number(amostrasValue);
+    if (newVal !== null && (!Number.isFinite(newVal) || newVal < 0)) {
+      toast.error('Número de amostras inválido.');
+      return;
+    }
+    if (!row.id) { setEditingAmostras(false); return; }
+    const oldVal = row.N_AMOSTRAS_SSG ?? null;
+    if (String(oldVal ?? '') === String(newVal ?? '')) { setEditingAmostras(false); return; }
+    setSavingAmostras(true);
+    try {
+      const { error } = await supabase.from('service_orders')
+        .update({ numero_amostras: newVal }).eq('id', row.id).is('deleted_at', null);
+      if (error) throw error;
+      await logOrderChange({ order_id: row.id, field_name: 'numero_amostras', old_value: String(oldVal ?? ''), new_value: String(newVal ?? '') });
+      onChange({ ...row, N_AMOSTRAS_SSG: newVal } as OrdersManagementRow);
+      setEditingAmostras(false);
+    } catch (e) {
+      console.error(e); toast.error('Erro ao salvar N° Amostras.');
+      setAmostrasValue(String(row.N_AMOSTRAS_SSG ?? ''));
+    } finally { setSavingAmostras(false); }
+  };
+
+  const handleOrderIdSave = async () => {
+    const newVal = orderIdValue === '' ? null : Number(orderIdValue);
+    if (newVal !== null && !Number.isFinite(newVal)) {
+      toast.error('Order ID inválido.');
+      return;
+    }
+    if (!row.id) { setEditingOrderId(false); return; }
+    const oldVal = row.envio_resultados_ordem_id ?? null;
+    if (String(oldVal ?? '') === String(newVal ?? '')) { setEditingOrderId(false); return; }
+    setSavingOrderId(true);
+    try {
+      const { error } = await supabase.from('service_orders')
+        .update({ envio_resultados_ordem_id: newVal }).eq('id', row.id).is('deleted_at', null);
+      if (error) throw error;
+      await logOrderChange({ order_id: row.id, field_name: 'envio_resultados_ordem_id', old_value: String(oldVal ?? ''), new_value: String(newVal ?? '') });
+      onChange({ ...row, envio_resultados_ordem_id: newVal } as OrdersManagementRow);
+      setEditingOrderId(false);
+    } catch (e) {
+      console.error(e); toast.error('Erro ao salvar Order ID.');
+      setOrderIdValue(String(row.envio_resultados_ordem_id ?? ''));
+    } finally { setSavingOrderId(false); }
+  };
+
 
   const handleOsSave = async () => {
     const newVal = Number(osValue);
@@ -399,58 +451,61 @@ const EtapasRow: React.FC<EtapasRowProps> = ({
           row.CLIENTE || '—'
         )}
       </td>
-      <td className="p-3 w-[150px] box-border">
-        <Dialog open={stageDialogOpen} onOpenChange={setStageDialogOpen}>
-          <DialogTrigger asChild>
-            {isAdmin ? (
-              <button
-                className="w-full text-left flex items-center gap-2 text-sm border rounded-md px-2 py-1 bg-background hover:bg-muted/50 transition-colors"
-              >
-                <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="truncate">{formatDateBR(agingBase) || 'dd/mm/aaaa'}</span>
-              </button>
-            ) : (
-              <div className="w-full text-left flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="truncate">{formatDateBR(agingBase) || '—'}</span>
-              </div>
-            )}
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Editar datas - OS {row.OS_SSGEN}</DialogTitle>
-            </DialogHeader>
-            <div className="grid grid-cols-2 gap-4 py-4">
-              {stageOrder.map((label) => {
-                const { view } = fieldMap[label];
-                const value = row[view];
-                const savingThisField = saving === label;
-                const hasError = errorStage === label;
-                return (
-                  <div key={label} className="space-y-1.5">
-                    <label className="text-sm font-medium">{label}</label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="date"
-                        className="border rounded-md px-2 py-1 bg-background w-full"
-                        value={formatDateForInput(value as string | null)}
-                        onChange={(event) => persistField(label, event.target.value || null)}
-                        disabled={!isAdmin}
-                      />
-                      {savingThisField && (
-                        <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" />
-                      )}
-                      {hasError && (
-                        <AlertCircle className="h-4 w-4 shrink-0 text-destructive" />
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </DialogContent>
-        </Dialog>
+      <td className="p-3 w-[160px] whitespace-nowrap box-border truncate">{row.PROD_SSG || row.PROD_NEOGEN || '—'}</td>
+      <td className="p-3 w-[140px] whitespace-nowrap box-border">{currentStage}</td>
+      <td className="p-3 w-[120px] whitespace-nowrap box-border">
+        {isAdmin && editingOrderId ? (
+          <input
+            type="number"
+            className="border rounded-md px-2 py-1 w-24 bg-background text-sm"
+            value={orderIdValue}
+            onChange={(e) => setOrderIdValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleOrderIdSave();
+              if (e.key === 'Escape') { setEditingOrderId(false); setOrderIdValue(String(row.envio_resultados_ordem_id ?? '')); }
+            }}
+            onBlur={handleOrderIdSave}
+            autoFocus
+            disabled={savingOrderId}
+          />
+        ) : (
+          <span
+            className={isAdmin ? 'cursor-pointer hover:underline' : ''}
+            onClick={() => { if (isAdmin) { setOrderIdValue(String(row.envio_resultados_ordem_id ?? '')); setEditingOrderId(true); } }}
+          >
+            {row.envio_resultados_ordem_id ?? '—'}
+          </span>
+        )}
       </td>
+      <td className="p-3 w-[120px] whitespace-nowrap box-border">{row.OS_NEOGEN || '—'}</td>
+      <td className="p-3 w-[110px] whitespace-nowrap box-border">
+        {isAdmin && editingAmostras ? (
+          <input
+            type="number"
+            className="border rounded-md px-2 py-1 w-20 bg-background text-sm"
+            value={amostrasValue}
+            onChange={(e) => setAmostrasValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleAmostrasSave();
+              if (e.key === 'Escape') { setEditingAmostras(false); setAmostrasValue(String(row.N_AMOSTRAS_SSG ?? '')); }
+            }}
+            onBlur={handleAmostrasSave}
+            autoFocus
+            disabled={savingAmostras}
+          />
+        ) : (
+          <span
+            className={isAdmin ? 'cursor-pointer hover:underline' : ''}
+            onClick={() => { if (isAdmin) { setAmostrasValue(String(row.N_AMOSTRAS_SSG ?? '')); setEditingAmostras(true); } }}
+          >
+            {row.N_AMOSTRAS_SSG ?? '—'}
+          </span>
+        )}
+      </td>
+      {stageOrder.map((label) => (
+        <React.Fragment key={label}>{renderField(label)}</React.Fragment>
+      ))}
+
       <td className="p-3"><Badge variant="outline">{priorityLabel}</Badge></td>
       <td className="p-3">
         <Badge variant="outline">{aging === null ? '—' : `${aging}d`}</Badge>
@@ -847,19 +902,31 @@ const OrdersManagement: React.FC = () => {
       )}
 
       <div className="w-full max-w-full overflow-x-auto overflow-y-auto max-h-[65vh] rounded-xl border custom-scrollbar">
-        <table className="min-w-[1100px] w-full text-sm border-separate border-spacing-0 table-fixed">
+        <table className="min-w-[2400px] w-full text-sm border-separate border-spacing-0 table-fixed">
           <thead className="bg-muted">
             <tr className="text-left">
               <th className="p-3 sticky top-0 left-0 z-30 bg-muted w-[90px] whitespace-nowrap box-border">OS SSGEN</th>
               <th className="p-3 sticky top-0 left-[90px] z-30 bg-muted w-[260px] whitespace-nowrap box-border">Nome do cliente</th>
-              <th className="p-3 sticky top-0 z-20 bg-muted w-[150px] whitespace-nowrap box-border">Data</th>
-              <th className="p-3 sticky top-0 z-20 bg-muted w-[90px] whitespace-nowrap box-border">Prioridade</th>
-              <th className="p-3 sticky top-0 z-20 bg-muted w-[70px] whitespace-nowrap box-border">Aging</th>
-              <th className="p-3 sticky top-0 z-20 bg-muted w-[80px] whitespace-nowrap box-border">Status</th>
-              <th className="p-3 sticky top-0 z-20 bg-muted w-[110px] whitespace-nowrap box-border">Arquivo</th>
-              {isAdmin && <th className="p-3 sticky top-0 z-20 bg-muted w-[70px] whitespace-nowrap box-border">Ações</th>}
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">Produto</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[140px] whitespace-nowrap box-border">Etapa</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[120px] whitespace-nowrap box-border">Order ID</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[120px] whitespace-nowrap box-border">OS Neogen</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[110px] whitespace-nowrap box-border">N° Amostras</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">CRA</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">Envio de Planilha</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">VRI</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">LPR</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">LR</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">Envio de Resultados</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[160px] whitespace-nowrap box-border">Faturar</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[100px] whitespace-nowrap box-border">Prioridade</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[80px] whitespace-nowrap box-border">Aging</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[90px] whitespace-nowrap box-border">Status</th>
+              <th className="p-3 sticky top-0 z-20 bg-muted w-[140px] whitespace-nowrap box-border">Arquivo</th>
+              {isAdmin && <th className="p-3 sticky top-0 z-20 bg-muted w-[90px] whitespace-nowrap box-border">Ações</th>}
             </tr>
           </thead>
+
           <tbody>
             {filteredRows.map((row) => (
               <EtapasRow
