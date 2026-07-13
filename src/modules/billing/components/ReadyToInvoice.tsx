@@ -25,6 +25,8 @@ export function ReadyToInvoice({ orders }: ReadyToInvoiceProps) {
   const [selectedOrder, setSelectedOrder] = useState<ReadyToInvoiceType | null>(null);
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
   const invoiceMutation = useInvoiceOrder();
+  const { data: profile } = useAuthProfile();
+  const isAdmin = profile?.role === 'ADM';
 
   const handleInvoice = async () => {
     if (!selectedOrder) return;
