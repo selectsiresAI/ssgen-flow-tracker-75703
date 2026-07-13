@@ -123,3 +123,14 @@ export async function invoiceOrder(orderId: string, dt_faturamento: string): Pro
 
   if (error) throw error;
 }
+
+export async function updateOrderValue(orderId: string, valor: number | null): Promise<void> {
+  await requireAdmin();
+  const { error } = await supabase
+    .from('service_orders')
+    .update({ valor_total_override: valor } as any)
+    .eq('id', orderId)
+    .is('deleted_at', null);
+
+  if (error) throw error;
+}
