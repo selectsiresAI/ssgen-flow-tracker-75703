@@ -77,6 +77,8 @@ function mapServiceOrderRow(row: ServiceOrderWithClient): PowerRow {
     issue_text: row.issue_text ?? null,
     source_table: 'service_orders',
     envio_resultados_ordem_id: row.envio_resultados_ordem_id ?? null,
+    pedido_ssb: (row as any).pedido_ssb ?? null,
+    nf_ssb: (row as any).nf_ssb ?? null,
   };
 }
 
