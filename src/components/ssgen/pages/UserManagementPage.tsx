@@ -309,6 +309,15 @@ export default function UserManagementPage() {
                   <Button
                     size="sm"
                     variant="outline"
+                    title="Gerar link de redefinição de senha"
+                    onClick={() => handleGenerateResetLink(user.id, user.email)}
+                    disabled={generatingFor === user.id}
+                  >
+                    <KeyRound className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
                     onClick={() => handleEdit(user.id, user.role, user.coord, user.rep)}
                   >
                     {user.role ? <Pencil className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
