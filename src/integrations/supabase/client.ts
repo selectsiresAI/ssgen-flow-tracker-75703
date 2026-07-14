@@ -55,9 +55,9 @@ const getFirstAvailableEnvVar = (keys: string[]): string | undefined => {
   return undefined;
 };
 
-const DEFAULT_SUPABASE_URL = 'https://cevsigsqiroeomtbrzpe.supabase.co';
+const DEFAULT_SUPABASE_URL = 'https://odactdxpecpiyiyaqfgi.supabase.co';
 const DEFAULT_SUPABASE_ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNldnNpZ3NxaXJvZW9tdGJyenBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3MDU3NzQsImV4cCI6MjA3NzI4MTc3NH0.ONNsDNzS6e6gKXU7DoUyzmYlTU_n0VElOvpt914yGbE';
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kYWN0ZHhwZWNwaXlpeWFxZmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMjQ4MTYsImV4cCI6MjA4ODkwMDgxNn0.1Ybzv5-oqg1yHu2W1vBRDHN23tj0YzN_AbwBJyKcrpY';
 
 export const SUPABASE_URL =
   getFirstAvailableEnvVar([

@@ -47,15 +47,11 @@ export default function AuthPage() {
     }
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('send-password-reset', {
-        body: {
-          email,
-          redirectTo: `${window.location.origin}/reset-password`,
-        },
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
       });
-      if (error || (data && (data as any).error)) {
-        const msg = (data as any)?.error || error?.message || 'Falha ao enviar email.';
-        toast({ title: 'Erro', description: String(msg), variant: 'destructive' });
+      if (error) {
+        toast({ title: 'Erro', description: error.message, variant: 'destructive' });
       } else {
         toast({
           title: 'Email enviado!',
