@@ -416,6 +416,29 @@ export default function UserManagementPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!resetLink} onOpenChange={(open) => !open && setResetLink(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Link de redefinição de senha</DialogTitle>
+            <DialogDescription>
+              Envie este link para <strong>{resetEmail}</strong> por WhatsApp, Teams ou outro meio.
+              O link expira em 1 hora e permite ao usuário definir uma nova senha.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="p-3 bg-muted rounded-md text-xs break-all font-mono">
+              {resetLink}
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setResetLink(null)}>Fechar</Button>
+              <Button onClick={handleCopyLink}>
+                <Copy className="w-4 h-4 mr-2" /> Copiar link
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
