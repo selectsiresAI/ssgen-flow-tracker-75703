@@ -21,11 +21,12 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { HeaderBar } from '../shared/HeaderBar';
-import { UserPlus, Pencil, Trash2, AlertTriangle } from 'lucide-react';
+import { UserPlus, Pencil, Trash2, AlertTriangle, KeyRound, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { fetchUsersWithRoles, assignUserRole, removeUserRole, type AppRole } from '@/lib/userRolesApi';
 import { fetchCoordenadores } from '@/lib/coordenadoresApi';
 import { fetchRepresentantes } from '@/lib/representantesApi';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function UserManagementPage() {
   const { toast } = useToast();
