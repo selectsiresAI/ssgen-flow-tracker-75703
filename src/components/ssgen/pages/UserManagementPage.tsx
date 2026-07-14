@@ -40,6 +40,38 @@ export default function UserManagementPage() {
   const [selectedRole, setSelectedRole] = useState<AppRole>('REPRESENTANTE');
   const [selectedCoord, setSelectedCoord] = useState<string | undefined>(undefined);
   const [selectedRep, setSelectedRep] = useState<string | undefined>(undefined);
+  const [resetLink, setResetLink] = useState<string | null>(null);
+  const [resetEmail, setResetEmail] = useState<string>('');
+  const [generatingFor, setGeneratingFor] = useState<string | null>(null);
+
+  const handleGenerateResetLink = async (userId: string, email: string) => {
+    setGeneratingFor(userId);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-reset-link', {
+        body: { email, redirectTo: `${window.location.origin}/reset-password` },
+      });
+      if (error || (data as any)?.error) {
+        toast({
+          title: 'Erro',
+          description: (data as any)?.error || error?.message || 'Falha ao gerar link',
+          variant: 'destructive',
+        });
+        return;
+      }
+      setResetEmail(email);
+      setResetLink((data as any).link);
+    } catch (e: any) {
+      toast({ title: 'Erro', description: e?.message ?? 'Erro inesperado', variant: 'destructive' });
+    } finally {
+      setGeneratingFor(null);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    if (!resetLink) return;
+    await navigator.clipboard.writeText(resetLink);
+    toast({ title: 'Copiado!', description: 'Link copiado para a área de transferência.' });
+  };
 
   // Buscar usuários com papéis
   const { data: users = [] } = useQuery({
