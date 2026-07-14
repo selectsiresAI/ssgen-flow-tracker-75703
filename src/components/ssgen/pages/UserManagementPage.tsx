@@ -21,11 +21,12 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { HeaderBar } from '../shared/HeaderBar';
-import { UserPlus, Pencil, Trash2, AlertTriangle } from 'lucide-react';
+import { UserPlus, Pencil, Trash2, AlertTriangle, KeyRound, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { fetchUsersWithRoles, assignUserRole, removeUserRole, type AppRole } from '@/lib/userRolesApi';
 import { fetchCoordenadores } from '@/lib/coordenadoresApi';
 import { fetchRepresentantes } from '@/lib/representantesApi';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function UserManagementPage() {
   const { toast } = useToast();
@@ -39,6 +40,38 @@ export default function UserManagementPage() {
   const [selectedRole, setSelectedRole] = useState<AppRole>('REPRESENTANTE');
   const [selectedCoord, setSelectedCoord] = useState<string | undefined>(undefined);
   const [selectedRep, setSelectedRep] = useState<string | undefined>(undefined);
+  const [resetLink, setResetLink] = useState<string | null>(null);
+  const [resetEmail, setResetEmail] = useState<string>('');
+  const [generatingFor, setGeneratingFor] = useState<string | null>(null);
+
+  const handleGenerateResetLink = async (userId: string, email: string) => {
+    setGeneratingFor(userId);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-reset-link', {
+        body: { email, redirectTo: `${window.location.origin}/reset-password` },
+      });
+      if (error || (data as any)?.error) {
+        toast({
+          title: 'Erro',
+          description: (data as any)?.error || error?.message || 'Falha ao gerar link',
+          variant: 'destructive',
+        });
+        return;
+      }
+      setResetEmail(email);
+      setResetLink((data as any).link);
+    } catch (e: any) {
+      toast({ title: 'Erro', description: e?.message ?? 'Erro inesperado', variant: 'destructive' });
+    } finally {
+      setGeneratingFor(null);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    if (!resetLink) return;
+    await navigator.clipboard.writeText(resetLink);
+    toast({ title: 'Copiado!', description: 'Link copiado para a área de transferência.' });
+  };
 
   // Buscar usuários com papéis
   const { data: users = [] } = useQuery({
@@ -276,6 +309,15 @@ export default function UserManagementPage() {
                   <Button
                     size="sm"
                     variant="outline"
+                    title="Gerar link de redefinição de senha"
+                    onClick={() => handleGenerateResetLink(user.id, user.email)}
+                    disabled={generatingFor === user.id}
+                  >
+                    <KeyRound className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
                     onClick={() => handleEdit(user.id, user.role, user.coord, user.rep)}
                   >
                     {user.role ? <Pencil className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
@@ -372,6 +414,29 @@ export default function UserManagementPage() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!resetLink} onOpenChange={(open) => !open && setResetLink(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Link de redefinição de senha</DialogTitle>
+            <DialogDescription>
+              Envie este link para <strong>{resetEmail}</strong> por WhatsApp, Teams ou outro meio.
+              O link expira em 1 hora e permite ao usuário definir uma nova senha.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="p-3 bg-muted rounded-md text-xs break-all font-mono">
+              {resetLink}
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setResetLink(null)}>Fechar</Button>
+              <Button onClick={handleCopyLink}>
+                <Copy className="w-4 h-4 mr-2" /> Copiar link
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
