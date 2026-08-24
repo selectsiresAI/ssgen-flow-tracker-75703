@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
+const RESET_PASSWORD_URL = 'https://ssgen-tracker.lovable.app/reset-password';
+
 export default function AuthPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -48,7 +50,7 @@ export default function AuthPage() {
     setLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: RESET_PASSWORD_URL,
       });
       if (error) {
         toast({ title: 'Erro', description: error.message, variant: 'destructive' });

@@ -28,6 +28,8 @@ import { fetchCoordenadores } from '@/lib/coordenadoresApi';
 import { fetchRepresentantes } from '@/lib/representantesApi';
 import { supabase } from '@/integrations/supabase/client';
 
+const RESET_PASSWORD_URL = 'https://ssgen-tracker.lovable.app/reset-password';
+
 export default function UserManagementPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -48,7 +50,7 @@ export default function UserManagementPage() {
     setGeneratingFor(userId);
     try {
       const { data, error } = await supabase.functions.invoke('generate-reset-link', {
-        body: { email, redirectTo: `${window.location.origin}/reset-password` },
+        body: { email, redirectTo: RESET_PASSWORD_URL },
       });
       if (error || (data as any)?.error) {
         toast({
