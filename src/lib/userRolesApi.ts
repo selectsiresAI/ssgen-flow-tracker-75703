@@ -96,7 +96,7 @@ export async function assignUserRole(
     // Atualizar
     const { error } = await supabase
       .from('user_roles')
-      .update({ role, coord, rep })
+      .update({ role, coord: cleanCoord ?? null, rep: cleanRep ?? null })
       .eq('user_id', userId);
     
     if (error) throw error;
@@ -104,10 +104,11 @@ export async function assignUserRole(
     // Inserir
     const { error } = await supabase
       .from('user_roles')
-      .insert({ user_id: userId, role, coord, rep });
+      .insert({ user_id: userId, role, coord: cleanCoord ?? null, rep: cleanRep ?? null });
     
     if (error) throw error;
   }
+
 }
 
 export async function removeUserRole(userId: string): Promise<void> {
