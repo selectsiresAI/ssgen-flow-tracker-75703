@@ -50,20 +50,40 @@ export async function fetchUsersWithRoles(): Promise<UserWithRole[]> {
   return usersWithRoles;
 }
 
+const VALID_ROLES: AppRole[] = ['ADM', 'GERENTE', 'REPRESENTANTE'];
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function assignUserRole(
   userId: string,
   role: AppRole,
   coord?: string,
   rep?: string
 ): Promise<void> {
-  // Validação client-side
-  if (role === 'GERENTE' && (!coord || coord.trim() === '')) {
+  // Validação de entrada (UX). A regra final é aplicada no banco:
+  // policy "Admins can manage all roles" + trigger validate_user_role_trigger.
+  if (!UUID_RE.test(userId ?? '')) {
+    throw new Error('Usuário inválido');
+  }
+
+  if (!VALID_ROLES.includes(role)) {
+    throw new Error('Perfil inválido');
+  }
+
+  const cleanCoord = role === 'GERENTE' ? (coord ?? '').trim() : undefined;
+  const cleanRep = role === 'REPRESENTANTE' ? (rep ?? '').trim() : undefined;
+
+  if (role === 'GERENTE' && !cleanCoord) {
     throw new Error('GERENTE deve ter um coordenador atribuído');
   }
-  
-  if (role === 'REPRESENTANTE' && (!rep || rep.trim() === '')) {
+
+  if (role === 'REPRESENTANTE' && !cleanRep) {
     throw new Error('REPRESENTANTE deve ter um representante atribuído');
   }
+
+  if ((cleanCoord && cleanCoord.length > 120) || (cleanRep && cleanRep.length > 120)) {
+    throw new Error('Nome de coordenador/representante muito longo');
+  }
+
 
   // Verificar se já existe
   const { data: existing } = await supabase
