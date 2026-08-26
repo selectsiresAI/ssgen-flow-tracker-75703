@@ -28,6 +28,7 @@ type ClientFormData = {
   status: string;
   representante?: string;
   coordenador?: string;
+  email: string;
   id_conta_ssgen: string;
   cep: string;
   endereco: string;
@@ -53,6 +54,7 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
     status: '',
     representante: profile.rep ?? undefined,
     coordenador: profile.coord ?? undefined,
+    email: '',
     id_conta_ssgen: '',
     cep: '',
     endereco: '',
@@ -128,6 +130,7 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
         status: formData.status || null,
         representante: formData.representante,
         coordenador: formData.coordenador,
+        email: formData.email?.trim() || null,
         id_conta_ssgen: formData.id_conta_ssgen ? Number(formData.id_conta_ssgen) : null,
         cep: formData.cep || null,
         endereco: formData.endereco || null,
@@ -168,6 +171,7 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
       status: client.status || '',
       representante: client.representante || undefined,
       coordenador: client.coordenador || undefined,
+      email: client.email || '',
       id_conta_ssgen: client.id_conta_ssgen ? String(client.id_conta_ssgen) : '',
       cep: (client as any).cep || '',
       endereco: (client as any).endereco || '',
@@ -240,6 +244,19 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
                     required
                     value={formData.cpf_cnpj}
                     onChange={(e) => setFormData({ ...formData, cpf_cnpj: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="email">E-mail</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="email@dominio.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
                 </div>
               </div>
@@ -360,6 +377,7 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
                   <TableHead>Data</TableHead>
                   <TableHead>Nome</TableHead>
                   <TableHead>CPF/CNPJ</TableHead>
+                  <TableHead>E-mail</TableHead>
                   <TableHead>Representante</TableHead>
                   <TableHead>Coordenador</TableHead>
                   <TableHead>Status</TableHead>
@@ -369,7 +387,7 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
               <TableBody>
                 {clients.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground">
+                    <TableCell colSpan={8} className="text-center text-muted-foreground">
                       Nenhum cliente cadastrado
                     </TableCell>
                   </TableRow>
@@ -379,6 +397,7 @@ const ClientsPage: React.FC<ClientsPageProps> = ({ profile }) => {
                       <TableCell>{new Date(client.data).toLocaleDateString('pt-BR')}</TableCell>
                       <TableCell>{client.nome}</TableCell>
                       <TableCell>{client.cpf_cnpj}</TableCell>
+                      <TableCell>{client.email || '—'}</TableCell>
                       <TableCell>{client.representante}</TableCell>
                       <TableCell>{client.coordenador}</TableCell>
                       <TableCell>{client.status || '—'}</TableCell>

@@ -91,6 +91,7 @@ export type Client = {
   status?: string | null;
   representante: string;
   coordenador: string;
+  email?: string | null;
   id_conta_ssgen?: number | null;
   created_at?: string;
   updated_at?: string;

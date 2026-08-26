@@ -55,6 +55,7 @@ export type Database = {
           created_at: string
           data: string
           deleted_at: string | null
+          email: string | null
           endereco: string | null
           estado: string | null
           id: string
@@ -78,6 +79,7 @@ export type Database = {
           created_at?: string
           data: string
           deleted_at?: string | null
+          email?: string | null
           endereco?: string | null
           estado?: string | null
           id?: string
@@ -101,6 +103,7 @@ export type Database = {
           created_at?: string
           data?: string
           deleted_at?: string | null
+          email?: string | null
           endereco?: string | null
           estado?: string | null
           id?: string
